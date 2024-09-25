@@ -23,7 +23,7 @@ const handler = NextAuth({
 
         if (!userExists) {
           // Crear el usuario si no existe
-          const createUserResponse = await fetch('http://localhost:3001/api/users', {
+          const createUserResponse = await fetch('http://localhost:3001/api/createuser', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -31,6 +31,7 @@ const handler = NextAuth({
             body: JSON.stringify({
               name: user.name,
               email: user.email,
+              image: user.image,
             }),
           });
 

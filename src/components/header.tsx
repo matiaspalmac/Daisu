@@ -13,6 +13,7 @@ export default function Header() {
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 <Link href="/" className="text-2xl font-bold text-orange-600 hover:text-orange-700">Daisu</Link>
                 <ul className="flex space-x-4 items-center justify-center">
+                    <li><Link href="/" className="text-gray-600 hover:text-orange-600">Inicio</Link></li>
                     <li><Link href="/languages" className="text-gray-600 hover:text-orange-600">Idiomas</Link></li>
                     <li><Link href="/chat" className="text-gray-600 hover:text-orange-600">Chat</Link></li>
                 </ul>
