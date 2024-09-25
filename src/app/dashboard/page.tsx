@@ -6,7 +6,7 @@ interface User {
   name: string;
   email: string;
 }
-
+const url_env = process.env.URL_API;
 export default function DashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +15,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/getusers');
+        const response = await fetch(`${url_env}/api/getusers`);
         if (!response.ok) {
           throw new Error('Failed to fetch users');
         }
@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   const deleteUser = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/users/${id}`, {
+      const response = await fetch(`${url_env}/api/users/${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

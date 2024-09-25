@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+const url_env = process.env.URL_API;
 const handler = NextAuth({
   providers: [
     GoogleProvider({
@@ -12,7 +13,8 @@ const handler = NextAuth({
     async signIn({ user }) {
       try {
         // Verificar si el usuario ya existe
-        const getUsersResponse = await fetch('http://localhost:3001/api/getusers');
+    
+        const getUsersResponse = await fetch(`${url_env}/api/getusers`);
         if (!getUsersResponse.ok) {
           console.error('Error al obtener la lista de usuarios');
           return false;
@@ -23,7 +25,7 @@ const handler = NextAuth({
 
         if (!userExists) {
           // Crear el usuario si no existe
-          const createUserResponse = await fetch('http://localhost:3001/api/createuser', {
+          const createUserResponse = await fetch(`${url_env}/api/createuser`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

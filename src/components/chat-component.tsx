@@ -12,6 +12,8 @@ interface Message {
   username: string;
 }
 
+const url_env = process.env.URL_API;
+
 function ChatComponent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -31,7 +33,7 @@ function ChatComponent() {
 
     const initializeSocket = async () => {
       const username = await getUsername();
-      socketRef.current = io('http://localhost:3001', {
+      socketRef.current = io(`${url_env}`, {
         path: '/api/socket',
         auth: {
           username,
