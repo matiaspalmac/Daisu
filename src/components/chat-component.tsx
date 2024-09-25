@@ -12,7 +12,7 @@ interface Message {
   username: string;
 }
 
-const url_env = process.env.URL_API;
+const url_env = process.env.NEXT_PUBLIC_URL_API;
 
 function ChatComponent() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -47,7 +47,6 @@ function ChatComponent() {
 
       socketRef.current.on('chat message', (msg: string, id: string, username: string) => {
         setMessages(prevMessages => {
-          // Verificar si el mensaje ya existe
           if (prevMessages.some(message => message.id === id)) {
             return prevMessages;
           }
