@@ -12,12 +12,19 @@ const handler = NextAuth({
   callbacks: {
     async signIn({ user }) {
       try {
+        // Verificar si las variables de entorno están definidas
+        if (!url_env) {
+          console.error('La URL de la API no está definida.');
+          return false;
+        }
+
         // Verificar si el usuario ya existe
-        console.log('user', user);
-        console.log('url_env');
+        console.log('Usuario:', user);
+        console.log('URL de la API:', url_env);
+
         const getUsersResponse = await fetch(`${url_env}/api/getusers`);
         if (!getUsersResponse.ok) {
-          console.error('Error al obtener la lista de usuarios');
+          console.error('Error al obtener la lista de usuarios:', getUsersResponse.statusText);
           return false;
         }
 
@@ -39,7 +46,7 @@ const handler = NextAuth({
           });
 
           if (!createUserResponse.ok) {
-            console.error('Error al enviar los datos del usuario a la API');
+            console.error('Error al enviar los datos del usuario a la API:', createUserResponse.statusText);
             return false;
           }
         }
@@ -53,4 +60,5 @@ const handler = NextAuth({
   },
 });
 
+//aaa
 export { handler as GET, handler as POST };
