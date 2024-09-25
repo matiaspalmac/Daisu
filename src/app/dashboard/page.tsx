@@ -6,7 +6,7 @@ interface User {
   name: string;
   email: string;
 }
-const url_env = process.env.NEXT_PUBLIC_URL_API;
+const url_env = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DashboardPage() {
   const [users, setUsers] = useState<User[]>([]);

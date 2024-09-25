@@ -12,7 +12,7 @@ interface Message {
   username: string;
 }
 
-const url_env = process.env.NEXT_PUBLIC_URL_API;
+const url_env = process.env.NEXT_PUBLIC_API_URL;
 
 function ChatComponent() {
   const [messages, setMessages] = useState<Message[]>([]);

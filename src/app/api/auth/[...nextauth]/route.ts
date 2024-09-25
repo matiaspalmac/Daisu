@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
-const url_env = process.env.NEXT_PUBLIC_URL_API;
+const url_env = process.env.NEXT_PUBLIC_API_URL;
 const handler = NextAuth({
   providers: [
     GoogleProvider({
