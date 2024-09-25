@@ -13,7 +13,8 @@ const handler = NextAuth({
     async signIn({ user }) {
       try {
         // Verificar si el usuario ya existe
-    
+        console.log('user', user);
+        console.log('url_env');
         const getUsersResponse = await fetch(`${url_env}/api/getusers`);
         if (!getUsersResponse.ok) {
           console.error('Error al obtener la lista de usuarios');
