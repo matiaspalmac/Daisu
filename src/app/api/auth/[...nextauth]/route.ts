@@ -36,10 +36,10 @@ const handler = NextAuth({
         }
 
         const users = await getUsersResponse.json();
-        const userExists = users.some((existingUser: { email: string }) => existingUser.email === user.email);
+        const existingUser = users.find((existingUser: { email: string }) => existingUser.email === user.email);
 
         // Si el usuario no existe, crear uno nuevo
-        if (!userExists) {
+        if (!existingUser) {
           const createUserResponse = await fetch(`${url_env}/api/createuser`, {
             method: 'POST',
             headers: {
@@ -62,6 +62,32 @@ const handler = NextAuth({
       } catch (error) {
         console.error("Error durante el proceso de inicio de sesión:", error);
         return false; // Error en la lógica de sign-in
+      }
+    },
+    async session({ session }) {
+      try {
+        // Verificar si el usuario ya existe en la API
+        const getUsersResponse = await fetch(`${url_env}/api/getusers`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!getUsersResponse.ok) {
+          console.error(`Error al obtener la lista de usuarios: ${getUsersResponse.statusText}`);
+          return session; // Error en la solicitud GET, devolver la sesión sin cambios
+        }
+
+        const users = await getUsersResponse.json();
+        const existingUser = users.find((existingUser: { email: string }) => existingUser.email === session.user.email);
+
+        // Establecer la propiedad isAdmin
+        session.user.isAdmin = existingUser?.isAdmin || false;
+
+        return session;
+      } catch (error) {
+        console.error("Error durante la obtención de la sesión:", error);
+        return session; // Error en la lógica de sesión, devolver la sesión sin cambios
       }
     },
   },
