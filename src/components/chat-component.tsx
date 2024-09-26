@@ -3,8 +3,8 @@
 import { SessionProvider, useSession } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import Button from "@/components/ui/button";
-import Input from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
 
 interface Message {
   id: string;
