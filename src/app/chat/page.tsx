@@ -97,7 +97,7 @@ export default function ChatPage() {
           </CardHeader>
           <CardContent className="p-0 h-[calc(100vh-200px)]">
             {selectedChat ? (
-              <ChatComponent chatUser={selectedChat} />
+              <ChatComponent />
             ) : (
               <div className="flex items-center justify-center h-full text-center text-gray-500">
                 <div>
