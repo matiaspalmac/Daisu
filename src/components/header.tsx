@@ -32,7 +32,7 @@ export default function Header() {
                                 />
                             </div>
                             {menuOpen && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg">
+                                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-40">
                                     <Link href="/dashboard" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Panel de control</Link>
                                     <Link href="/profile" className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Perfil</Link>
                                     <button onClick={ async () => { await signOut({callbackUrl:"/"})}} className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Cerrar sesión</button>
