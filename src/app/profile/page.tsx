@@ -3,11 +3,12 @@ import { toast } from 'nextjs-toast-notify'
 import "nextjs-toast-notify/dist/nextjs-toast-notify.css"
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import Button from "@/components/ui/button"
-import Input from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Textarea from "@/components/ui/textarea"
-  
+import { Textarea } from "@/components/ui/textarea"
+import { User, Mail, FileText, Globe, BookOpen } from 'lucide-react'
+
 interface UserProfile {
   username: string;
   email: string;
@@ -55,71 +56,86 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-orange-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-orange-600">Tu Perfil</CardTitle>
+        <Card className="shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
+            <CardTitle className="text-2xl font-bold">Tu Perfil</CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">Nombre de usuario</label>
+          <CardContent className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 flex items-center">
+                  <User className="w-5 h-5 mr-2 text-blue-500" />
+                  Nombre de usuario
+                </label>
                 <Input
                   type="text"
                   id="username"
                   name="username"
                   value={profile.username}
                   onChange={handleChange}
-                  className="mt-1"
+                  className="w-full rounded-full"
                 />
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo electrónico</label>
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 flex items-center">
+                  <Mail className="w-5 h-5 mr-2 text-blue-500" />
+                  Correo electrónico
+                </label>
                 <Input
                   type="email"
                   id="email"
                   name="email"
                   value={profile.email}
                   onChange={handleChange}
-                  className="mt-1"
+                  className="w-full rounded-full"
                 />
               </div>
-              <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-gray-700">Biografía</label>
+              <div className="space-y-2">
+                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 flex items-center">
+                  <FileText className="w-5 h-5 mr-2 text-blue-500" />
+                  Biografía
+                </label>
                 <Textarea
                   id="bio"
                   name="bio"
                   value={profile.bio}
                   onChange={handleChange}
-                  className="mt-1"
+                  className="w-full rounded-lg"
                   rows={4}
                 />
               </div>
-              <div>
-                <label htmlFor="nativeLanguage" className="block text-sm font-medium text-gray-700">Idioma nativo</label>
+              <div className="space-y-2">
+                <label htmlFor="nativeLanguage" className="block text-sm font-medium text-gray-700 flex items-center">
+                  <Globe className="w-5 h-5 mr-2 text-blue-500" />
+                  Idioma nativo
+                </label>
                 <Input
                   type="text"
                   id="nativeLanguage"
                   name="nativeLanguage"
                   value={profile.nativeLanguage}
                   onChange={handleChange}
-                  className="mt-1"
+                  className="w-full rounded-full"
                 />
               </div>
-              <div>
-                <label htmlFor="learningLanguages" className="block text-sm font-medium text-gray-700">Idiomas que estás aprendiendo</label>
+              <div className="space-y-2">
+                <label htmlFor="learningLanguages" className="block text-sm font-medium text-gray-700 flex items-center">
+                  <BookOpen className="w-5 h-5 mr-2 text-blue-500" />
+                  Idiomas que estás aprendiendo
+                </label>
                 <Input
                   type="text"
                   id="learningLanguages"
                   name="learningLanguages"
                   value={profile.learningLanguages.join(', ')}
                   onChange={(e) => setProfile(prev => ({ ...prev, learningLanguages: e.target.value.split(', ') }))}
-                  className="mt-1"
+                  className="w-full rounded-full"
                 />
-                <p className="text-xs text-gray-500 mt-1">Separa los idiomas con comas</p>
+                <p className="text-xs text-gray-500 mt-1 ml-7">Separa los idiomas con comas</p>
               </div>
-              <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600">
+              <Button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-full transition duration-300 ease-in-out transform hover:scale-105">
                 Guardar Cambios
               </Button>
             </form>

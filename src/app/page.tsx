@@ -81,7 +81,7 @@ export default function DaisuHome() {
                       <p className="text-sm text-gray-600">Estudiante de {i === 1 ? 'Inglés' : i === 2 ? 'Español' : 'Francés'}</p>
                     </div>
                   </div>
-                  <p className="text-gray-700">Daisu ha transformado mi forma de aprender idiomas. La comunidad es increíble y he mejorado mucho más rápido de lo que esperaba.</p>
+                  <p className="text-gray-700">Daisu ha transformado mi forma de aprender idiomas. La comunidad es increíble y he mejorado mucho más rápido de lo que esperaba. </p>
                 </CardContent>
               </Card>
             ))}
