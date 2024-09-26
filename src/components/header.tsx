@@ -2,12 +2,26 @@
 import Link from 'next/link';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Header() {
     const { data: session } = useSession();
     const [menuOpen, setMenuOpen] = useState(false);
-    
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [menuRef]);
+
     return (
         <nav className="bg-white shadow-md">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -19,7 +33,7 @@ export default function Header() {
                 </ul>
                 {session?.user ? (
                     <div className="flex items-center space-x-4">
-                        <div className="relative">
+                        <div className="relative" ref={menuRef}>
                             <div className="flex items-center space-x-2">
                                 <span className="text-gray-600">{session.user.name}</span>
                                 <Image 
