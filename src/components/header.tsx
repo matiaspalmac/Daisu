@@ -6,11 +6,13 @@ import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button"
 import { MessageCircle, Globe, Home, User, LogOut } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function Header() {
     const { data: session } = useSession();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const t = useTranslations('Header');
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -33,19 +35,19 @@ export default function Header() {
                     <li>
                         <Link href="/" className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                             <Home size={24} />
-                            <span className="sr-only">Inicio</span>
+                            <span className="sr-only">{t('home')}</span>
                         </Link>
                     </li>
                     <li>
                         <Link href="/languages" className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                             <Globe size={24} />
-                            <span className="sr-only">Idiomas</span>
+                            <span className="sr-only">{t('languages')}</span>
                         </Link>
                     </li>
                     <li>
                         <Link href="/chat" className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
                             <MessageCircle size={24} />
-                            <span className="sr-only">Chat</span>
+                            <span className="sr-only">{t('chat')}</span>
                         </Link>
                     </li>
                 </ul>
@@ -68,16 +70,16 @@ export default function Header() {
                                     {session.user.isAdmin && (
                                         <Link href="/dashboard" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg">
                                             <Home size={18} className="mr-2" />
-                                            Panel de control
+                                            {t('dashboard')}
                                         </Link>
                                     )}
                                     <Link href="/profile" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
                                         <User size={18} className="mr-2" />
-                                        Perfil
+                                        {t('profile')}
                                     </Link>
                                     <button onClick={ async () => { await signOut({callbackUrl:"/"})}} className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-b-lg">
                                         <LogOut size={18} className="mr-2" />
-                                        Cerrar sesión
+                                        {t('signOut')}
                                     </button>
                                 </div>
                             )}
@@ -85,7 +87,7 @@ export default function Header() {
                     </div>
                 ) : (
                     <Button onClick={() => signIn()} className="bg-blue-500 text-white hover:bg-blue-600">
-                        Iniciar sesión
+                        {t('signIn')}
                     </Button>
                 )}
             </div>

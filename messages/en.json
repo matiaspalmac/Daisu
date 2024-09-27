@@ -1,0 +1,58 @@
+{
+  "DaisuHome": {
+    "title": "Welcome to Daisu",
+    "exploreLanguages": "Explore Languages",
+    "exploreLanguagesDescription": "Discover new languages and cultures.",
+    "liveChat": "Live Chat",
+    "liveChatDescription": "Chat with native speakers in real-time.",
+    "activeCommunity": "Active Community",
+    "activeCommunityDescription": "Join a vibrant community of language learners.",
+    "startExchangingNow": "Start Exchanging Now",
+    "whyChooseDaisu": "Why Choose Daisu",
+    "personalizedLearning": "Personalized Learning",
+    "personalizedLearningDescription": "Tailored lessons to fit your needs.",
+    "certifications": "Certifications",
+    "certificationsDescription": "Earn certificates as you progress.",
+    "fastLearning": "Fast Learning",
+    "fastLearningDescription": "Accelerate your learning with our methods.",
+    "support247": "Support 24/7",
+    "support247Description": "Get help anytime, anywhere.",
+    "userTestimonials": "User Testimonials",
+    "user1Name": "John Doe",
+    "user1Role": "Language Enthusiast",
+    "user1Testimonial": "Daisu has transformed the way I learn languages!",
+    "user2Name": "Jane Smith",
+    "user2Role": "Polyglot",
+    "user2Testimonial": "The community is amazing and very supportive.",
+    "user3Name": "Carlos Ruiz",
+    "user3Role": "Traveler",
+    "user3Testimonial": "I love the live chat feature. It's like traveling without leaving home.",
+    "readyToStart": "Ready to Start?",
+    "joinNow": "Join Now",
+    "registerFree": "Register for Free",
+    "searchPlaceholder": "Search for languages or topics..."
+  },
+
+  "Header": {
+    "home": "Home",
+    "languages": "Languages",
+    "chat": "Chat",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "signOut": "Sign Out",
+    "signIn": "Sign In"
+  },
+
+  "Footer": {
+    "aboutTitle": "About Daisu",
+    "aboutDescription": "Daisu is a language exchange platform that connects people from all over the world to learn and practice new languages.",
+    "quickLinksTitle": "Quick Links",
+    "exploreLanguages": "Explore Languages",
+    "liveChat": "Live Chat",
+    "myProfile": "My Profile",
+    "contactTitle": "Contact",
+    "email": "Email: info@daisu.com",
+    "phone": "Phone: +1 234 567 890",
+    "allRightsReserved": "All rights reserved."
+  }
+}

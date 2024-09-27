@@ -1,0 +1,60 @@
+{
+    "DaisuHome": {
+      "title": "Bienvenido a Daisu",
+      "exploreLanguages": "Explorar Idiomas",
+      "exploreLanguagesDescription": "Descubre nuevos idiomas y culturas.",
+      "liveChat": "Chat en Vivo",
+      "liveChatDescription": "Chatea con hablantes nativos en tiempo real.",
+      "activeCommunity": "Comunidad Activa",
+      "activeCommunityDescription": "Únete a una vibrante comunidad de estudiantes de idiomas.",
+      "startExchangingNow": "Comienza a Intercambiar Ahora",
+      "whyChooseDaisu": "¿Por Qué Elegir Daisu?",
+      "personalizedLearning": "Aprendizaje Personalizado",
+      "personalizedLearningDescription": "Lecciones personalizadas para adaptarse a tus necesidades.",
+      "certifications": "Certificaciones",
+      "certificationsDescription": "Obtén certificados a medida que avanzas.",
+      "fastLearning": "Aprendizaje Rápido",
+      "fastLearningDescription": "Acelera tu aprendizaje con nuestros métodos.",
+      "support247": "Soporte 24/7",
+      "support247Description": "Obtén ayuda en cualquier momento y lugar.",
+      "userTestimonials": "Testimonios de Usuarios",
+      "user1Name": "Juan Pérez",
+      "user1Role": "Entusiasta de los Idiomas",
+      "user1Testimonial": "¡Daisu ha transformado la manera en que aprendo idiomas!",
+      "user2Name": "Ana Gómez",
+      "user2Role": "Políglota",
+      "user2Testimonial": "La comunidad es increíble y muy solidaria.",
+      "user3Name": "Carlos Ruiz",
+      "user3Role": "Viajero",
+      "user3Testimonial": "Me encanta la función de chat en vivo. Es como viajar sin salir de casa.",
+      "readyToStart": "¿Listo para Empezar?",
+      "joinNow": "Únete Ahora",
+      "registerFree": "Regístrate Gratis",
+      "searchPlaceholder": "Buscar idiomas o temas..."
+    },
+
+    "Header": {
+    "home": "Inicio",
+    "languages": "Idiomas",
+    "chat": "Chat",
+    "dashboard": "Panel de control",
+    "profile": "Perfil",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión"
+    },
+
+    "Footer": {
+    "aboutTitle": "Acerca de Daisu",
+    "aboutDescription": "Daisu es una plataforma de intercambio de idiomas que conecta a personas de todo el mundo para aprender y practicar nuevos idiomas.",
+    "quickLinksTitle": "Enlaces rápidos",
+    "exploreLanguages": "Explorar idiomas",
+    "liveChat": "Chat en vivo",
+    "myProfile": "Mi perfil",
+    "contactTitle": "Contacto",
+    "email": "Email: info@daisu.com",
+    "phone": "Teléfono: +1 234 567 890",
+    "allRightsReserved": "Todos los derechos reservados."
+    }
+
+  }
+  
