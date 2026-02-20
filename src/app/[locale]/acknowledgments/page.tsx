@@ -48,17 +48,10 @@ export default function AcknowledgmentsPage() {
               </div>
 
               <div className="min-w-0">
-                <h2 className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>Matias Palma</h2>
+                <h2 className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>Matias</h2>
                 <p className="text-sm font-semibold mt-1" style={{ color: 'var(--primary)' }}>
                   {t('mainRole')}
                 </p>
-                <a
-                  href="mailto:matiaspalma2594@gmail.com"
-                  className="inline-flex items-center gap-2 text-sm mt-2 hover:opacity-80"
-                  style={{ color: 'var(--text2)' }}
-                >
-                  <Mail size={14} /> matiaspalma2594@gmail.com
-                </a>
               </div>
             </div>
 
