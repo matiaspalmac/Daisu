@@ -1,0 +1,816 @@
+{
+  "Common": {
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "back": "Volver",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No",
+    "or": "o",
+    "and": "y",
+    "languages": {
+      "es": "🇪🇸 Español",
+      "en": "🇬🇧 Inglés",
+      "pt": "🇧🇷 Portugués"
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "badge": "Chat en vivo 24/7",
+      "title": "Daisu",
+      "subtitle": "Practica idiomas reales con nativos",
+      "subtitleHighlight": "Correcciones IA · Chat en vivo · Comunidad global",
+      "statsActive": "usuarios activos ahora",
+      "statsMessages": "mensajes hoy",
+      "statsLanguages": "3 idiomas: Español · Inglés · Portugués",
+      "ctaPrimary": "Empieza a chatear gratis",
+      "ctaSecondary": "Ver membresías"
+    },
+    "features": {
+      "title": "¿Por qué Daisu?",
+      "subtitle": "Todo lo que necesitas para hablar con fluidez",
+      "chat": {
+        "title": "Chat en vivo 24/7",
+        "desc": "Conecta con hablantes nativos en tiempo real, cualquier hora"
+      },
+      "languages": {
+        "title": "3 idiomas principales",
+        "desc": "Español, Inglés y Portugués — más idiomas en camino"
+      },
+      "ai": {
+        "title": "Corrección IA",
+        "desc": "Feedback inmediato sobre gramática y pronunciación"
+      },
+      "tandem": {
+        "title": "Matching de tandem",
+        "desc": "Te emparejamos con el compañero perfecto para tu nivel"
+      }
+    },
+    "rooms": {
+      "title": "Salas populares ahora",
+      "subtitle": "Únete y empieza a practicar",
+      "viewAll": "Ver todas",
+      "join": "Unirse",
+      "online": "online",
+      "openChat": "Chat abierto"
+    },
+    "testimonials": {
+      "title": "Lo que dicen nuestros usuarios",
+      "t0": {
+        "name": "Sofía R.",
+        "country": "🇲🇽 México",
+        "quote": "Subí de A2 a B1 en 2 meses. Las correcciones son increíbles.",
+        "level": "B1"
+      },
+      "t1": {
+        "name": "Marco V.",
+        "country": "🇮🇹 Italia",
+        "quote": "Encontré mi compañero de tandem en la primera semana. Ahora somos amigos.",
+        "level": "B2"
+      },
+      "t2": {
+        "name": "Yuki S.",
+        "country": "🇯🇵 Japón",
+        "quote": "El chat en vivo 24/7 es perfecto para mi horario. Lo recomiendo 100%.",
+        "level": "A2"
+      },
+      "t3": {
+        "name": "Ana P.",
+        "country": "🇧🇷 Brasil",
+        "quote": "Aprendí más en 1 mes que en 2 años de clases tradicionales.",
+        "level": "C1"
+      }
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "q0": "¿Es gratis?",
+      "a0": "Sí, el plan básico es 100% gratis. Accedés a chat, idiomas y recursos sin pagar nada.",
+      "q1": "¿Cómo funciona el intercambio de idiomas?",
+      "a1": "Conectás con hablantes nativos que quieren aprender tu idioma. Vos les enseñás el tuyo, ellos te enseñan el suyo.",
+      "q2": "¿Necesito ser nativo para enseñar?",
+      "a2": "No. Podés practicar con gente de tu mismo nivel o chatear con nativos que te corrijan de forma natural.",
+      "q3": "¿Qué diferencia a Daisu de otras apps?",
+      "a3": "Chat en vivo 24/7, detección automática de idioma, correcciones comunitarias, y matching de tandem real."
+    },
+    "cta": {
+      "title": "Empieza a hablar hoy",
+      "subtitle": "Gratis para siempre. Sin tarjeta de crédito.",
+      "buttonLoggedIn": "🚀 Ir al chat",
+      "buttonAnon": "✨ Crear cuenta gratis"
+    },
+    "miniChat": {
+      "title": "Chat en vivo",
+      "loginTitle": "¡Únete al chat en vivo!",
+      "loginDesc": "Inicia sesión para chatear con hablantes nativos en tiempo real",
+      "loginButton": "Iniciar sesión",
+      "selectRoom": "Selecciona una sala arriba"
+    }
+  },
+  "Header": {
+    "home": "Inicio",
+    "languages": "Idiomas",
+    "chat": "Chat",
+    "acknowledgments": "Agradecimientos",
+    "dashboard": "Panel de control",
+    "profile": "Perfil",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión",
+    "changeLanguage": "Cambiar Idioma",
+    "resources": "Recursos",
+    "news": "Noticias",
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "membership": "Membresía"
+  },
+  "Footer": {
+    "aboutTitle": "Acerca de Daisu",
+    "aboutDescription": "Daisu es una plataforma de intercambio de idiomas que conecta a personas de todo el mundo para aprender y practicar Español, Inglés y Portugués.",
+    "quickLinksTitle": "Enlaces rápidos",
+    "exploreLanguages": "Explorar idiomas",
+    "liveChat": "Chat en vivo",
+    "myProfile": "Mi perfil",
+    "contactTitle": "Contacto",
+    "email": "Email: info@daisu.com",
+    "phone": "Teléfono: +1 234 567 890",
+    "allRightsReserved": "Todos los derechos reservados.",
+    "followUs": "Síguenos",
+    "company": "Compañía",
+    "about": "Sobre Nosotros",
+    "contact": "Contacto",
+    "legal": "Legal",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "chat": "Chat",
+    "description": "Conectando el mundo a través del intercambio de idiomas y culturas.",
+    "explore": "Explorar",
+    "languages": "Idiomas",
+    "resources": "Recursos",
+    "madeWith": "Hecho con",
+    "inChile": "en Chile",
+    "acknowledgments": "Agradecimientos"
+  },
+  "ChatPage": {
+    "pleaseLogIn": "Por favor, inicia sesión para usar el chat.",
+    "sidebar": {
+      "title": "💬 Chat",
+      "placeholder": "Buscar sala...",
+      "changeLang": "Cambiar idioma objetivo",
+      "chooseLang": "¿Practicando qué idioma?",
+      "filter": {
+        "all": "Todos",
+        "es": "Español",
+        "en": "Inglés",
+        "pt": "Portugués"
+      },
+      "sections": {
+        "rooms": "Salas",
+        "custom": "Personalizadas"
+      },
+      "newRoom": "Nueva sala"
+    },
+    "header": {
+      "online": "{count} online",
+      "selectRoom": "Selecciona una sala",
+      "dailyPrompt": "Tema del día"
+    },
+    "prompt": {
+      "topic": "✨ Tema del día:",
+      "close": "×"
+    },
+    "messages": {
+      "selectRoom": "Selecciona una sala para comenzar",
+      "moreRooms": "Más de {count} salas disponibles",
+      "empty": "Sé el primero en escribir en #{room}",
+      "inputPlaceholder": "Mensaje en #{room}...",
+      "inputDisabled": "Selecciona una sala",
+      "newMessages": "Nuevos mensajes"
+    },
+    "typing": {
+      "isTyping": "{users} está escribiendo..."
+    },
+    "langSelector": {
+      "title": "🎯 ¿Qué idioma estás practicando?",
+      "subtitle": "Te ayudaremos a detectar cuándo escribís en tu idioma nativo.",
+      "skip": "Omitir por ahora",
+      "langs": {
+        "es": "Español",
+        "en": "English",
+        "pt": "Português"
+      }
+    },
+    "langWarning": "¡Recuerda practicar {lang}! 😄",
+    "isOffTarget": "Intenta escribir en {lang}",
+    "report": {
+      "title": "Reportar mensaje",
+      "spam": "Spam",
+      "offensive": "Contenido ofensivo",
+      "harassment": "Acoso",
+      "inappropriate": "Inapropiado",
+      "other": "Otro",
+      "reasons": {
+        "spam": "Spam",
+        "offensive": "Contenido ofensivo",
+        "harassment": "Acoso",
+        "inappropriate": "Inapropiado",
+        "other": "Otro"
+      },
+      "cancel": "Cancelar",
+      "submit": "Reportar"
+    },
+    "createRoom": {
+      "title": "Nueva sala",
+      "placeholder": "Nombre de la sala",
+      "button": "Crear sala",
+      "submit": "Crear sala"
+    },
+    "miniProfile": {
+      "level": "Nivel {level}",
+      "nativelang": "Idioma nativo: {lang}",
+      "targetLang": "Idioma objetivo: {lang}",
+      "close": "Cerrar"
+    },
+    "profile": {
+      "native": "🗣 Nativo:",
+      "learning": "🎯 Aprende:",
+      "close": "Cerrar"
+    },
+    "toast": {
+      "roomCreated": "Sala creada",
+      "roomError": "Error al crear sala",
+      "langSaved": "Idioma objetivo: {lang}",
+      "reportSent": "Reporte enviado. Gracias.",
+      "messageFailed": "Error al enviar mensaje"
+    },
+    "activeChats": "Chats Activos",
+    "selectChat": "Selecciona un chat para empezar.",
+    "search": "Buscar...",
+    "chatRooms": "Salas de Chat",
+    "createNewRoom": "Crear Nueva Sala",
+    "participants": "Participantes",
+    "create": "Crear",
+    "roomName": "Nombre de la Sala",
+    "rooms": "Salas",
+    "writeMessage": "Escribe un mensaje"
+  },
+  "Dashboard": {
+    "title": "Dashboard Admin",
+    "subtitle": "Daisu Language Learning Platform",
+    "refresh": "Actualizar",
+    "tabs": {
+      "overview": "Resumen",
+      "users": "Usuarios",
+      "rooms": "Salas",
+      "messages": "Mensajes",
+      "reports": "Reportes"
+    },
+    "overview": {
+      "users": "Usuarios",
+      "rooms": "Salas",
+      "messages": "Mensajes",
+      "reports": "Reportes pendientes",
+      "langDistribution": "Distribución de idiomas (salas)",
+      "noLang": "Sin idioma",
+      "rooms_count": "{count} salas ({pct}%)"
+    },
+    "users": {
+      "search": "Buscar usuario...",
+      "admin": "ADMIN",
+      "banned": "BANEADO",
+      "edit": "Editar",
+      "toggleAdmin": "Alternar admin",
+      "ban": "Banear",
+      "unban": "Desbanear",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar usuario?"
+    },
+    "rooms": {
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar sala?",
+      "openChat": "Chat abierto",
+      "msgs": "{count} msgs"
+    },
+    "reports": {
+      "empty": "Sin reportes pendientes",
+      "by": "Reportado por:",
+      "author": "Autor:",
+      "resolve": "Resolver",
+      "dismiss": "Descartar"
+    },
+    "editUser": {
+      "title": "Editar usuario",
+      "name": "Nombre",
+      "email": "Email",
+      "image": "Foto",
+      "imageUpload": "Subir imagen",
+      "bio": "Bio",
+      "country": "País",
+      "nativeLang": "Idioma nativo",
+      "targetLang": "Idioma objetivo",
+      "level": "Nivel",
+      "save": "Guardar"
+    },
+    "editRoom": {
+      "title": "Editar sala",
+      "name": "Nombre",
+      "description": "Descripción",
+      "prompt": "Prompt del día",
+      "language": "Idioma",
+      "noLanguage": "Sin idioma",
+      "level": "Nivel",
+      "noLevel": "Sin nivel",
+      "type": "Tipo",
+      "save": "Guardar",
+      "types": {
+        "public": "Público",
+        "private": "Privado",
+        "daily": "Temático diario"
+      }
+    },
+    "toast": {
+      "updated": "Usuario actualizado",
+      "deleted": "Usuario eliminado",
+      "banned": "Usuario baneado",
+      "unbanned": "Usuario desbaneado",
+      "roomUpdated": "Sala actualizada",
+      "roomDeleted": "Sala eliminada",
+      "error": "Error al cargar datos"
+    }
+  },
+  "ProfilePage": {
+    "editButton": "Editar",
+    "saveButton": "Guardar",
+    "cancelButton": "Cancelar",
+    "since": "📅 Miembro desde {date}",
+    "lastActive": "🕐 Activo hace {hours}h",
+    "coverChange": "Cambiar portada",
+    "adminBadge": "ADMIN",
+    "stats": {
+      "messagesWeek": "Mensajes esta semana",
+      "uniqueWords": "Palabras nuevas",
+      "longestSentence": "{count} palabras",
+      "corrections": "Correcciones dadas",
+      "longestLabel": "Oración más larga"
+    },
+    "sections": {
+      "bio": "Bio",
+      "location": "País",
+      "email": "Email",
+      "languages": "Idiomas",
+      "interests": "Intereses",
+      "tandemGoal": "¿Qué busco en un tandem?"
+    },
+    "bio": {
+      "placeholder": "Cuéntanos sobre ti...",
+      "empty": "Sin bio aún"
+    },
+    "country": {
+      "placeholder": "ej: 🇦🇷 Argentina",
+      "empty": "—"
+    },
+    "langs": {
+      "native": "🗣 Idioma nativo",
+      "target": "🎯 Idioma objetivo",
+      "level": "📊 Nivel CEFR",
+      "selectLang": "— seleccionar —",
+      "es": "🇪🇸 Español",
+      "en": "🇬🇧 Inglés",
+      "pt": "🇧🇷 Portugués"
+    },
+    "interests": {
+      "add": "Añadir interés...",
+      "addButton": "+",
+      "noInterests": "Sin intereses aún",
+      "s0": "anime",
+      "s1": "fútbol",
+      "s2": "viajes",
+      "s3": "series",
+      "s4": "K-pop",
+      "s5": "gaming",
+      "s6": "música",
+      "s7": "cocina",
+      "s8": "tecnología",
+      "s9": "libros",
+      "s10": "política",
+      "s11": "películas",
+      "s12": "arte",
+      "s13": "fotografía"
+    },
+    "tandemGoal": {
+      "placeholder": "Ej: Busco practicar conversación diaria, corregir escritura, hablar de anime...",
+      "empty": "Sin describir aún"
+    },
+    "toast": {
+      "saved": "Perfil actualizado",
+      "error": "Error al guardar"
+    },
+    "audio": {
+      "available": "Audio disponible"
+    }
+  },
+  "News": {
+    "title": "Noticias",
+    "subtitle": "Tips, eventos, historias y actualizaciones de la plataforma",
+    "filter": {
+      "all": "Todos",
+      "tips": "Tips",
+      "events": "Eventos",
+      "stories": "Historias",
+      "updates": "Actualizaciones",
+      "world": "Mundo"
+    },
+    "featured": "Destacado",
+    "practiceNow": "Practicar ahora",
+    "readMore": "Leer más",
+    "chatNow": "Chatear ahora",
+    "audioLabel": "🎧 Audio disponible",
+    "empty": "No hay contenido en esta categoría aún",
+    "subscribe": {
+      "title": "Recibe novedades por email",
+      "placeholder": "tu@email.com",
+      "button": "Suscribirme",
+      "success": "¡Suscripto! Te avisaremos con novedades."
+    },
+    "suggest": {
+      "title": "✍️ Sugerir noticia",
+      "desc": "¿Tenés algo interesante para compartir con la comunidad? Envianos tu idea.",
+      "button": "Enviar sugerencia"
+    },
+    "quickStats": {
+      "title": "📊 En Daisu esta semana",
+      "messages": "Mensajes enviados",
+      "newUsers": "Nuevos usuarios",
+      "rooms": "Salas activas"
+    },
+    "items": {
+      "1": {
+        "title": "Tip de la semana: Cómo usar el subjuntivo en español",
+        "content": "El subjuntivo es uno de los retos más grandes para los estudiantes de español. La clave: úsalo después de verbos de deseo, emoción o duda.",
+        "example": "\"Espero que llegues pronto\" / \"Quiero que seas feliz\" — El verbo principal reacciona con el subjuntivo.",
+        "action": "Practicar ahora",
+        "badge": "✨ Tip semanal",
+        "category": "tips",
+        "lang": "es",
+        "date": "2026-02-18",
+        "author": "Equipo Daisu"
+      },
+      "2": {
+        "title": "Challenge 7 días: Habla solo en inglés · Streak x2",
+        "content": "Durante 7 días, intenta usar solo inglés en nuestras salas de chat. Cada mensaje cuenta para tu streak. ¡Los mejores 3 ganan badge exclusivo + XP doble!",
+        "action": "Unirme al challenge",
+        "badge": "⏰ Esta semana",
+        "category": "events",
+        "date": "2026-02-17",
+        "author": "Comunidad Daisu"
+      },
+      "3": {
+        "title": "Historia de éxito: María subió de A2 a B1 en 3 meses",
+        "content": "\"Llegué a Daisu sin saber hablar casi nada. En 3 meses de práctica diaria con nativos, pasé mi examen DELE B1. ¡No hubiera sido posible sin esta comunidad!\"",
+        "action": "Chatear ahora",
+        "category": "stories",
+        "lang": "es",
+        "date": "2026-02-15",
+        "author": "María G."
+      },
+      "4": {
+        "title": "Nueva función: Correcciones IA ilimitadas en plan Pro",
+        "content": "Los usuarios Pro ahora tienen acceso a correcciones automáticas ilimitadas en tiempo real. El sistema detecta errores gramaticales y sugiere alternativas más naturales.",
+        "category": "updates",
+        "date": "2026-02-14",
+        "author": "Equipo Daisu"
+      },
+      "5": {
+        "title": "Torneo de vocabulario: gana badge + XP",
+        "content": "Participa en nuestro primer torneo de vocabulario. Cada ronda, se te presentan 10 palabras y debes usarlas correctamente en el chat. El ganador obtiene el badge \"Lexicón\".",
+        "action": "Participar ahora",
+        "badge": "🎁 Premio",
+        "category": "events",
+        "date": "2026-02-12",
+        "author": "Comunidad Daisu"
+      },
+      "6": {
+        "title": "Duolingo lanza modo IA conversacional — ¿qué opinas?",
+        "content": "Duolingo anunció un modo donde la IA simula conversaciones reales. En Daisu creemos que más que IA, necesitás humanos reales. ¿Qué preferís vos?",
+        "category": "world",
+        "date": "2026-02-10",
+        "author": "Redacción"
+      },
+      "7": {
+        "title": "Cómo entender el acento brasileño rápido",
+        "content": "El portugués brasileño tiene características únicas: reducción de sílabas, jerga regional y ritmo diferente al europeo. Practica escuchando podcasts y conversando con brasileños.",
+        "example": "\"Cê tá bem?\" = \"Você está bem?\" — La reducción de \"você\" a \"cê\" es muy común en el Brasil informal.",
+        "action": "Practicar ahora",
+        "category": "tips",
+        "lang": "pt",
+        "date": "2026-02-08",
+        "author": "Equipo Daisu"
+      },
+      "8": {
+        "title": "Nuevo estudio: hablar 15 min al día acelera 3x el aprendizaje",
+        "content": "Una investigación de la Universidad de Cambridge confirma que practicar conversación 15 minutos diarios es 3 veces más efectivo que estudiar gramática sola.",
+        "category": "world",
+        "date": "2026-02-06",
+        "author": "Redacción"
+      }
+    }
+  },
+  "Acknowledgments": {
+    "title": "Agradecimientos",
+    "description": "Daisu desea agradecer a todos los colaboradores que han hecho posible la creación de esta plataforma.",
+    "thankYouMessage": "¡Apreciamos profundamente tu contribución a Daisu!",
+    "frontend-developer": "Desarrollador Front-End",
+    "backend-developer": "Desarrollador Back-End",
+    "designer": "Diseñadora",
+    "brtranslator": "Traductora BR",
+    "contentCreator": "Creador de Contenido",
+    "communityManager": "Gestor de Comunidad",
+    "finalMessage": "¡Gracias por ser parte de la familia Daisu!"
+  },
+  "LanguagesPage": {
+    "title": "Explora Idiomas",
+    "subtitle": "Idiomas disponibles en la plataforma",
+    "searchPlaceholder": "Buscar idioma...",
+    "startLearning": "Comenzar a aprender",
+    "activeUsers": "usuarios activos",
+    "speakers": "hablantes nativos",
+    "langs": {
+      "es": {
+        "name": "Español",
+        "description": "El idioma más hablado de América Latina y España."
+      },
+      "en": {
+        "name": "Inglés",
+        "description": "El idioma global de los negocios, la ciencia y la cultura."
+      },
+      "pt": {
+        "name": "Portugués",
+        "description": "Hablado en Brasil, Portugal y países africanos."
+      }
+    }
+  },
+  "Resources": {
+    "title": "Recursos",
+    "subtitle": "Elige una categoría para explorar",
+    "textbooks": "Libros y Manuales",
+    "textbooksDesc": "Encuentra gramática estructurada y lecturas.",
+    "textbooksCount": "12 libros",
+    "videos": "Videoclases",
+    "videosDesc": "Aprende con explicaciones visuales y audio nativo.",
+    "videosCount": "48 videos",
+    "articles": "Artículos",
+    "articlesDesc": "Lee sobre cultura y métodos de estudio.",
+    "articlesCount": "34 artículos",
+    "links": "Links Útiles",
+    "linksDesc": "Descubre sitios web y herramientas recomendadas para aprender idiomas.",
+    "linksCount": "75 links",
+    "exploreButton": "Explorar"
+  },
+  "ArticlesPage": {
+    "title": "Artículos",
+    "back": "Recursos",
+    "readTime": "{minutes} min",
+    "articles": {
+      "article1": {
+        "title": "Cómo aprender un idioma en 6 meses",
+        "author": "María López",
+        "date": "Ene 2025",
+        "tag": "Estrategias"
+      },
+      "article2": {
+        "title": "La ciencia de la adquisición del lenguaje",
+        "author": "James Smith",
+        "date": "Feb 2025",
+        "tag": "Investigación"
+      },
+      "article3": {
+        "title": "10 trucos para recordar vocabulario",
+        "author": "Carlos Ruiz",
+        "date": "Mar 2025",
+        "tag": "Vocabulario"
+      },
+      "article4": {
+        "title": "Por qué funciona el intercambio de idiomas",
+        "author": "Ana Silva",
+        "date": "Mar 2025",
+        "tag": "Intercambio"
+      },
+      "article5": {
+        "title": "Errores comunes de hispanohablantes en inglés",
+        "author": "Emily Johnson",
+        "date": "Abr 2025",
+        "tag": "Inglés"
+      },
+      "article6": {
+        "title": "Inmersión total: ventajas y desventajas",
+        "author": "Diego Martín",
+        "date": "Abr 2025",
+        "tag": "Métodos"
+      }
+    }
+  },
+  "MembershipPage": {
+    "title": "Planes de Membresía",
+    "subtitle": "Sin compromisos. Cancela cuando quieras.",
+    "popular": "Más popular",
+    "period": "/mes",
+    "free_price": "GRATIS",
+    "free_cta": "Comenzar gratis",
+    "pro_cta": "Elegir Pro",
+    "premium_cta": "Elegir Premium",
+    "footer": "Los precios no incluyen impuestos locales. Al suscribirte aceptás nuestros",
+    "terms": "Términos de Servicio",
+    "basicPlan": "Plan Básico",
+    "proPlan": "Plan Pro",
+    "premiumPlan": "Plan Premium",
+    "basicFeature1": "Video chat nativo integrado",
+    "basicFeature2": "Chat de texto global",
+    "basicFeature3": "Búsqueda avanzada de salas",
+    "basicFeature4": "Acceso a foros comunitarios",
+    "basicFeature5": "- Sin soporte de IA",
+    "proFeature1": "Todas las funciones del Plan Básico",
+    "proFeature2": "IA correctora en tiempo real",
+    "proFeature3": "Generador de vocabulario post-sesión",
+    "proFeature4": "Traductor en línea sin límites",
+    "premiumFeature1": "Todas las funciones del Plan Pro",
+    "premiumFeature2": "Coaching semanal 1:1 con tutores nativos",
+    "premiumFeature3": "Acceso temprano a eventos exclusivos",
+    "premiumFeature4": "Certificaciones oficiales Daisu",
+    "premiumFeature5": "Soporte prioritario 24/7"
+  },
+  "AboutPage": {
+    "title": "Sobre Nosotros",
+    "subtitle": "Daisu es una plataforma de intercambio de idiomas que conecta a personas de todo el mundo para aprender idiomas a través de conversaciones reales.",
+    "missionTitle": "Nuestra misión",
+    "missionDesc": "Democratizar el acceso al aprendizaje de idiomas, haciendo que cada persona pueda conectar con hablantes nativos de manera gratuita y sencilla, rompiendo las barreras del lenguaje.",
+    "values": {
+      "v0": {
+        "title": "Conexión global",
+        "desc": "Unimos personas de todo el mundo para que intercambien idiomas y culturas de manera auténtica."
+      },
+      "v1": {
+        "title": "Comunidad",
+        "desc": "Creemos que aprender un idioma es mejor cuando lo haces junto a una comunidad que te apoya."
+      },
+      "v2": {
+        "title": "Objetivo claro",
+        "desc": "Potenciar el aprendizaje de idiomas a través de conversaciones reales con hablantes nativos."
+      },
+      "v3": {
+        "title": "Pasión",
+        "desc": "Desarrollado con amor por personas apasionadas por los idiomas y las culturas del mundo."
+      }
+    }
+  },
+  "ContactPage": {
+    "title": "Contacto",
+    "subtitle": "¿Tenés alguna pregunta? Estamos para ayudarte.",
+    "email": {
+      "title": "Email",
+      "value": "hola@daisu.app"
+    },
+    "chat": {
+      "title": "Chat",
+      "value": "Disponible en la plataforma"
+    },
+    "location": {
+      "title": "Ubicación",
+      "value": "Chile"
+    },
+    "form": {
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Tu nombre",
+      "emailLabel": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "messageLabel": "Mensaje",
+      "messagePlaceholder": "¿En qué podemos ayudarte?",
+      "sending": "Enviando...",
+      "submit": "Enviar mensaje"
+    },
+    "success": {
+      "title": "¡Mensaje enviado!",
+      "subtitle": "Te responderemos a la brevedad."
+    }
+  },
+  "CheckoutPage": {
+    "doneTitle": "¡Pago procesado!",
+    "doneMessage": "Bienvenido a Daisu {planColor}. Tu cuenta ha sido activada.",
+    "homeButton": "Ir al inicio",
+    "backToPlans": "Volver a planes",
+    "orderSummary": "Resumen del pedido",
+    "subscription": "Suscripción mensual",
+    "securityBadge": "Pago 100% seguro · Cancela cuando quieras · Sin permanencia",
+    "paymentInfo": "Información de pago",
+    "fields": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "tu@email.com",
+      "nameLabel": "Nombre en la tarjeta",
+      "namePlaceholder": "Juan Pérez",
+      "cardNumberLabel": "Número de tarjeta",
+      "expiryLabel": "Vencimiento",
+      "cvvLabel": "CVV"
+    },
+    "processing": "Procesando...",
+    "subscribeButton": "Suscribirse · {price}{period}",
+    "demoWarning": "* Esto es una demo. No se procesarán pagos reales.",
+    "plans": {
+      "pro": {
+        "name": "Pro",
+        "period": "/mes",
+        "features": {
+          "f0": "Chat ilimitado",
+          "f1": "Acceso a todos los materiales",
+          "f2": "Soporte prioritario",
+          "f3": "Sin anuncios"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "period": "/mes",
+        "features": {
+          "f0": "Todo lo de Pro",
+          "f1": "Clases 1:1",
+          "f2": "Certificados",
+          "f3": "IA Tutor",
+          "f4": "Acceso beta exclusivo"
+        }
+      }
+    }
+  },
+  "TermsPage": {
+    "title": "Términos de Servicio",
+    "updated": "Última actualización: febrero 2026",
+    "sections": {
+      "s0": {
+        "title": "1. Aceptación de los términos",
+        "content": "Al acceder y usar Daisu, aceptás estos Términos de Servicio. Si no estás de acuerdo con alguno de los términos, no debés usar la plataforma."
+      },
+      "s1": {
+        "title": "2. Descripción del servicio",
+        "content": "Daisu es una plataforma de intercambio de idiomas que permite a los usuarios conectarse con hablantes nativos para practicar y aprender idiomas a través de chat en tiempo real."
+      },
+      "s2": {
+        "title": "3. Registro y cuentas",
+        "content": "Para acceder a ciertas funcionalidades, debés crear una cuenta. Sos responsable de mantener la confidencialidad de tu contraseña y de todas las actividades que ocurran bajo tu cuenta."
+      },
+      "s3": {
+        "title": "4. Conducta del usuario",
+        "content": "Te comprometés a no usar Daisu para: publicar contenido ofensivo, abusivo o ilegal; acosar a otros usuarios; distribuir spam o malware; intentar acceder sin autorización a sistemas de la plataforma."
+      },
+      "s4": {
+        "title": "5. Propiedad intelectual",
+        "content": "Todo el contenido de Daisu, incluyendo software, diseño y logotipos, es propiedad de Daisu y está protegido por leyes de propiedad intelectual. No podés reproducirlo sin autorización."
+      },
+      "s5": {
+        "title": "6. Limitación de responsabilidad",
+        "content": "Daisu no es responsable por daños indirectos, incidentales o consecuentes derivados del uso de la plataforma. El servicio se provee \"tal cual\" sin garantías de ningún tipo."
+      },
+      "s6": {
+        "title": "7. Modificaciones",
+        "content": "Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor al ser publicados en la plataforma. El uso continuado del servicio implica aceptación."
+      },
+      "s7": {
+        "title": "8. Ley aplicable",
+        "content": "Estos términos se rigen por las leyes de Chile. Cualquier disputa será resuelta en los tribunales competentes de dicho país."
+      }
+    }
+  },
+  "PrivacyPage": {
+    "title": "Política de Privacidad",
+    "updated": "Última actualización: febrero 2026",
+    "sections": {
+      "s0": {
+        "title": "1. Información que recopilamos",
+        "content": "Recopilamos información que nos proporcionás directamente, como cuando creás una cuenta (nombre, correo electrónico, contraseña), completás tu perfil (idioma nativo, idiomas que aprendés, biografía) o te comunicás con nosotros."
+      },
+      "s1": {
+        "title": "2. Cómo usamos tu información",
+        "content": "Usamos la información recopilada para: proveer, mantener y mejorar nuestros servicios; personalizar tu experiencia en la plataforma; comunicarnos contigo sobre tu cuenta y actualizaciones; y garantizar la seguridad de la plataforma."
+      },
+      "s2": {
+        "title": "3. Compartir información",
+        "content": "No vendemos, intercambiamos ni transferimos a terceros tu información personal identificable. Esto no incluye a terceros de confianza que nos asisten en la operación de nuestra plataforma, siempre que acuerden mantener esta información confidencial."
+      },
+      "s3": {
+        "title": "4. Seguridad",
+        "content": "Implementamos medidas de seguridad apropiadas para proteger tu información personal. Sin embargo, ningún método de transmisión por Internet es 100% seguro, por lo que no podemos garantizar su seguridad absoluta."
+      },
+      "s4": {
+        "title": "5. Cookies",
+        "content": "Usamos cookies para mejorar tu experiencia en nuestra plataforma. Podés configurar tu navegador para rechazar cookies, aunque esto puede afectar algunas funcionalidades del sitio."
+      },
+      "s5": {
+        "title": "6. Tus derechos",
+        "content": "Tenés derecho a acceder, corregir o eliminar tu información personal. Podés actualizar tus datos desde la página de perfil o contactarnos directamente."
+      },
+      "s6": {
+        "title": "7. Cambios a esta política",
+        "content": "Podemos actualizar esta política de privacidad periódicamente. Te notificaremos sobre cambios significativos publicando la nueva política en esta página."
+      }
+    }
+  }
+}

@@ -1,0 +1,816 @@
+{
+  "Common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "back": "Back",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "languages": {
+      "es": "🇪🇸 Spanish",
+      "en": "🇬🇧 English",
+      "pt": "🇧🇷 Portuguese"
+    }
+  },
+  "HomePage": {
+    "hero": {
+      "badge": "Live Chat 24/7",
+      "title": "Daisu",
+      "subtitle": "Practice real languages with native speakers",
+      "subtitleHighlight": "AI Corrections · Live Chat · Global Community",
+      "statsActive": "active users right now",
+      "statsMessages": "messages today",
+      "statsLanguages": "3 languages: Spanish · English · Portuguese",
+      "ctaPrimary": "Start chatting for free",
+      "ctaSecondary": "See memberships"
+    },
+    "features": {
+      "title": "Why Daisu?",
+      "subtitle": "Everything you need to speak fluently",
+      "chat": {
+        "title": "Live Chat 24/7",
+        "desc": "Connect with native speakers in real time, any hour"
+      },
+      "languages": {
+        "title": "3 main languages",
+        "desc": "Spanish, English and Portuguese — more languages coming soon"
+      },
+      "ai": {
+        "title": "AI Correction",
+        "desc": "Instant feedback on grammar and pronunciation"
+      },
+      "tandem": {
+        "title": "Tandem matching",
+        "desc": "We pair you with the perfect partner for your level"
+      }
+    },
+    "rooms": {
+      "title": "Popular rooms right now",
+      "subtitle": "Join and start practicing",
+      "viewAll": "View all",
+      "join": "Join",
+      "online": "online",
+      "openChat": "Open chat"
+    },
+    "testimonials": {
+      "title": "What our users say",
+      "t0": {
+        "name": "Sofía R.",
+        "country": "🇲🇽 Mexico",
+        "quote": "I went from A2 to B1 in 2 months. The corrections are incredible.",
+        "level": "B1"
+      },
+      "t1": {
+        "name": "Marco V.",
+        "country": "🇮🇹 Italy",
+        "quote": "I found my tandem partner in the first week. Now we're friends.",
+        "level": "B2"
+      },
+      "t2": {
+        "name": "Yuki S.",
+        "country": "🇯🇵 Japan",
+        "quote": "The 24/7 live chat is perfect for my schedule. 100% recommended.",
+        "level": "A2"
+      },
+      "t3": {
+        "name": "Ana P.",
+        "country": "🇧🇷 Brazil",
+        "quote": "I learned more in 1 month than in 2 years of traditional classes.",
+        "level": "C1"
+      }
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "q0": "Is it free?",
+      "a0": "Yes, the basic plan is 100% free. You get access to chat, languages and resources without paying anything.",
+      "q1": "How does language exchange work?",
+      "a1": "You connect with native speakers who want to learn your language. You teach them yours, they teach you theirs.",
+      "q2": "Do I need to be a native speaker to teach?",
+      "a2": "No. You can practice with people at your level or chat with natives who correct you naturally.",
+      "q3": "What makes Daisu different from other apps?",
+      "a3": "Live chat 24/7, automatic language detection, community corrections, and real tandem matching."
+    },
+    "cta": {
+      "title": "Start speaking today",
+      "subtitle": "Free forever. No credit card required.",
+      "buttonLoggedIn": "🚀 Go to chat",
+      "buttonAnon": "✨ Create free account"
+    },
+    "miniChat": {
+      "title": "Live Chat",
+      "loginTitle": "Join the live chat!",
+      "loginDesc": "Sign in to chat with native speakers in real time",
+      "loginButton": "Sign in",
+      "selectRoom": "Select a room above"
+    }
+  },
+  "Header": {
+    "home": "Home",
+    "languages": "Languages",
+    "chat": "Chat",
+    "acknowledgments": "Acknowledgments",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "signOut": "Sign Out",
+    "signIn": "Sign In",
+    "changeLanguage": "Change Language",
+    "resources": "Resources",
+    "news": "News",
+    "about": "About",
+    "contact": "Contact",
+    "membership": "Membership"
+  },
+  "Footer": {
+    "aboutTitle": "About Daisu",
+    "aboutDescription": "Daisu is a language exchange platform that connects people from around the world to learn and practice Spanish, English and Portuguese.",
+    "quickLinksTitle": "Quick Links",
+    "exploreLanguages": "Explore Languages",
+    "liveChat": "Live Chat",
+    "myProfile": "My Profile",
+    "contactTitle": "Contact",
+    "email": "Email: info@daisu.com",
+    "phone": "Phone: +1 234 567 890",
+    "allRightsReserved": "All rights reserved.",
+    "followUs": "Follow Us",
+    "company": "Company",
+    "about": "About Us",
+    "contact": "Contact",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "chat": "Chat",
+    "description": "Connecting the world through language and culture exchange.",
+    "explore": "Explore",
+    "languages": "Languages",
+    "resources": "Resources",
+    "madeWith": "Made with",
+    "inChile": "in Chile",
+    "acknowledgments": "Acknowledgments"
+  },
+  "ChatPage": {
+    "pleaseLogIn": "Please log in to use the chat.",
+    "sidebar": {
+      "title": "💬 Chat",
+      "placeholder": "Search room...",
+      "changeLang": "Change target language",
+      "chooseLang": "Practicing which language?",
+      "filter": {
+        "all": "All",
+        "es": "Spanish",
+        "en": "English",
+        "pt": "Portuguese"
+      },
+      "sections": {
+        "rooms": "Rooms",
+        "custom": "Custom"
+      },
+      "newRoom": "New room"
+    },
+    "header": {
+      "online": "{count} online",
+      "selectRoom": "Select a room",
+      "dailyPrompt": "Daily prompt"
+    },
+    "prompt": {
+      "topic": "✨ Topic of the day:",
+      "close": "×"
+    },
+    "messages": {
+      "selectRoom": "Select a room to start",
+      "moreRooms": "More than {count} rooms available",
+      "empty": "Be the first to write in #{room}",
+      "inputPlaceholder": "Message in #{room}...",
+      "inputDisabled": "Select a room",
+      "newMessages": "New messages"
+    },
+    "typing": {
+      "isTyping": "{users} is typing..."
+    },
+    "langSelector": {
+      "title": "🎯 What language are you practicing?",
+      "subtitle": "We'll help you detect when you write in your native language.",
+      "skip": "Skip for now",
+      "langs": {
+        "es": "Spanish",
+        "en": "English",
+        "pt": "Portuguese"
+      }
+    },
+    "langWarning": "Remember to practice {lang}! 😄",
+    "isOffTarget": "Try writing in {lang}",
+    "report": {
+      "title": "Report message",
+      "spam": "Spam",
+      "offensive": "Offensive content",
+      "harassment": "Harassment",
+      "inappropriate": "Inappropriate",
+      "other": "Other",
+      "reasons": {
+        "spam": "Spam",
+        "offensive": "Offensive content",
+        "harassment": "Harassment",
+        "inappropriate": "Inappropriate",
+        "other": "Other"
+      },
+      "cancel": "Cancel",
+      "submit": "Report"
+    },
+    "createRoom": {
+      "title": "New room",
+      "placeholder": "Room name",
+      "button": "Create room",
+      "submit": "Create room"
+    },
+    "miniProfile": {
+      "level": "Level {level}",
+      "nativelang": "Native language: {lang}",
+      "targetLang": "Target language: {lang}",
+      "close": "Close"
+    },
+    "profile": {
+      "native": "🗣 Native:",
+      "learning": "🎯 Learning:",
+      "close": "Close"
+    },
+    "toast": {
+      "roomCreated": "Room created",
+      "roomError": "Error creating room",
+      "langSaved": "Target language: {lang}",
+      "reportSent": "Report submitted. Thank you.",
+      "messageFailed": "Failed to send message"
+    },
+    "activeChats": "Active Chats",
+    "selectChat": "Select a chat to start.",
+    "search": "Search...",
+    "chatRooms": "Chat Rooms",
+    "createNewRoom": "Create New Room",
+    "participants": "Participants",
+    "create": "Create",
+    "roomName": "Room Name",
+    "rooms": "Rooms",
+    "writeMessage": "Write a message"
+  },
+  "Dashboard": {
+    "title": "Admin Dashboard",
+    "subtitle": "Daisu Language Learning Platform",
+    "refresh": "Refresh",
+    "tabs": {
+      "overview": "Overview",
+      "users": "Users",
+      "rooms": "Rooms",
+      "messages": "Messages",
+      "reports": "Reports"
+    },
+    "overview": {
+      "users": "Users",
+      "rooms": "Rooms",
+      "messages": "Messages",
+      "reports": "Pending reports",
+      "langDistribution": "Language distribution (rooms)",
+      "noLang": "No language",
+      "rooms_count": "{count} rooms ({pct}%)"
+    },
+    "users": {
+      "search": "Search user...",
+      "admin": "ADMIN",
+      "banned": "BANNED",
+      "edit": "Edit",
+      "toggleAdmin": "Toggle admin",
+      "ban": "Ban",
+      "unban": "Unban",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this user?"
+    },
+    "rooms": {
+      "delete": "Delete",
+      "deleteConfirm": "Delete this room?",
+      "openChat": "Open chat",
+      "msgs": "{count} msgs"
+    },
+    "reports": {
+      "empty": "No pending reports",
+      "by": "Reported by:",
+      "author": "Author:",
+      "resolve": "Resolve",
+      "dismiss": "Dismiss"
+    },
+    "editUser": {
+      "title": "Edit user",
+      "name": "Name",
+      "email": "Email",
+      "image": "Photo",
+      "imageUpload": "Upload image",
+      "bio": "Bio",
+      "country": "Country",
+      "nativeLang": "Native language",
+      "targetLang": "Target language",
+      "level": "Level",
+      "save": "Save"
+    },
+    "editRoom": {
+      "title": "Edit room",
+      "name": "Name",
+      "description": "Description",
+      "prompt": "Daily prompt",
+      "language": "Language",
+      "noLanguage": "No language",
+      "level": "Level",
+      "noLevel": "No level",
+      "type": "Type",
+      "save": "Save",
+      "types": {
+        "public": "Public",
+        "private": "Private",
+        "daily": "Daily themed"
+      }
+    },
+    "toast": {
+      "updated": "User updated",
+      "deleted": "User deleted",
+      "banned": "User banned",
+      "unbanned": "User unbanned",
+      "roomUpdated": "Room updated",
+      "roomDeleted": "Room deleted",
+      "error": "Error loading data"
+    }
+  },
+  "ProfilePage": {
+    "editButton": "Edit",
+    "saveButton": "Save",
+    "cancelButton": "Cancel",
+    "since": "📅 Member since {date}",
+    "lastActive": "🕐 Active {hours}h ago",
+    "coverChange": "Change cover",
+    "adminBadge": "ADMIN",
+    "stats": {
+      "messagesWeek": "Messages this week",
+      "uniqueWords": "New words",
+      "longestSentence": "{count} words",
+      "corrections": "Corrections given",
+      "longestLabel": "Longest sentence"
+    },
+    "sections": {
+      "bio": "Bio",
+      "location": "Country",
+      "email": "Email",
+      "languages": "Languages",
+      "interests": "Interests",
+      "tandemGoal": "What am I looking for in a tandem?"
+    },
+    "bio": {
+      "placeholder": "Tell us about yourself...",
+      "empty": "No bio yet"
+    },
+    "country": {
+      "placeholder": "e.g. 🇺🇸 United States",
+      "empty": "—"
+    },
+    "langs": {
+      "native": "🗣 Native language",
+      "target": "🎯 Target language",
+      "level": "📊 CEFR Level",
+      "selectLang": "— select —",
+      "es": "🇪🇸 Spanish",
+      "en": "🇬🇧 English",
+      "pt": "🇧🇷 Portuguese"
+    },
+    "interests": {
+      "add": "Add interest...",
+      "addButton": "+",
+      "noInterests": "No interests yet",
+      "s0": "anime",
+      "s1": "soccer",
+      "s2": "travel",
+      "s3": "series",
+      "s4": "K-pop",
+      "s5": "gaming",
+      "s6": "music",
+      "s7": "cooking",
+      "s8": "technology",
+      "s9": "books",
+      "s10": "politics",
+      "s11": "movies",
+      "s12": "art",
+      "s13": "photography"
+    },
+    "tandemGoal": {
+      "placeholder": "e.g. I want to practice daily conversation, improve my writing, talk about anime...",
+      "empty": "Not described yet"
+    },
+    "toast": {
+      "saved": "Profile updated",
+      "error": "Error saving profile"
+    },
+    "audio": {
+      "available": "Audio available"
+    }
+  },
+  "News": {
+    "title": "News",
+    "subtitle": "Tips, events, stories and platform updates",
+    "filter": {
+      "all": "All",
+      "tips": "Tips",
+      "events": "Events",
+      "stories": "Stories",
+      "updates": "Updates",
+      "world": "World"
+    },
+    "featured": "Featured",
+    "practiceNow": "Practice now",
+    "readMore": "Read more",
+    "chatNow": "Chat now",
+    "audioLabel": "🎧 Audio available",
+    "empty": "No content in this category yet",
+    "subscribe": {
+      "title": "Get news by email",
+      "placeholder": "your@email.com",
+      "button": "Subscribe",
+      "success": "Subscribed! We'll notify you with updates."
+    },
+    "suggest": {
+      "title": "✍️ Suggest a story",
+      "desc": "Got something interesting to share with the community? Send us your idea.",
+      "button": "Send suggestion"
+    },
+    "quickStats": {
+      "title": "📊 On Daisu this week",
+      "messages": "Messages sent",
+      "newUsers": "New users",
+      "rooms": "Active rooms"
+    },
+    "items": {
+      "1": {
+        "title": "Weekly tip: How to use the subjunctive in Spanish",
+        "content": "The subjunctive is one of the biggest challenges for Spanish learners. The key: use it after verbs of desire, emotion or doubt.",
+        "example": "\"Espero que llegues pronto\" / \"Quiero que seas feliz\" — The main verb triggers the subjunctive.",
+        "action": "Practice now",
+        "badge": "✨ Weekly tip",
+        "category": "tips",
+        "lang": "es",
+        "date": "2026-02-18",
+        "author": "Daisu Team"
+      },
+      "2": {
+        "title": "7-day challenge: Speak only English · Streak x2",
+        "content": "For 7 days, try to use only English in our chat rooms. Every message counts for your streak. The top 3 win an exclusive badge + double XP!",
+        "action": "Join the challenge",
+        "badge": "⏰ This week",
+        "category": "events",
+        "date": "2026-02-17",
+        "author": "Daisu Community"
+      },
+      "3": {
+        "title": "Success story: María went from A2 to B1 in 3 months",
+        "content": "\"I came to Daisu barely able to speak. In 3 months of daily practice with natives, I passed my DELE B1 exam. It wouldn't have been possible without this community!\"",
+        "action": "Chat now",
+        "category": "stories",
+        "lang": "es",
+        "date": "2026-02-15",
+        "author": "María G."
+      },
+      "4": {
+        "title": "New feature: Unlimited AI corrections in Pro plan",
+        "content": "Pro users now have access to unlimited real-time automatic corrections. The system detects grammatical errors and suggests more natural alternatives.",
+        "category": "updates",
+        "date": "2026-02-14",
+        "author": "Daisu Team"
+      },
+      "5": {
+        "title": "Vocabulary tournament: win badge + XP",
+        "content": "Join our first vocabulary tournament. Each round, you get 10 words and must use them correctly in the chat. The winner gets the \"Lexicon\" badge.",
+        "action": "Join now",
+        "badge": "🎁 Prize",
+        "category": "events",
+        "date": "2026-02-12",
+        "author": "Daisu Community"
+      },
+      "6": {
+        "title": "Duolingo launches AI conversational mode — what do you think?",
+        "content": "Duolingo announced a mode where AI simulates real conversations. At Daisu we believe that more than AI, you need real humans. What do you prefer?",
+        "category": "world",
+        "date": "2026-02-10",
+        "author": "Editorial"
+      },
+      "7": {
+        "title": "How to understand the Brazilian accent quickly",
+        "content": "Brazilian Portuguese has unique characteristics: syllable reduction, regional slang, and a different rhythm from European Portuguese. Practice by listening to podcasts and talking with Brazilians.",
+        "example": "\"Cê tá bem?\" = \"Você está bem?\" — The reduction of \"você\" to \"cê\" is very common in informal Brazil.",
+        "action": "Practice now",
+        "category": "tips",
+        "lang": "pt",
+        "date": "2026-02-08",
+        "author": "Daisu Team"
+      },
+      "8": {
+        "title": "New study: speaking 15 min a day accelerates learning 3x",
+        "content": "A Cambridge University study confirms that practicing conversation for 15 minutes daily is 3 times more effective than studying grammar alone.",
+        "category": "world",
+        "date": "2026-02-06",
+        "author": "Editorial"
+      }
+    }
+  },
+  "Acknowledgments": {
+    "title": "Acknowledgments",
+    "description": "Daisu would like to thank all the contributors who made this platform possible.",
+    "thankYouMessage": "We deeply appreciate your contribution to Daisu!",
+    "frontend-developer": "Front-End Developer",
+    "backend-developer": "Back-End Developer",
+    "designer": "Designer",
+    "brtranslator": "BR Translator",
+    "contentCreator": "Content Creator",
+    "communityManager": "Community Manager",
+    "finalMessage": "Thank you for being part of the Daisu family!"
+  },
+  "LanguagesPage": {
+    "title": "Explore Languages",
+    "subtitle": "Languages available on the platform",
+    "searchPlaceholder": "Search language...",
+    "startLearning": "Start learning",
+    "activeUsers": "active users",
+    "speakers": "native speakers",
+    "langs": {
+      "es": {
+        "name": "Spanish",
+        "description": "The most spoken language in Latin America and Spain."
+      },
+      "en": {
+        "name": "English",
+        "description": "The global language of business, science, and culture."
+      },
+      "pt": {
+        "name": "Portuguese",
+        "description": "Spoken in Brazil, Portugal, and African countries."
+      }
+    }
+  },
+  "Resources": {
+    "title": "Resources",
+    "subtitle": "Choose a category to explore",
+    "textbooks": "Textbooks & Manuals",
+    "textbooksDesc": "Find structured grammar and readings.",
+    "textbooksCount": "12 books",
+    "videos": "Video Lessons",
+    "videosDesc": "Learn with visual explanations and native audio.",
+    "videosCount": "48 videos",
+    "articles": "Articles",
+    "articlesDesc": "Read about culture and study methods.",
+    "articlesCount": "34 articles",
+    "links": "Useful Links",
+    "linksDesc": "Discover recommended websites and tools for learning languages.",
+    "linksCount": "75 links",
+    "exploreButton": "Explore"
+  },
+  "ArticlesPage": {
+    "title": "Articles",
+    "back": "Resources",
+    "readTime": "{minutes} min",
+    "articles": {
+      "article1": {
+        "title": "How to learn a language in 6 months",
+        "author": "María López",
+        "date": "Jan 2025",
+        "tag": "Strategies"
+      },
+      "article2": {
+        "title": "The Science of Language Acquisition",
+        "author": "James Smith",
+        "date": "Feb 2025",
+        "tag": "Research"
+      },
+      "article3": {
+        "title": "10 tricks to remember vocabulary",
+        "author": "Carlos Ruiz",
+        "date": "Mar 2025",
+        "tag": "Vocabulary"
+      },
+      "article4": {
+        "title": "Why language exchange works",
+        "author": "Ana Silva",
+        "date": "Mar 2025",
+        "tag": "Exchange"
+      },
+      "article5": {
+        "title": "Common Mistakes Spanish Speakers Make in English",
+        "author": "Emily Johnson",
+        "date": "Apr 2025",
+        "tag": "English"
+      },
+      "article6": {
+        "title": "Total immersion: pros and cons",
+        "author": "Diego Martín",
+        "date": "Apr 2025",
+        "tag": "Methods"
+      }
+    }
+  },
+  "MembershipPage": {
+    "title": "Membership Plans",
+    "subtitle": "No commitments. Cancel anytime.",
+    "popular": "Most popular",
+    "period": "/month",
+    "free_price": "FREE",
+    "free_cta": "Start for free",
+    "pro_cta": "Choose Pro",
+    "premium_cta": "Choose Premium",
+    "footer": "Prices do not include local taxes. By subscribing you accept our",
+    "terms": "Terms of Service",
+    "basicPlan": "Basic Plan",
+    "proPlan": "Pro Plan",
+    "premiumPlan": "Premium Plan",
+    "basicFeature1": "Integrated native video chat",
+    "basicFeature2": "Global text chat",
+    "basicFeature3": "Advanced room search",
+    "basicFeature4": "Community forums access",
+    "basicFeature5": "- No AI support",
+    "proFeature1": "All Basic Plan features",
+    "proFeature2": "Real-time AI corrections",
+    "proFeature3": "Post-session vocabulary builder",
+    "proFeature4": "Unlimited inline translator",
+    "premiumFeature1": "All Pro Plan features",
+    "premiumFeature2": "Weekly 1:1 coaching with native tutors",
+    "premiumFeature3": "Early access to exclusive events",
+    "premiumFeature4": "Official Daisu certifications",
+    "premiumFeature5": "24/7 priority support"
+  },
+  "AboutPage": {
+    "title": "About Us",
+    "subtitle": "Daisu is a language exchange platform that connects people from all over the world to learn languages through real conversations.",
+    "missionTitle": "Our Mission",
+    "missionDesc": "Democratize access to language learning, making it easy and free for everyone to connect with native speakers, breaking down language barriers.",
+    "values": {
+      "v0": {
+        "title": "Global Connection",
+        "desc": "We bring people from around the world together to exchange languages and cultures authentically."
+      },
+      "v1": {
+        "title": "Community",
+        "desc": "We believe learning a language is better when done alongside a supportive community."
+      },
+      "v2": {
+        "title": "Clear Goal",
+        "desc": "Boost language learning through real conversations with native speakers."
+      },
+      "v3": {
+        "title": "Passion",
+        "desc": "Developed with love by people passionate about languages and world cultures."
+      }
+    }
+  },
+  "ContactPage": {
+    "title": "Contact",
+    "subtitle": "Have any questions? We're here to help.",
+    "email": {
+      "title": "Email",
+      "value": "hello@daisu.app"
+    },
+    "chat": {
+      "title": "Chat",
+      "value": "Available on platform"
+    },
+    "location": {
+      "title": "Location",
+      "value": "Chile"
+    },
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "How can we help you?",
+      "sending": "Sending...",
+      "submit": "Send message"
+    },
+    "success": {
+      "title": "Message sent!",
+      "subtitle": "We will get back to you shortly."
+    }
+  },
+  "CheckoutPage": {
+    "doneTitle": "Payment processed!",
+    "doneMessage": "Welcome to Daisu {planColor}. Your account has been activated.",
+    "homeButton": "Go to home",
+    "backToPlans": "Back to plans",
+    "orderSummary": "Order summary",
+    "subscription": "Monthly subscription",
+    "securityBadge": "100% secure payment · Cancel anytime · No commitments",
+    "paymentInfo": "Payment information",
+    "fields": {
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "nameLabel": "Name on card",
+      "namePlaceholder": "John Doe",
+      "cardNumberLabel": "Card number",
+      "expiryLabel": "Expiry",
+      "cvvLabel": "CVV"
+    },
+    "processing": "Processing...",
+    "subscribeButton": "Subscribe · {price}{period}",
+    "demoWarning": "* This is a demo. No real payments will be processed.",
+    "plans": {
+      "pro": {
+        "name": "Pro",
+        "period": "/mo",
+        "features": {
+          "f0": "Unlimited chat",
+          "f1": "Access to all materials",
+          "f2": "Priority support",
+          "f3": "No ads"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "period": "/mo",
+        "features": {
+          "f0": "Everything in Pro",
+          "f1": "1:1 Classes",
+          "f2": "Certificates",
+          "f3": "AI Tutor",
+          "f4": "Exclusive beta access"
+        }
+      }
+    }
+  },
+  "TermsPage": {
+    "title": "Terms of Service",
+    "updated": "Last updated: February 2026",
+    "sections": {
+      "s0": {
+        "title": "1. Acceptance of terms",
+        "content": "By accessing and using Daisu, you accept these Terms of Service. If you do not agree to any of the terms, you should not use the platform."
+      },
+      "s1": {
+        "title": "2. Description of service",
+        "content": "Daisu is a language exchange platform that allows users to connect with native speakers to practice and learn languages through real-time chat."
+      },
+      "s2": {
+        "title": "3. Registration and accounts",
+        "content": "To access certain features, you must create an account. You are responsible for maintaining the confidentiality of your password and all activities that occur under your account."
+      },
+      "s3": {
+        "title": "4. User conduct",
+        "content": "You agree not to use Daisu to: post offensive, abusive or illegal content; harass other users; distribute spam or malware; attempt unauthorized access to platform systems."
+      },
+      "s4": {
+        "title": "5. Intellectual property",
+        "content": "All Daisu content, including software, design and logos, is the property of Daisu and is protected by intellectual property laws. You cannot reproduce it without authorization."
+      },
+      "s5": {
+        "title": "6. Limitation of liability",
+        "content": "Daisu is not liable for indirect, incidental or consequential damages arising from the use of the platform. The service is provided \"as is\" without warranties of any kind."
+      },
+      "s6": {
+        "title": "7. Modifications",
+        "content": "We reserve the right to modify these terms at any time. Changes will be effective upon posting on the platform. Continued use of the service implies acceptance."
+      },
+      "s7": {
+        "title": "8. Governing law",
+        "content": "These terms are governed by the laws of Chile. Any dispute will be resolved in the competent courts of that country."
+      }
+    }
+  },
+  "PrivacyPage": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: February 2026",
+    "sections": {
+      "s0": {
+        "title": "1. Information we collect",
+        "content": "We collect information you provide directly, such as when you create an account (name, email, password), complete your profile (native language, learning languages, biography), or communicate with us."
+      },
+      "s1": {
+        "title": "2. How we use your information",
+        "content": "We use the information collected to: provide, maintain and improve our services; customize your experience; communicate with you about your account and updates; and assist in keeping the platform safe."
+      },
+      "s2": {
+        "title": "3. Sharing your information",
+        "content": "We do not sell, trade, or transfer to third parties your personally identifiable information. This does not include trusted third parties who assist us in operating our platform, provided they agree to keep this information confidential."
+      },
+      "s3": {
+        "title": "4. Security",
+        "content": "We implement security measures to maintain the safety of your personal information. However, no method of transmission over the Internet is 100% secure, so we cannot guarantee absolute security."
+      },
+      "s4": {
+        "title": "5. Cookies",
+        "content": "We use cookies to enhance your experience. You can choose to have your computer warn you each time a cookie is being sent, or to turn off cookies, but this may affect some site functionality."
+      },
+      "s5": {
+        "title": "6. Your rights",
+        "content": "You have the right to access, correct or delete your personal information. You can update your data from the profile page or contact us directly."
+      },
+      "s6": {
+        "title": "7. Changes to this policy",
+        "content": "We may update this privacy policy periodically. We will notify you of any significant changes by posting the new privacy policy on this page."
+      }
+    }
+  }
+}
