@@ -139,7 +139,20 @@ export default function ProfilePage() {
         interests,
       }
       setProfile(normalizedProfile)
-      await update({ ...session, user: { ...session?.user, ...normalizedProfile } })
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          id: normalizedProfile.id,
+          name: normalizedProfile.name,
+          email: normalizedProfile.email,
+          image: normalizedProfile.image,
+          isAdmin: normalizedProfile.isAdmin,
+          nativelang: normalizedProfile.nativelang,
+          learninglang: normalizedProfile.learninglang,
+          created_at: normalizedProfile.created_at,
+        },
+      })
       setIsEditing(false)
       toast.success(t('toast.saved'))
     } catch { toast.error(t('toast.error')) }

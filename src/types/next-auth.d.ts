@@ -5,20 +5,20 @@ declare module "next-auth" {
     user: {
       id: number;
       isAdmin: boolean;
-      bio: string;
-      nativelang: string;
-      learninglang: string;
-      created_at: string;
+      bio?: string;
+      nativelang?: string;
+      learninglang?: string;
+      created_at?: string;
     } & DefaultSession["user"]
   }
 
   interface User {
     id: number;
     isAdmin: boolean;
-    bio: string;
-    nativelang: string;
-    learninglang: string;
-    created_at: string;
+    bio?: string;
+    nativelang?: string;
+    learninglang?: string;
+    created_at?: string;
   }
 }
 
@@ -26,9 +26,9 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: number;
     isAdmin: boolean;
-    bio: string;
-    nativelang: string;
-    learninglang: string;
-    created_at: string;
+    bio?: string;
+    nativelang?: string;
+    learninglang?: string;
+    created_at?: string;
   }
 }

@@ -4,6 +4,18 @@ import CredentialsProvider from "next-auth/providers/credentials";
 const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
 const nextAuthSecret = process.env.NEXTAUTH_SECRET;
 
+const normalizeString = (value: unknown, max = 120) => {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, max);
+};
+
+const normalizeImage = (value: unknown) => {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.startsWith("data:")) return "";
+  return trimmed.slice(0, 500);
+};
+
 if (!apiUrl) {
   console.error("La URL de la API no está definida. Verifica la variable API_URL o NEXT_PUBLIC_API_URL.");
 }
@@ -41,7 +53,15 @@ const handler = NextAuth({
 
           const user = await res.json();
           if (user) {
-            return user;
+            return {
+              id: Number(user.id) || 0,
+              name: normalizeString(user.name),
+              email: normalizeString(user.email),
+              image: normalizeImage(user.image),
+              isAdmin: Boolean(user.isAdmin),
+              nativelang: normalizeString(user.nativelang, 12),
+              learninglang: normalizeString(user.learninglang, 12),
+            };
           }
           return null;
         } catch (error) {
@@ -55,22 +75,24 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = Number(user.id);
-        token.isAdmin = user.isAdmin;
-        token.bio = user.bio;
-        token.nativelang = user.nativelang;
-        token.learninglang = user.learninglang;
-        token.created_at = user.created_at;
+        token.name = normalizeString(user.name);
+        token.email = normalizeString(user.email);
+        token.image = normalizeImage(user.image);
+        token.isAdmin = Boolean(user.isAdmin);
+        token.nativelang = normalizeString(user.nativelang, 12);
+        token.learninglang = normalizeString(user.learninglang, 12);
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as number;
+        session.user.name = (token.name as string) || session.user.name || '';
+        session.user.email = (token.email as string) || session.user.email || '';
+        session.user.image = (token.image as string) || session.user.image || '';
         session.user.isAdmin = token.isAdmin as boolean;
-        session.user.bio = token.bio as string;
         session.user.nativelang = token.nativelang as string;
         session.user.learninglang = token.learninglang as string;
-        session.user.created_at = token.created_at as string;
       }
       return session;
     }
