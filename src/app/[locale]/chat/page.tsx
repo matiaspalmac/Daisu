@@ -158,8 +158,8 @@ export default function ChatPage() {
 
   const getDisplayName = useCallback((senderId?: string | number, username?: string) => {
     const key = getUserKey(senderId, username)
-    return nicknames[key] || username || 'Usuario'
-  }, [getUserKey, nicknames])
+    return nicknames[key] || username || t('common.user')
+  }, [getUserKey, nicknames, t])
 
   const getModeration = useCallback((senderId?: string | number) => {
     if (senderId === undefined || senderId === null) return { muted: false, blocked: false }
@@ -189,12 +189,12 @@ export default function ChatPage() {
     const [a, b] = [me, other].sort((x, y) => x.localeCompare(y, undefined, { numeric: true }))
     return {
       id: `private-${a}-${b}`,
-      name: `Privado · ${otherUserName}`,
-      description: 'Chat privado',
+      name: t('privateInvite.roomName', { name: otherUserName }),
+      description: t('privateInvite.privateChatDescription'),
       language: selectedRoom?.language || '',
       level: selectedRoom?.level || '',
     }
-  }, [session?.user?.id, selectedRoom?.language, selectedRoom?.level])
+  }, [session?.user?.id, selectedRoom?.language, selectedRoom?.level, t])
 
   useEffect(() => {
     let cancelled = false
@@ -313,12 +313,12 @@ export default function ChatPage() {
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === 'PrintScreen' || (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 's')) {
-        toast.error('Capturas deshabilitadas en el chat')
+        toast.error(t('toast.screenshotsDisabled'))
       }
     }
     window.addEventListener('keydown', handleKeydown)
     return () => window.removeEventListener('keydown', handleKeydown)
-  }, [])
+  }, [t])
 
   // ── Connect socket when joining room ─────────────────────────────────────
   const joinRoom = useCallback((room: ChatRoom) => {
@@ -500,10 +500,10 @@ export default function ChatPage() {
     s.on('private-chat-invite-response', ({ fromUserId, fromName, accepted }: { fromUserId: string | number; fromName: string; accepted: boolean }) => {
       if (!fromUserId) return
       if (accepted) {
-        const room = buildPrivateRoom(fromUserId, fromName || 'Usuario')
+        const room = buildPrivateRoom(fromUserId, fromName || t('common.user'))
         setRooms(prev => prev.some(r => r.id === room.id) ? prev : [room, ...prev])
         setPendingPrivateRoom(room)
-        toast.success(`${fromName || 'Usuario'} aceptó el chat privado`)
+        toast.success(t('privateInvite.accepted', { name: fromName || t('common.user') }))
         return
       }
 
@@ -511,31 +511,31 @@ export default function ChatPage() {
         const fifteenMinutes = 15 * 60 * 1000
         privateInviteCooldownRef.current.set(String(fromUserId), Date.now() + fifteenMinutes)
       }
-      toast.error(`${fromName || 'Usuario'} rechazó la solicitud de chat privado`)
+      toast.error(t('privateInvite.rejected', { name: fromName || t('common.user') }))
     })
     s.on('private-chat-invite-sent', ({ delivered }: { delivered: boolean }) => {
       if (!delivered) {
-        toast.error('El usuario no está conectado ahora mismo')
+        toast.error(t('privateInvite.userOffline'))
       }
     })
     s.on('private-chat-invite-error', ({ reason, retryAfterMs }: { reason?: string; retryAfterMs?: number }) => {
       if (reason === 'cooldown') {
         const leftMin = Math.max(1, Math.ceil((retryAfterMs || 0) / 60000))
-        toast.error(`Debes esperar ${leftMin} min para volver a invitar`) 
+        toast.error(t('privateInvite.cooldown', { minutes: leftMin }))
         return
       }
       if (reason === 'blocked') {
-        toast.error('No puedes invitar a este usuario')
+        toast.error(t('privateInvite.blocked'))
         return
       }
-      toast.error('No se pudo enviar la invitación privada')
+      toast.error(t('privateInvite.sendError'))
     })
 
     // NEW: Socket listeners for new features
     s.on('message-pinned', ({ messageId, roomId: pinRoomId, pinnedBy }: any) => {
       if (String(pinRoomId) === String(selectedRoom?.id)) {
         void loadPinned()
-        toast.success(`${pinnedBy} fijó un mensaje`)
+        toast.success(t('toast.messagePinnedBy', { name: pinnedBy }))
       }
     })
     s.on('message-unpinned', ({ messageId, roomId: unpinRoomId }: any) => {
@@ -544,11 +544,11 @@ export default function ChatPage() {
       }
     })
     s.on('user-banned', ({ userId, reason, isPermanent, expiresAt }: any) => {
-      toast.error(`Usuario baneado${reason ? ': ' + reason : ''}`)
+      toast.error(reason ? t('toast.userBannedWithReason', { reason }) : t('toast.userBanned'))
     })
     s.on('you-were-banned', ({ roomId: banRoomId, reason }: any) => {
       if (String(banRoomId) === String(selectedRoom?.id)) {
-        toast.error(`Fuiste baneado de esta sala: ${reason || 'Sin razón especificada'}`)
+        toast.error(t('toast.youWereBanned', { reason: reason || t('toast.noReason') }))
         if (selectedRoom) {
           setRooms(prev => prev.filter(r => r.id !== selectedRoom.id))
           setSelectedRoom(null)
@@ -556,10 +556,10 @@ export default function ChatPage() {
       }
     })
     s.on('user-unbanned', ({ userId }: any) => {
-      toast.success('Usuario desbaneado')
+      toast.success(t('toast.userUnbanned'))
     })
     s.on('you-were-mentioned', ({ messageId, roomId: mentionRoomId, mentionedBy: mentionedByName }: any) => {
-      toast.success(`${mentionedByName} te mencionó`)
+      toast.success(t('toast.userMentionedYou', { name: mentionedByName }))
       if (String(mentionRoomId) === String(selectedRoom?.id)) {
         void triggerConfetti(window.innerWidth / 2, 100)
       }
@@ -761,9 +761,9 @@ export default function ChatPage() {
     if (!socketRef.current || !selectedRoom) return
     socketRef.current.emit('pin-message', { messageId, roomId: selectedRoom.id }, (ack: any) => {
       if (ack?.ok) {
-        toast.success('Mensaje fijado')
+        toast.success(t('toast.messagePinned'))
       } else {
-        toast.error(ack?.error || 'Permisos insuficientes')
+        toast.error(ack?.error || t('toast.insufficientPermissions'))
       }
     })
   }
@@ -772,9 +772,9 @@ export default function ChatPage() {
     if (!socketRef.current || !selectedRoom) return
     socketRef.current.emit('unpin-message', { messageId, roomId: selectedRoom.id }, (ack: any) => {
       if (ack?.ok) {
-        toast.success('Mensaje desfijado')
+        toast.success(t('toast.messageUnpinned'))
       } else {
-        toast.error('Error al desfijar')
+        toast.error(t('toast.unpinError'))
       }
     })
   }
@@ -789,9 +789,11 @@ export default function ChatPage() {
       durationMinutes,
     }, (ack: any) => {
       if (ack?.ok) {
-        toast.success(`Usuario baneado ${durationMinutes > 0 ? `por ${durationMinutes} minutos` : 'permanentemente'}`)
+        toast.success(durationMinutes > 0
+          ? t('toast.userBannedForMinutes', { minutes: durationMinutes })
+          : t('toast.userBannedPermanent'))
       } else {
-        toast.error(ack?.error || 'Error al banear usuario')
+        toast.error(ack?.error || t('toast.banUserError'))
       }
     })
   }
@@ -887,7 +889,7 @@ export default function ChatPage() {
     if (!isAdmin && Date.now() < cooldownUntil) {
       const leftMs = cooldownUntil - Date.now()
       const leftMin = Math.max(1, Math.ceil(leftMs / 60000))
-      toast.error(`Debes esperar ${leftMin} min para volver a invitar a ${user.name}`)
+      toast.error(t('privateInvite.cooldownUser', { minutes: leftMin, name: user.name }))
       return
     }
 
@@ -914,10 +916,10 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(merged),
       })
-      toast.success(merged.blocked ? 'Usuario bloqueado' : merged.muted ? 'Usuario silenciado' : 'Preferencias actualizadas')
+      toast.success(merged.blocked ? t('toast.userBlocked') : merged.muted ? t('toast.userMuted') : t('toast.preferencesUpdated'))
     } catch {
       setModerationMap(prev => ({ ...prev, [key]: current }))
-      toast.error('No se pudo actualizar la moderación')
+      toast.error(t('toast.moderationUpdateError'))
     }
   }
 
@@ -927,7 +929,7 @@ export default function ChatPage() {
       ...prev,
       [selectedRoom.id]: roomBgDraft.trim(),
     }))
-    toast.success('Fondo actualizado para este chat')
+    toast.success(t('toast.backgroundUpdated'))
   }
 
   const clearRoomBackground = () => {
@@ -938,14 +940,14 @@ export default function ChatPage() {
       return next
     })
     setRoomBgDraft('')
-    toast.success('Fondo eliminado de este chat')
+    toast.success(t('toast.backgroundCleared'))
   }
 
   const setNicknameForMessage = (msg: Message) => {
     if (typeof window === 'undefined') return
     const key = getUserKey(msg.senderId, msg.username)
     const current = nicknames[key] || ''
-    const value = window.prompt(`Apodo para ${msg.username} (vacío para quitar):`, current)
+    const value = window.prompt(t('settings.nicknamePrompt', { name: msg.username }), current)
     if (value === null) return
     const nickname = value.trim()
     setNicknames(prev => {
@@ -969,7 +971,7 @@ export default function ChatPage() {
     setNicknames({})
     setReplyTarget(null)
     setRoomBgDraft('')
-    toast.success('Configuración restaurada')
+    toast.success(t('toast.settingsReset'))
   }
 
   const respondPrivateInvite = (accepted: boolean) => {
@@ -992,16 +994,14 @@ export default function ChatPage() {
   }
 
   // ── Mini profile ─────────────────────────────────────────────────────────
-  const fetchProfile = async (username: string) => {
+  const fetchProfile = async (userId: string | number) => {
     try {
-      const res = await fetch(`${url_env}/api/getusers`)
-      const users = await res.json()
-      const user = users.find((u: any) => u.name === username)
-      if (user) {
-        let interests = user.interests
-        try { interests = typeof interests === 'string' ? JSON.parse(interests) : interests } catch { interests = [] }
-        setMiniProfile({ ...user, interests })
-      }
+      const res = await fetch(`${url_env}/api/users/${userId}`)
+      if (!res.ok) return
+      const user = await res.json()
+      let interests = user.interests
+      try { interests = typeof interests === 'string' ? JSON.parse(interests) : interests } catch { interests = [] }
+      setMiniProfile({ ...user, interests })
     } catch { }
   }
 
@@ -1179,7 +1179,7 @@ export default function ChatPage() {
           <button className="md:hidden h-8 px-2 flex items-center justify-center rounded-lg mr-1 gap-1"
             style={{ background: 'var(--surface2)' }} onClick={() => setSidebarOpen(true)}>
             <Menu size={16} style={{ color: 'var(--text2)' }} />
-            <span className="text-[11px] font-semibold" style={{ color: 'var(--text2)' }}>Salas</span>
+            <span className="text-[11px] font-semibold" style={{ color: 'var(--text2)' }}>{t('sidebar.sections.rooms')}</span>
           </button>
 
           {selectedRoom ? (
@@ -1203,11 +1203,11 @@ export default function ChatPage() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 <div className="flex -space-x-2">
                   {onlineUsers.slice(0, 3).map(u => (
-                    <button key={u.userId} onClick={() => sendPrivateInvite(u)} title={`Chat privado con ${u.name}`}
+                    <button key={u.userId} onClick={() => sendPrivateInvite(u)} title={t('privateInvite.withUser', { name: u.name })}
                       className="w-6 h-6 rounded-full flex-shrink-0 ring-2 overflow-hidden"
                       style={{ ringColor: 'var(--surface)' } as any}>
                       {resolveImageSrc(u.image)
-                        ? <Image src={resolveImageSrc(u.image)} alt={u.name} width={24} height={24} className="object-cover" />
+                        ? <img src={resolveImageSrc(u.image)} alt={u.name} className="w-6 h-6 object-cover" />
                         : <div className="w-6 h-6 flex items-center justify-center text-[10px] font-bold text-white" style={{ background: 'var(--primary)' }}>{u.name[0]}</div>}
                     </button>
                   ))}
@@ -1215,13 +1215,13 @@ export default function ChatPage() {
                 {onlineUsers.length > 0 && (
                   <span className="text-[11px] font-medium" style={{ color: 'var(--text3)' }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block mr-1" />
-                    {onlineUsers.length} online
+                    {t('header.online', { count: onlineUsers.length })}
                   </span>
                 )}
               </div>
             </>
           ) : (
-            <p className="text-sm" style={{ color: 'var(--text3)' }}>Selecciona una sala</p>
+            <p className="text-sm" style={{ color: 'var(--text3)' }}>{t('header.selectRoom')}</p>
           )}
         </div>
 
@@ -1237,7 +1237,7 @@ export default function ChatPage() {
         {/* NEW: Pinned messages banner */}
         {selectedRoom && pinnedMessages.length > 0 && (
           <div className="px-3 py-2 text-xs flex gap-2 overflow-x-auto" style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)', color: 'var(--text3)' }}>
-            <span className="font-bold flex-shrink-0">📌 Fijados:</span>
+            <span className="font-bold flex-shrink-0">📌 {t('pinned.title')}</span>
             {pinnedMessages.slice(0, 3).map((pin: any) => (
               <button key={pin.id} onClick={() => { }}
                 className="px-2 py-1 rounded-sm flex-shrink-0 hover:opacity-80 transition-opacity"
@@ -1256,9 +1256,7 @@ export default function ChatPage() {
           style={
             !textOnlyMode && selectedRoom && roomBackgrounds[selectedRoom.id]
               ? {
-                backgroundImage: `url(${roomBackgrounds[selectedRoom.id]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundColor: roomBackgrounds[selectedRoom.id],
                 overscrollBehaviorY: 'contain',
                 touchAction: 'pan-y',
               }
@@ -1293,14 +1291,14 @@ export default function ChatPage() {
                     initial={effectsEnabled ? { opacity: 0, y: 8 } : false}
                     animate={effectsEnabled ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.18 }}
-                    className={`flex items-end gap-2 group ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+                    className={`flex items-end gap-2 group relative ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
                   >
                     {/* Avatar */}
                     {!textOnlyMode && (
                       <div className="w-8 flex-shrink-0" style={{ marginBottom: 2 }}>
-                        <button onClick={() => fetchProfile(msg.username)} className="block" title={`Ver perfil de ${displayName}`}>
+                        <button onClick={() => msg.senderId && fetchProfile(msg.senderId)} className="block" title={`Ver perfil de ${displayName}`}>
                           {shouldLoadImages && resolveImageSrc(msg.userImage)
-                            ? <Image src={resolveImageSrc(msg.userImage)} alt={displayName} width={28} height={28} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="rounded-full" style={{ border: '2px solid var(--border)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
+                            ? <img src={resolveImageSrc(msg.userImage)} alt={displayName} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-7 h-7 rounded-full object-cover" style={{ border: '2px solid var(--border)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
                             : <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
                               style={{ background: 'var(--primary)', color: '#fff' }}>{displayName[0]}</div>}
                         </button>
@@ -1364,7 +1362,7 @@ export default function ChatPage() {
                     {/* Action buttons (hover) */}
                     <div className={`flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0 flex-wrap ${isMe ? 'flex-row-reverse' : ''}`}>
                       <button onClick={() => setReplyTarget({ id: msg.id, username: displayName, preview: msg.content.slice(0, 80) })}
-                        className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title="Responder rápido">
+                        className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('messages.quickReply')}>
                         <Reply size={12} style={{ color: 'var(--text3)' }} />
                       </button>
                       <button onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)}
@@ -1372,7 +1370,7 @@ export default function ChatPage() {
                         <Smile size={12} style={{ color: 'var(--text3)' }} />
                       </button>
                       <button onClick={() => setNicknameForMessage(msg)}
-                        className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title="Apodo">
+                        className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.nickname')}>
                         <UserIcon size={11} style={{ color: 'var(--text3)' }} />
                       </button>
                       
@@ -1382,7 +1380,7 @@ export default function ChatPage() {
                           const isPinned = pinnedMessages.some((p: any) => String(p.message_id) === String(msg.id))
                           isPinned ? handleUnpinMessage(msg.id) : handlePinMessage(msg.id)
                         }}
-                          className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title="Pin/Unpin">
+                          className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.pinToggle')}>
                           <span style={{ fontSize: '12px' }}>📌</span>
                         </button>
                       )}
@@ -1391,23 +1389,23 @@ export default function ChatPage() {
                       {!isMe && msg.senderId !== undefined && msg.senderId !== null && (
                         <>
                           <button onClick={() => { const isMuted = moderationMap[String(msg.senderId!)]?.muted; updateModeration(msg.senderId!, { muted: !isMuted }) }}
-                            className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title="Silenciar/Dessilenciar">
+                            className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.muteToggle')}>
                             <span style={{ fontSize: '11px' }}>🔇</span>
                           </button>
                           <button onClick={() => { const isBlocked = moderationMap[String(msg.senderId!)]?.blocked; updateModeration(msg.senderId!, { blocked: !isBlocked }) }}
-                            className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title="Bloquear/Desbloquear">
+                            className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.blockToggle')}>
                             <span style={{ fontSize: '11px' }}>🚫</span>
                           </button>
                           
                           {/* NEW: Ban (only mods/owners) */}
                           {session?.user?.id && ['mod', 'owner'].includes(getUserRoleInRoom(session.user.id)) && (
                             <button onClick={() => {
-                              const duration = prompt('Ban duration in minutes (0 for permanent):', '60')
+                              const duration = prompt(t('actions.banPrompt'), '60')
                               if (duration !== null && msg.senderId) {
-                                handleBanUser(msg.senderId, 'Comportamiento inapropiado', parseInt(duration) || 0)
+                                handleBanUser(msg.senderId, t('actions.banDefaultReason'), parseInt(duration) || 0)
                               }
                             }}
-                              className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#ef4444' }} title="Banear usuario">
+                              className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#ef4444' }} title={t('actions.banUser')}>
                               <span style={{ fontSize: '11px', color: '#fff' }}>🚷</span>
                             </button>
                           )}
@@ -1461,13 +1459,13 @@ export default function ChatPage() {
         <div className="px-4 py-3 flex-shrink-0" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
           {replyTarget && (
             <div className="mb-2 px-3 py-2 rounded-lg text-xs flex items-center justify-between" style={{ background: 'var(--surface2)', color: 'var(--text2)' }}>
-              <span>Respondiendo a <strong>{replyTarget.username}</strong>: {replyTarget.preview}</span>
+              <span>{t('replyingTo', { user: replyTarget.username, preview: replyTarget.preview })}</span>
               <button onClick={() => setReplyTarget(null)} className="ml-2" style={{ color: 'var(--text3)' }}>✕</button>
             </div>
           )}
           <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
             {shouldLoadImages && currentUserAvatar
-              ? <Image src={currentUserAvatar} alt="" width={28} height={28} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="rounded-full flex-shrink-0 object-cover" style={{ WebkitTouchCallout: 'none', userSelect: 'none' }} />
+              ? <img src={currentUserAvatar} alt="" draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-7 h-7 rounded-full flex-shrink-0 object-cover" style={{ WebkitTouchCallout: 'none', userSelect: 'none' }} />
               : <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--primary)' }}>
                 <span className="text-xs font-bold text-white">{session?.user?.name?.[0]}</span>
               </div>}
@@ -1489,7 +1487,7 @@ export default function ChatPage() {
                       className="w-full px-3 py-2 text-left text-sm hover:opacity-80 transition-opacity flex items-center gap-2"
                       style={{ color: 'var(--text)', borderBottom: '1px solid var(--border)' }}>
                       {resolveImageSrc(user.image)
-                        ? <Image src={resolveImageSrc(user.image)} alt={user.name} width={20} height={20} className="rounded-full" />
+                        ? <img src={resolveImageSrc(user.image)} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
                         : <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: 'var(--primary)' }}>{user.name[0]}</div>}
                       <span>{user.name}</span>
                     </button>
@@ -1502,7 +1500,7 @@ export default function ChatPage() {
               onClick={() => setShowChatSettings(true)}
               className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ background: 'var(--surface2)', border: '1px solid var(--border)' }}
-              title="Configuración del chat"
+              title={t('settings.title')}
             >
               <Settings size={16} style={{ color: 'var(--text2)' }} />
             </button>
@@ -1527,27 +1525,27 @@ export default function ChatPage() {
               className="p-5 rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}
               style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold" style={{ color: 'var(--text)' }}>⚙️ Configuración del chat</h3>
+                <h3 className="font-bold" style={{ color: 'var(--text)' }}>⚙️ {t('settings.title')}</h3>
                 <button onClick={() => setShowChatSettings(false)} style={{ color: 'var(--text3)' }}><X size={18} /></button>
               </div>
 
               <div className="space-y-4 text-sm">
                 <div>
-                  <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>Tema de burbujas</p>
+                  <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>{t('settings.bubbleTheme')}</p>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {(['neon', 'pastel', 'minimal', 'custom'] as BubbleTheme[]).map(theme => (
                       <button key={theme} onClick={() => setBubbleTheme(theme)} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
                         style={{ background: bubbleTheme === theme ? 'var(--primary)' : 'var(--surface2)', color: bubbleTheme === theme ? '#fff' : 'var(--text2)' }}>
-                        {theme}
+                        {t(`settings.themes.${theme}` as any)}
                       </button>
                     ))}
                   </div>
                   {bubbleTheme === 'custom' && (
                     <div className="grid grid-cols-2 gap-2">
-                      <label className="text-xs" style={{ color: 'var(--text3)' }}>Mis mensajes
+                      <label className="text-xs" style={{ color: 'var(--text3)' }}>{t('settings.myMessages')}
                         <input type="color" value={myBubbleColor} onChange={e => setMyBubbleColor(e.target.value)} className="w-full h-8 mt-1" />
                       </label>
-                      <label className="text-xs" style={{ color: 'var(--text3)' }}>Mensajes del otro
+                      <label className="text-xs" style={{ color: 'var(--text3)' }}>{t('settings.otherMessages')}
                         <input type="color" value={otherBubbleColor} onChange={e => setOtherBubbleColor(e.target.value)} className="w-full h-8 mt-1" />
                       </label>
                     </div>
@@ -1555,34 +1553,34 @@ export default function ChatPage() {
                 </div>
 
                 <div>
-                  <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>Tamaño de fuente</p>
+                  <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>{t('settings.fontSize')}</p>
                   <div className="flex gap-2">
                     {(['small', 'medium', 'large'] as FontSize[]).map(size => (
                       <button key={size} onClick={() => setFontSize(size)} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
                         style={{ background: fontSize === size ? 'var(--primary)' : 'var(--surface2)', color: fontSize === size ? '#fff' : 'var(--text2)' }}>
-                        {size}
+                        {t(`settings.sizes.${size}` as any)}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>Fondo por chat</p>
-                  <div className="flex gap-2">
-                    <input value={roomBgDraft} onChange={e => setRoomBgDraft(e.target.value)} placeholder="URL del fondo para esta conversación"
-                      className="flex-1 px-3 py-2 rounded-lg text-xs outline-none"
-                      style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-                    <button onClick={applyRoomBackground} className="px-3 py-2 rounded-lg text-xs text-white" style={{ background: 'var(--primary)' }}>Guardar</button>
-                    <button onClick={clearRoomBackground} className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--surface2)', color: 'var(--text2)' }}>Quitar</button>
+                  <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>{t('settings.roomBackground')}</p>
+                  <div className="flex gap-2 items-center">
+                    <input type="color" value={roomBgDraft || '#000000'} onChange={e => setRoomBgDraft(e.target.value)}
+                      className="w-10 h-10 p-0 border-0 rounded-lg cursor-pointer flex-shrink-0"
+                      style={{ background: 'var(--surface2)' }} title={t('settings.backgroundPlaceholder')} />
+                    <button onClick={applyRoomBackground} className="px-3 py-2 rounded-lg text-xs text-white" style={{ background: 'var(--primary)' }}>{t('settings.saveBackground')}</button>
+                    <button onClick={clearRoomBackground} className="px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--surface2)', color: 'var(--text2)' }}>{t('settings.removeBackground')}</button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
-                    { label: 'Animaciones sutiles', value: effectsEnabled, setValue: setEffectsEnabled },
-                    { label: 'Vista solo texto', value: textOnlyMode, setValue: setTextOnlyMode },
-                    { label: 'Ahorro de datos', value: dataSaverMode, setValue: setDataSaverMode },
-                    { label: 'No cargar fotos de perfil', value: disableProfileImages, setValue: setDisableProfileImages },
+                    { label: t('settings.effectsEnabled'), value: effectsEnabled, setValue: setEffectsEnabled },
+                    { label: t('settings.textOnlyMode'), value: textOnlyMode, setValue: setTextOnlyMode },
+                    { label: t('settings.dataSaverMode'), value: dataSaverMode, setValue: setDataSaverMode },
+                    { label: t('settings.disableProfileImages'), value: disableProfileImages, setValue: setDisableProfileImages },
                   ].map(item => (
                     <label key={item.label} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'var(--surface2)' }}>
                       <input type="checkbox" checked={item.value} onChange={e => item.setValue(e.target.checked)} />
@@ -1592,7 +1590,7 @@ export default function ChatPage() {
                 </div>
 
                 <div className="text-xs px-3 py-2 rounded-lg" style={{ background: 'var(--surface2)', color: 'var(--text3)' }}>
-                  Atajos: doble click o deslizar sobre un mensaje para responder rápido.
+                  {t('settings.shortcutsHint')}
                 </div>
 
                 <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
@@ -1601,7 +1599,7 @@ export default function ChatPage() {
                     className="w-full py-2.5 rounded-xl text-sm font-semibold"
                     style={{ background: 'var(--surface2)', color: 'var(--text2)', border: '1px solid var(--border)' }}
                   >
-                    Restaurar valores predeterminados
+                    {t('settings.resetDefaults')}
                   </button>
                 </div>
               </div>
@@ -1616,14 +1614,14 @@ export default function ChatPage() {
               className="p-5 rounded-2xl w-full max-w-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
               <div className="flex items-center gap-2 mb-3" style={{ color: 'var(--text)' }}>
                 <UserIcon size={16} />
-                <h3 className="font-bold text-sm">{incomingPrivateInvite.fromName} quiere chatear contigo por privado</h3>
+                <h3 className="font-bold text-sm">{t('privateInvite.modalTitle', { name: incomingPrivateInvite.fromName })}</h3>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => respondPrivateInvite(true)} className="py-2 rounded-xl text-sm font-semibold text-white" style={{ background: 'var(--primary)' }}>
-                  aceptar
+                  {t('privateInvite.accept')}
                 </button>
                 <button onClick={() => respondPrivateInvite(false)} className="py-2 rounded-xl text-sm font-semibold" style={{ background: 'var(--surface2)', color: 'var(--text2)', border: '1px solid var(--border)' }}>
-                  rechazar
+                  {t('privateInvite.reject')}
                 </button>
               </div>
             </motion.div>
@@ -1668,7 +1666,7 @@ export default function ChatPage() {
               <div className="px-5 pb-5">
                 <div className="-mt-8 mb-3">
                     {resolveImageSrc(miniProfile.image)
-                      ? <Image src={resolveImageSrc(miniProfile.image)} alt={miniProfile.name} width={56} height={56} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="rounded-full border-4" style={{ borderColor: 'var(--surface)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
+                      ? <img src={resolveImageSrc(miniProfile.image)} alt={miniProfile.name} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-14 h-14 rounded-full border-4 object-cover" style={{ borderColor: 'var(--surface)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
                     : <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white border-4"
                       style={{ background: 'var(--primary)', borderColor: 'var(--surface)' }}>{miniProfile.name[0]}</div>}
                 </div>

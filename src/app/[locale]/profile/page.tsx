@@ -126,12 +126,12 @@ export default function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      toast.error('Selecciona una imagen válida')
+      toast.error(t('toast.invalidImage'))
       e.target.value = ''
       return
     }
     if (file.size > 3 * 1024 * 1024) {
-      toast.error('La imagen es muy grande (máx. 3MB)')
+      toast.error(t('toast.imageTooLarge'))
       e.target.value = ''
       return
     }
@@ -206,7 +206,7 @@ export default function ProfilePage() {
     await fetch(`${url_env}/api/updateuser`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...updated, isAdmin: updated.isAdmin ? 1 : 0 }),
-    }).then(() => toast.success(newValue ? 'Mensajes antiguos ocultados' : 'Mensajes antiguos visibles'))
+    }).then(() => toast.success(newValue ? t('privacy.oldMessagesHidden') : t('privacy.oldMessagesVisible')))
       .catch(() => { setProfile(p => ({ ...p, hide_old_messages: !newValue })); toast.error(t('toast.error')) })
   }
 
@@ -218,7 +218,7 @@ export default function ProfilePage() {
     })
       .then(() => {
         setBlockedUsers(p => p.filter(u => u.id !== userId))
-        toast.success('Usuario desbloqueado')
+        toast.success(t('connections.unblocked'))
       })
       .catch(() => toast.error(t('toast.error')))
   }
@@ -234,10 +234,10 @@ export default function ProfilePage() {
   const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : ''
 
   const TABS: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
-    { id: 'overview', label: '👤 Overview', icon: MessageCircle },
-    { id: 'connections', label: '👥 Conexiones', icon: Users },
-    { id: 'privacy', label: '🔐 Privacidad', icon: Lock },
-    { id: 'customization', label: '✨ Personalización', icon: Palette },
+    { id: 'overview', label: `👤 ${t('tabs.overview')}`, icon: MessageCircle },
+    { id: 'connections', label: `👥 ${t('tabs.connections')}`, icon: Users },
+    { id: 'privacy', label: `🔐 ${t('tabs.privacy')}`, icon: Lock },
+    { id: 'customization', label: `✨ ${t('tabs.customization')}`, icon: Palette },
   ]
 
   return (
@@ -280,7 +280,7 @@ export default function ProfilePage() {
           <div className="absolute top-14 left-28 sm:left-32 flex items-center gap-2 flex-wrap">
             {profile.isAdmin && <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(45,136,255,0.15)', color: '#2d88ff' }}>{t('adminBadge')}</span>}
             {profile.level && <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold" style={{ background: levelColor.bg, color: levelColor.text }}>{profile.level}</span>}
-            {!profile.is_public && <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: '#ef444220', color: '#ef4444' }}>Privado</span>}
+            {!profile.is_public && <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: '#ef444220', color: '#ef4444' }}>{t('privacy.privateBadge')}</span>}
           </div>
 
           <div className="absolute top-0 right-0 flex gap-2">
@@ -334,10 +334,10 @@ export default function ProfilePage() {
             {stats && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                 {[
-                  { icon: '💬', value: stats.messages_sent || 0, label: 'Total Mensajes' },
-                  { icon: '✅', value: stats.streak || 0, label: 'Racha (días)' },
-                  { icon: '🏆', value: stats.corrections_given || 0, label: 'Correcciones' },
-                  { icon: '📊', value: stats.unique_words_this_week || 0, label: 'Palabras únicas' },
+                  { icon: '💬', value: stats.messages_sent || 0, label: t('stats.totalMessages') },
+                  { icon: '✅', value: stats.streak || 0, label: t('stats.streakDays') },
+                  { icon: '🏆', value: stats.corrections_given || 0, label: t('stats.correctionsTotal') },
+                  { icon: '📊', value: stats.unique_words_this_week || 0, label: t('stats.uniqueWordsTotal') },
                 ].map((s, i) => (
                   <div key={i} className="p-3 rounded-xl text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
                     <p className="text-xl mb-0.5">{s.icon}</p>
@@ -350,12 +350,12 @@ export default function ProfilePage() {
 
             {/* Favorite Rooms */}
             {stats?.favorite_rooms && stats.favorite_rooms.length > 0 && (
-              <FieldCard icon={<span>🏠</span>} label="Salas Favoritas">
+              <FieldCard icon={<span>🏠</span>} label={t('overview.favoriteRooms')}>
                 <div className="space-y-2">
                   {stats.favorite_rooms.slice(0, 5).map((room, idx) => (
                     <div key={idx} className="flex items-center justify-between text-sm">
                       <span style={{ color: 'var(--text2)' }}>{room.name}</span>
-                      <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--primary)20', color: 'var(--primary)' }}>{room.message_count} msgs</span>
+                      <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--primary)20', color: 'var(--primary)' }}>{t('overview.msgs', { count: room.message_count })}</span>
                     </div>
                   ))}
                 </div>
@@ -364,7 +364,7 @@ export default function ProfilePage() {
 
             {/* Languages Stats */}
             {stats?.languages_stats && stats.languages_stats.length > 0 && (
-              <FieldCard icon={<Globe size={15} />} label="Idiomas Practicados">
+              <FieldCard icon={<Globe size={15} />} label={t('overview.languagesPracticed')}>
                 <div className="space-y-2">
                   {stats.languages_stats.map((lang, idx) => (
                     <div key={idx}>
@@ -425,9 +425,9 @@ export default function ProfilePage() {
         {tab === 'connections' && (
           <div className="space-y-4">
             {/* Followers */}
-            <FieldCard icon={<Heart size={15} />} label={`👥 Seguidores (${followers.length})`}>
+            <FieldCard icon={<Heart size={15} />} label={t('connections.followers', { count: followers.length })}>
               {followers.length === 0 ? (
-                <p className="text-sm" style={{ color: 'var(--text3)' }}>Aún no tienes seguidores</p>
+                <p className="text-sm" style={{ color: 'var(--text3)' }}>{t('connections.noFollowers')}</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {followers.map(f => (
@@ -445,7 +445,7 @@ export default function ProfilePage() {
 
             {/* Blocked Users */}
             {blockedUsers.length > 0 && (
-              <FieldCard icon={<AlertTriangle size={15} />} label={`⛔ Usuarios Bloqueados (${blockedUsers.length})`}>
+              <FieldCard icon={<AlertTriangle size={15} />} label={t('connections.blockedUsers', { count: blockedUsers.length })}>
                 <div className="space-y-2">
                   {blockedUsers.map(u => (
                     <div key={u.id} className="flex items-center justify-between p-2 rounded-lg" style={{ background: 'var(--surface2)' }}>
@@ -457,7 +457,7 @@ export default function ProfilePage() {
                         <span className="text-xs font-semibold" style={{ color: 'var(--text2)' }}>{u.name}</span>
                       </div>
                       <button onClick={() => unblockUser(u.id)} className="text-xs px-2 py-1 rounded-lg font-semibold" style={{ background: '#10b98120', color: '#10b981' }}>
-                        Desbloquear
+                        {t('connections.unblock')}
                       </button>
                     </div>
                   ))}
@@ -467,7 +467,7 @@ export default function ProfilePage() {
 
             {/* Profile Views */}
             {profileViews.length > 0 && (
-              <FieldCard icon={<Eye size={15} />} label={`👁️ Quién vio tu perfil (${profileViews.length})`}>
+              <FieldCard icon={<Eye size={15} />} label={t('connections.profileViews', { count: profileViews.length })}>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   {profileViews.map(view => (
                     <div key={view.id} className="flex items-center justify-between p-2 rounded-lg text-xs" style={{ background: 'var(--surface2)' }}>
@@ -486,40 +486,40 @@ export default function ProfilePage() {
         {/* PRIVACY TAB */}
         {tab === 'privacy' && (
           <div className="space-y-4">
-            <FieldCard icon={<Lock size={15} />} label="🔐 Privacidad del Perfil">
+            <FieldCard icon={<Lock size={15} />} label={t('privacy.title')}>
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--surface2)' }}>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Perfil {profile.is_public ? 'Público' : 'Privado'}</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{t('privacy.profileStatus', { status: profile.is_public ? t('privacy.publicState') : t('privacy.privateState') })}</p>
                     <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>
-                      {profile.is_public ? 'Otros usuarios pueden ver tu perfil' : 'Solo tú puedes ver tu perfil'}
+                      {profile.is_public ? t('privacy.publicDesc') : t('privacy.privateDesc')}
                     </p>
                   </div>
                   <button onClick={togglePrivacy}
                     className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
                     style={{ background: profile.is_public ? '#ef4444' : '#10b981' }}>
-                    {profile.is_public ? 'Hacer Privado' : 'Hacer Público'}
+                    {profile.is_public ? t('privacy.makePrivate') : t('privacy.makePublic')}
                   </button>
                 </div>
 
                 <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--surface2)' }}>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Ocultar Mensajes Antiguos</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{t('privacy.hideOldMessagesTitle')}</p>
                     <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>
-                      {profile.hide_old_messages ? 'Los mensajes previos a hace 90 días están ocultos' : 'Todos tus mensajes son visibles'}
+                      {profile.hide_old_messages ? t('privacy.hideOldMessagesOn') : t('privacy.hideOldMessagesOff')}
                     </p>
                   </div>
                   <button onClick={toggleHideOldMessages}
                     className="px-4 py-2 rounded-lg font-semibold text-sm text-white"
                     style={{ background: profile.hide_old_messages ? '#10b981' : '#3b82f6' }}>
-                    {profile.hide_old_messages ? 'Mostrar Todo' : 'Ocultar'}
+                    {profile.hide_old_messages ? t('privacy.showAll') : t('privacy.hide')}
                   </button>
                 </div>
               </div>
             </FieldCard>
 
-            <FieldCard icon={<Bell size={15} />} label="🔔 Notificaciones">
-              <p className="text-sm" style={{ color: 'var(--text3)' }}>Las opciones de notificación se encuentran en tu cuenta de sistema</p>
+            <FieldCard icon={<Bell size={15} />} label={t('privacy.notificationsTitle')}>
+              <p className="text-sm" style={{ color: 'var(--text3)' }}>{t('privacy.notificationsDesc')}</p>
             </FieldCard>
           </div>
         )}
@@ -528,7 +528,7 @@ export default function ProfilePage() {
         {tab === 'customization' && (
           <div className="space-y-4">
             {/* Bubble Color */}
-            <FieldCard icon={<Palette size={15} />} label="🎨 Color de Burbuja">
+            <FieldCard icon={<Palette size={15} />} label={t('customization.bubbleColor')}>
               <div className="grid grid-cols-4 gap-2">
                 {BUBBLE_COLORS.map(color => (
                   <button key={color} onClick={() => {
@@ -584,7 +584,7 @@ export default function ProfilePage() {
             <FieldCard icon={<Globe size={15} />} label={t('sections.location')}>
               {isEditing
                 ? <input value={profile.country} onChange={e => setProfile(p => ({ ...p, country: e.target.value }))} placeholder={t('country.placeholder')} className="w-full outline-none text-sm px-2 py-1.5 rounded-lg" style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-                : <p className="text-sm" style={{ color: 'var(--text2)' }}>{profile.country || t('country.empty')} {isEditing && <button onClick={() => setIsEditing(true)} className="text-xs ml-2 opacity-50">Editar</button>}</p>}
+                : <p className="text-sm" style={{ color: 'var(--text2)' }}>{profile.country || t('country.empty')}</p>}
             </FieldCard>
           </div>
         )}

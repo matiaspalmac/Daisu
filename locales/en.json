@@ -189,7 +189,8 @@
       "empty": "Be the first to write in #{room}",
       "inputPlaceholder": "Message in #{room}...",
       "inputDisabled": "Select a room",
-      "newMessages": "New messages"
+      "newMessages": "New messages",
+      "quickReply": "Quick reply"
     },
     "typing": {
       "isTyping": "{users} is typing..."
@@ -240,12 +241,94 @@
       "learning": "🎯 Learning:",
       "close": "Close"
     },
+    "common": {
+      "user": "User"
+    },
+    "pinned": {
+      "title": "Pinned:"
+    },
+    "replyingTo": "Replying to {user}: {preview}",
+    "privateInvite": {
+      "roomName": "Private · {name}",
+      "withUser": "Private chat with {name}",
+      "privateChatDescription": "Private chat",
+      "accepted": "{name} accepted the private chat",
+      "rejected": "{name} rejected the private chat request",
+      "userOffline": "The user is not online right now",
+      "cooldown": "You must wait {minutes} min before inviting again",
+      "cooldownUser": "You must wait {minutes} min before inviting {name} again",
+      "blocked": "You cannot invite this user",
+      "sendError": "Could not send private invite",
+      "modalTitle": "{name} wants to chat with you privately",
+      "accept": "accept",
+      "reject": "reject"
+    },
+    "settings": {
+      "title": "Chat settings",
+      "bubbleTheme": "Bubble theme",
+      "themes": {
+        "neon": "Neon",
+        "pastel": "Pastel",
+        "minimal": "Minimal",
+        "custom": "Custom"
+      },
+      "myMessages": "My messages",
+      "otherMessages": "Other messages",
+      "fontSize": "Font size",
+      "sizes": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
+      },
+      "roomBackground": "Room background",
+      "backgroundPlaceholder": "Background URL for this conversation",
+      "saveBackground": "Save",
+      "removeBackground": "Remove",
+      "effectsEnabled": "Subtle animations",
+      "textOnlyMode": "Text only mode",
+      "dataSaverMode": "Data saver",
+      "disableProfileImages": "Do not load profile photos",
+      "shortcutsHint": "Shortcuts: double-click or swipe a message to reply quickly.",
+      "resetDefaults": "Restore defaults",
+      "nicknamePrompt": "Nickname for {name} (empty to remove):"
+    },
+    "actions": {
+      "nickname": "Nickname",
+      "pinToggle": "Pin/Unpin",
+      "muteToggle": "Mute/Unmute",
+      "blockToggle": "Block/Unblock",
+      "banUser": "Ban user",
+      "banPrompt": "Ban duration in minutes (0 for permanent):",
+      "banDefaultReason": "Inappropriate behavior"
+    },
     "toast": {
       "roomCreated": "Room created",
       "roomError": "Error creating room",
       "langSaved": "Target language: {lang}",
       "reportSent": "Report submitted. Thank you.",
-      "messageFailed": "Failed to send message"
+      "messageFailed": "Failed to send message",
+      "screenshotsDisabled": "Screenshots are disabled in chat",
+      "messagePinnedBy": "{name} pinned a message",
+      "userBanned": "User banned",
+      "userBannedWithReason": "User banned: {reason}",
+      "userBannedForMinutes": "User banned for {minutes} minutes",
+      "userBannedPermanent": "User permanently banned",
+      "youWereBanned": "You were banned from this room: {reason}",
+      "noReason": "No reason provided",
+      "userUnbanned": "User unbanned",
+      "userMentionedYou": "{name} mentioned you",
+      "messagePinned": "Message pinned",
+      "insufficientPermissions": "Insufficient permissions",
+      "messageUnpinned": "Message unpinned",
+      "unpinError": "Error unpinning message",
+      "banUserError": "Error banning user",
+      "userBlocked": "User blocked",
+      "userMuted": "User muted",
+      "preferencesUpdated": "Preferences updated",
+      "moderationUpdateError": "Could not update moderation",
+      "backgroundUpdated": "Background updated for this chat",
+      "backgroundCleared": "Background removed from this chat",
+      "settingsReset": "Settings restored"
     },
     "activeChats": "Active Chats",
     "selectChat": "Select a chat to start.",
@@ -267,7 +350,8 @@
       "users": "Users",
       "rooms": "Rooms",
       "messages": "Messages",
-      "reports": "Reports"
+      "reports": "Reports",
+      "moderation": "Moderation"
     },
     "overview": {
       "users": "Users",
@@ -276,7 +360,18 @@
       "reports": "Pending reports",
       "langDistribution": "Language distribution (rooms)",
       "noLang": "No language",
-      "rooms_count": "{count} rooms ({pct}%)"
+      "rooms_count": "{count} rooms ({pct}%)",
+      "noData": "No data available",
+      "topUsersTitle": "Top 10 users",
+      "msgsShort": "{count} msgs",
+      "activeUsersTitle": "Active users",
+      "period24h": "Last 24h",
+      "period7d": "Last week",
+      "period30d": "Last month",
+      "usersCount": "{count} users",
+      "messagesPerRoomTitle": "Messages per room",
+      "languageDistributionTitle": "Language distribution",
+      "messagesPct": "{count} msgs ({pct}%)"
     },
     "users": {
       "search": "Search user...",
@@ -330,7 +425,39 @@
         "public": "Public",
         "private": "Private",
         "daily": "Daily themed"
+      },
+      "languages": {
+        "es": "🇪🇸 Spanish",
+        "en": "🇬🇧 English",
+        "pt": "🇧🇷 Portuguese"
       }
+    },
+    "moderation": {
+      "floodTitle": "Flood detection",
+      "floodSuspicious": "{count} suspicious users detected",
+      "floodRoomStat": "in #{room} ({count} msgs in 5 min)",
+      "suspiciousCount": "{count} suspicious",
+      "noSpam": "No spam detected",
+      "messagesIn5Min": "{count} messages in 5 min",
+      "review": "Review",
+      "auditLogTitle": "Audit log",
+      "noAudit": "No actions logged",
+      "table": {
+        "moderator": "Moderator",
+        "action": "Action",
+        "user": "User",
+        "room": "Room",
+        "date": "Date"
+      },
+      "bannedWordsTitle": "Banned words",
+      "bannedWordPlaceholder": "Add banned word...",
+      "addWordButton": "Add",
+      "bannedWordsHelp": "Words will be automatically detected in messages",
+      "confirmBanSpam": "Ban {name} for spam? This action can be reverted.",
+      "bannedSuccess": "{name} has been banned",
+      "enterWord": "Enter a word",
+      "wordAdded": "\"{word}\" added to banned list",
+      "addWordError": "Error adding word"
     },
     "toast": {
       "updated": "User updated",
@@ -339,7 +466,11 @@
       "unbanned": "User unbanned",
       "roomUpdated": "Room updated",
       "roomDeleted": "Room deleted",
-      "error": "Error loading data"
+      "error": "Error loading data",
+      "analyzticError": "Error loading analytics",
+      "invalidImage": "Select a valid image file",
+      "imageTooLarge": "Image is too large (max. 3MB)",
+      "imageReadError": "Could not read image"
     }
   },
   "ProfilePage": {
@@ -355,7 +486,57 @@
       "uniqueWords": "New words",
       "longestSentence": "{count} words",
       "corrections": "Corrections given",
-      "longestLabel": "Longest sentence"
+      "longestLabel": "Longest sentence",
+      "totalMessages": "Total messages",
+      "streakDays": "Streak (days)",
+      "correctionsTotal": "Corrections",
+      "uniqueWordsTotal": "Unique words"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "connections": "Connections",
+      "privacy": "Privacy",
+      "customization": "Customization"
+    },
+    "overview": {
+      "favoriteRooms": "Favorite rooms",
+      "languagesPracticed": "Practiced languages",
+      "msgs": "{count} msgs"
+    },
+    "connections": {
+      "followers": "👥 Followers ({count})",
+      "noFollowers": "You still have no followers",
+      "blockedUsers": "⛔ Blocked users ({count})",
+      "unblock": "Unblock",
+      "profileViews": "👁️ Who viewed your profile ({count})",
+      "unblocked": "User unblocked"
+    },
+    "privacy": {
+      "title": "🔐 Profile privacy",
+      "privateBadge": "Private",
+      "profileStatus": "Profile {status}",
+      "publicState": "Public",
+      "privateState": "Private",
+      "publicDesc": "Other users can see your profile",
+      "privateDesc": "Only you can see your profile",
+      "makePrivate": "Make private",
+      "makePublic": "Make public",
+      "hideOldMessagesTitle": "Hide old messages",
+      "hideOldMessagesOn": "Messages older than 90 days are hidden",
+      "hideOldMessagesOff": "All your messages are visible",
+      "showAll": "Show all",
+      "hide": "Hide",
+      "notificationsTitle": "🔔 Notifications",
+      "notificationsDesc": "Notification options are in your system account",
+      "oldMessagesHidden": "Old messages hidden",
+      "oldMessagesVisible": "Old messages visible"
+    },
+    "customization": {
+      "bubbleColor": "🎨 Bubble color"
+    },
+    "social": {
+      "public": "Profile is now public",
+      "private": "Profile is now private"
     },
     "sections": {
       "bio": "Bio",
@@ -407,7 +588,9 @@
     },
     "toast": {
       "saved": "Profile updated",
-      "error": "Error saving profile"
+      "error": "Error saving profile",
+      "invalidImage": "Select a valid image",
+      "imageTooLarge": "Image is too large (max. 3MB)"
     },
     "audio": {
       "available": "Audio available"

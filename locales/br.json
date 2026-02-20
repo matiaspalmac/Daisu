@@ -189,7 +189,8 @@
             "empty": "Seja o primeiro a escrever em #{room}",
             "inputPlaceholder": "Mensagem em #{room}...",
             "inputDisabled": "Selecione uma sala",
-            "newMessages": "Novas mensagens"
+            "newMessages": "Novas mensagens",
+            "quickReply": "Responder rápido"
         },
         "typing": {
             "isTyping": "{users} está digitando..."
@@ -240,12 +241,94 @@
             "learning": "🎯 Aprendendo:",
             "close": "Fechar"
         },
+        "common": {
+            "user": "Usuário"
+        },
+        "pinned": {
+            "title": "Fixados:"
+        },
+        "replyingTo": "Respondendo a {user}: {preview}",
+        "privateInvite": {
+            "roomName": "Privado · {name}",
+            "withUser": "Chat privado com {name}",
+            "privateChatDescription": "Chat privado",
+            "accepted": "{name} aceitou o chat privado",
+            "rejected": "{name} recusou o convite de chat privado",
+            "userOffline": "O usuário não está online agora",
+            "cooldown": "Você precisa esperar {minutes} min para convidar novamente",
+            "cooldownUser": "Você precisa esperar {minutes} min para convidar {name} novamente",
+            "blocked": "Você não pode convidar este usuário",
+            "sendError": "Não foi possível enviar o convite privado",
+            "modalTitle": "{name} quer conversar com você no privado",
+            "accept": "aceitar",
+            "reject": "recusar"
+        },
+        "settings": {
+            "title": "Configurações do chat",
+            "bubbleTheme": "Tema das bolhas",
+            "themes": {
+                "neon": "Neon",
+                "pastel": "Pastel",
+                "minimal": "Minimal",
+                "custom": "Personalizado"
+            },
+            "myMessages": "Minhas mensagens",
+            "otherMessages": "Mensagens do outro",
+            "fontSize": "Tamanho da fonte",
+            "sizes": {
+                "small": "Pequena",
+                "medium": "Média",
+                "large": "Grande"
+            },
+            "roomBackground": "Fundo por chat",
+            "backgroundPlaceholder": "URL do fundo para esta conversa",
+            "saveBackground": "Salvar",
+            "removeBackground": "Remover",
+            "effectsEnabled": "Animações sutis",
+            "textOnlyMode": "Modo só texto",
+            "dataSaverMode": "Economia de dados",
+            "disableProfileImages": "Não carregar fotos de perfil",
+            "shortcutsHint": "Atalhos: duplo clique ou deslizar em uma mensagem para responder rápido.",
+            "resetDefaults": "Restaurar padrão",
+            "nicknamePrompt": "Apelido para {name} (vazio para remover):"
+        },
+        "actions": {
+            "nickname": "Apelido",
+            "pinToggle": "Fixar/Desfixar",
+            "muteToggle": "Silenciar/Ativar som",
+            "blockToggle": "Bloquear/Desbloquear",
+            "banUser": "Banir usuário",
+            "banPrompt": "Duração do banimento em minutos (0 para permanente):",
+            "banDefaultReason": "Comportamento inadequado"
+        },
         "toast": {
             "roomCreated": "Sala criada",
             "roomError": "Erro ao criar sala",
             "langSaved": "Idioma alvo: {lang}",
             "reportSent": "Denúncia enviada. Obrigado.",
-            "messageFailed": "Falha ao enviar mensagem"
+            "messageFailed": "Falha ao enviar mensagem",
+            "screenshotsDisabled": "Capturas de tela desativadas no chat",
+            "messagePinnedBy": "{name} fixou uma mensagem",
+            "userBanned": "Usuário banido",
+            "userBannedWithReason": "Usuário banido: {reason}",
+            "userBannedForMinutes": "Usuário banido por {minutes} minutos",
+            "userBannedPermanent": "Usuário banido permanentemente",
+            "youWereBanned": "Você foi banido desta sala: {reason}",
+            "noReason": "Sem motivo informado",
+            "userUnbanned": "Usuário desbanido",
+            "userMentionedYou": "{name} mencionou você",
+            "messagePinned": "Mensagem fixada",
+            "insufficientPermissions": "Permissões insuficientes",
+            "messageUnpinned": "Mensagem desfixada",
+            "unpinError": "Erro ao desfixar",
+            "banUserError": "Erro ao banir usuário",
+            "userBlocked": "Usuário bloqueado",
+            "userMuted": "Usuário silenciado",
+            "preferencesUpdated": "Preferências atualizadas",
+            "moderationUpdateError": "Não foi possível atualizar a moderação",
+            "backgroundUpdated": "Fundo atualizado para este chat",
+            "backgroundCleared": "Fundo removido deste chat",
+            "settingsReset": "Configurações restauradas"
         },
         "activeChats": "Chats Ativos",
         "selectChat": "Selecione um chat para começar.",
@@ -267,7 +350,8 @@
             "users": "Usuários",
             "rooms": "Salas",
             "messages": "Mensagens",
-            "reports": "Denúncias"
+            "reports": "Denúncias",
+            "moderation": "Moderação"
         },
         "overview": {
             "users": "Usuários",
@@ -276,7 +360,18 @@
             "reports": "Denúncias pendentes",
             "langDistribution": "Distribuição de idiomas (salas)",
             "noLang": "Sem idioma",
-            "rooms_count": "{count} salas ({pct}%)"
+            "rooms_count": "{count} salas ({pct}%)",
+            "noData": "Sem dados disponíveis",
+            "topUsersTitle": "Top 10 usuários",
+            "msgsShort": "{count} msgs",
+            "activeUsersTitle": "Usuários ativos",
+            "period24h": "Últimas 24h",
+            "period7d": "Última semana",
+            "period30d": "Último mês",
+            "usersCount": "{count} usuários",
+            "messagesPerRoomTitle": "Mensagens por sala",
+            "languageDistributionTitle": "Distribuição de idiomas",
+            "messagesPct": "{count} msgs ({pct}%)"
         },
         "users": {
             "search": "Buscar usuário...",
@@ -330,7 +425,39 @@
                 "public": "Público",
                 "private": "Privado",
                 "daily": "Temático diário"
+            },
+            "languages": {
+                "es": "🇪🇸 Espanhol",
+                "en": "🇬🇧 Inglês",
+                "pt": "🇧🇷 Português"
             }
+        },
+        "moderation": {
+            "floodTitle": "Detecção de flood",
+            "floodSuspicious": "{count} usuários suspeitos detectados",
+            "floodRoomStat": "em #{room} ({count} msgs em 5 min)",
+            "suspiciousCount": "{count} suspeito(s)",
+            "noSpam": "Nenhum spam detectado",
+            "messagesIn5Min": "{count} mensagens em 5 min",
+            "review": "Revisar",
+            "auditLogTitle": "Log de auditoria",
+            "noAudit": "Nenhuma ação registrada",
+            "table": {
+                "moderator": "Moderador",
+                "action": "Ação",
+                "user": "Usuário",
+                "room": "Sala",
+                "date": "Data"
+            },
+            "bannedWordsTitle": "Palavras proibidas",
+            "bannedWordPlaceholder": "Adicionar palavra proibida...",
+            "addWordButton": "Adicionar",
+            "bannedWordsHelp": "As palavras serão detectadas automaticamente nas mensagens",
+            "confirmBanSpam": "Banir {name} por spam? Esta ação pode ser revertida.",
+            "bannedSuccess": "{name} foi banido",
+            "enterWord": "Digite uma palavra",
+            "wordAdded": "\"{word}\" adicionada à lista de proibidas",
+            "addWordError": "Erro ao adicionar palavra"
         },
         "toast": {
             "updated": "Usuário atualizado",
@@ -339,7 +466,11 @@
             "unbanned": "Usuário desbanido",
             "roomUpdated": "Sala atualizada",
             "roomDeleted": "Sala excluída",
-            "error": "Erro ao carregar dados"
+            "error": "Erro ao carregar dados",
+            "analyzticError": "Erro ao carregar analytics",
+            "invalidImage": "Selecione um arquivo de imagem válido",
+            "imageTooLarge": "A imagem é muito grande (máx. 3MB)",
+            "imageReadError": "Não foi possível ler a imagem"
         }
     },
     "ProfilePage": {
@@ -355,7 +486,57 @@
             "uniqueWords": "Palavras novas",
             "longestSentence": "{count} palavras",
             "corrections": "Correções dadas",
-            "longestLabel": "Frase mais longa"
+            "longestLabel": "Frase mais longa",
+            "totalMessages": "Total de mensagens",
+            "streakDays": "Sequência (dias)",
+            "correctionsTotal": "Correções",
+            "uniqueWordsTotal": "Palavras únicas"
+        },
+        "tabs": {
+            "overview": "Resumo",
+            "connections": "Conexões",
+            "privacy": "Privacidade",
+            "customization": "Personalização"
+        },
+        "overview": {
+            "favoriteRooms": "Salas favoritas",
+            "languagesPracticed": "Idiomas praticados",
+            "msgs": "{count} msgs"
+        },
+        "connections": {
+            "followers": "👥 Seguidores ({count})",
+            "noFollowers": "Você ainda não tem seguidores",
+            "blockedUsers": "⛔ Usuários bloqueados ({count})",
+            "unblock": "Desbloquear",
+            "profileViews": "👁️ Quem viu seu perfil ({count})",
+            "unblocked": "Usuário desbloqueado"
+        },
+        "privacy": {
+            "title": "🔐 Privacidade do perfil",
+            "privateBadge": "Privado",
+            "profileStatus": "Perfil {status}",
+            "publicState": "Público",
+            "privateState": "Privado",
+            "publicDesc": "Outros usuários podem ver seu perfil",
+            "privateDesc": "Somente você pode ver seu perfil",
+            "makePrivate": "Tornar privado",
+            "makePublic": "Tornar público",
+            "hideOldMessagesTitle": "Ocultar mensagens antigas",
+            "hideOldMessagesOn": "Mensagens anteriores a 90 dias estão ocultas",
+            "hideOldMessagesOff": "Todas as suas mensagens estão visíveis",
+            "showAll": "Mostrar tudo",
+            "hide": "Ocultar",
+            "notificationsTitle": "🔔 Notificações",
+            "notificationsDesc": "As opções de notificação ficam na sua conta do sistema",
+            "oldMessagesHidden": "Mensagens antigas ocultadas",
+            "oldMessagesVisible": "Mensagens antigas visíveis"
+        },
+        "customization": {
+            "bubbleColor": "🎨 Cor da bolha"
+        },
+        "social": {
+            "public": "O perfil agora é público",
+            "private": "O perfil agora é privado"
         },
         "sections": {
             "bio": "Bio",
@@ -407,7 +588,9 @@
         },
         "toast": {
             "saved": "Perfil atualizado",
-            "error": "Erro ao salvar"
+            "error": "Erro ao salvar",
+            "invalidImage": "Selecione uma imagem válida",
+            "imageTooLarge": "A imagem é muito grande (máx. 3MB)"
         },
         "audio": {
             "available": "Áudio disponível"
