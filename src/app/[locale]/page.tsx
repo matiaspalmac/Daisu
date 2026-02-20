@@ -9,10 +9,11 @@ import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import io, { Socket } from 'socket.io-client';
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+const API = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
 
 interface Room { id: string; name: string; language: string; level: string; onlineCount?: number; }
 interface Message { id: string; content: string; user: { name: string; image: string }; sent_at: string; }
+interface HomeStats { users?: number; messages?: number; }
 
 const LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷' };
 const LEVEL_COLORS: Record<string, string> = { 'A1-A2': '#10b981', 'A1': '#10b981', 'B1-B2': '#3b82f6', 'B1': '#3b82f6', 'C1-C2': '#8b5cf6' };
@@ -25,16 +26,21 @@ export default function HomePage() {
   const [miniMessages, setMiniMessages] = useState<Message[]>([]);
   const [miniInput, setMiniInput] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [liveUsers, setLiveUsers] = useState(1284);
-  const [liveMessages, setLiveMessages] = useState(34892);
+  const [liveUsers, setLiveUsers] = useState(0);
+  const [liveMessages, setLiveMessages] = useState(0);
+  const [isMiniChatOpen, setIsMiniChatOpen] = useState(true);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Fake live counters
+  // Real counters from backend stats
   useEffect(() => {
-    const t0 = setInterval(() => setLiveUsers(u => u + Math.floor(Math.random() * 3)), 4000);
-    const t1 = setInterval(() => setLiveMessages(m => m + Math.floor(Math.random() * 8) + 1), 2500);
-    return () => { clearInterval(t0); clearInterval(t1); };
+    fetch(`${API}/api/stats`)
+      .then(r => r.json())
+      .then((s: HomeStats) => {
+        if (typeof s?.users === 'number') setLiveUsers(s.users);
+        if (typeof s?.messages === 'number') setLiveMessages(s.messages);
+      })
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -261,66 +267,80 @@ export default function HomePage() {
 
       {/* ── MINI CHAT WIDGET ─────────────────── */}
       <div className="fixed bottom-6 right-6 z-40">
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1, type: 'spring' }}
-          className="w-72 sm:w-80 rounded-2xl overflow-hidden shadow-2xl flex flex-col" style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '420px' }}>
-          {/* header */}
-          <div className="px-4 py-3 flex items-center gap-2" style={{ background: 'var(--primary)', color: '#fff' }}>
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="font-bold text-sm flex-1">{t('miniChat.title')}</span>
-            {/* Room chips */}
-            {session && (
-              <div className="flex gap-1">
-                {featuredRooms.slice(0, 3).map(r => (
-                  <button key={r.id} onClick={() => setMiniChatRoom(r)}
-                    className="text-[10px] px-1.5 py-0.5 rounded font-bold transition-all"
-                    style={{ background: miniChatRoom?.id === r.id ? '#fff' : 'rgba(255,255,255,0.2)', color: miniChatRoom?.id === r.id ? 'var(--primary)' : '#fff' }}>
-                    {LANG_FLAGS[r.language] || '#'}{r.name?.slice(0, 3)}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          {/* messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 120 }}>
-            {!session ? (
-              <div className="text-center py-4">
-                <p className="text-sm font-bold mb-1" style={{ color: 'var(--text)' }}>{t('miniChat.loginTitle')}</p>
-                <p className="text-xs mb-3" style={{ color: 'var(--text3)' }}>{t('miniChat.loginDesc')}</p>
-                <Link href="/login">
-                  <button className="text-xs px-4 py-2 rounded-xl font-semibold text-white" style={{ background: 'var(--primary)' }}>{t('miniChat.loginButton')}</button>
-                </Link>
-              </div>
-            ) : !miniChatRoom ? (
-              <p className="text-center text-xs py-4" style={{ color: 'var(--text3)' }}>{t('miniChat.selectRoom')}</p>
-            ) : miniMessages.length === 0 ? (
-              <p className="text-center text-xs py-4" style={{ color: 'var(--text3)' }}>{t('rooms.openChat')}</p>
-            ) : (
-              miniMessages.map(m => (
-                <div key={m.id} className="flex gap-2">
-                  {m.user?.image
-                    ? <Image src={m.user.image} alt={m.user.name} width={20} height={20} className="w-5 h-5 rounded-full flex-shrink-0 object-cover" />
-                    : <div className="w-5 h-5 rounded-full flex-shrink-0 text-[9px] font-bold flex items-center justify-center text-white" style={{ background: 'var(--primary)' }}>{m.user?.name?.[0]}</div>}
-                  <div>
-                    <span className="text-[10px] font-bold" style={{ color: 'var(--primary)' }}>{m.user?.name} </span>
-                    <span className="text-[11px]" style={{ color: 'var(--text2)' }}>{m.content}</span>
+        <AnimatePresence mode="wait">
+          {isMiniChatOpen ? (
+            <motion.div key="mini-open" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ delay: 0.2, type: 'spring' }}
+              className="w-72 sm:w-80 rounded-2xl overflow-hidden shadow-2xl flex flex-col" style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '420px' }}>
+              {/* header */}
+              <div className="px-4 py-3 flex items-center gap-2" style={{ background: 'var(--primary)', color: '#fff' }}>
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="font-bold text-sm flex-1">{t('miniChat.title')}</span>
+                {/* Room chips */}
+                {session && (
+                  <div className="flex gap-1">
+                    {featuredRooms.slice(0, 3).map(r => (
+                      <button key={r.id} onClick={() => setMiniChatRoom(r)}
+                        className="text-[10px] px-1.5 py-0.5 rounded font-bold transition-all"
+                        style={{ background: miniChatRoom?.id === r.id ? '#fff' : 'rgba(255,255,255,0.2)', color: miniChatRoom?.id === r.id ? 'var(--primary)' : '#fff' }}>
+                        {LANG_FLAGS[r.language] || '#'}{r.name?.slice(0, 3)}
+                      </button>
+                    ))}
                   </div>
+                )}
+                <button onClick={() => setIsMiniChatOpen(false)} className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'rgba(255,255,255,0.22)', color: '#fff' }}>×</button>
+              </div>
+              {/* messages */}
+              <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 120 }}>
+                {!session ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm font-bold mb-1" style={{ color: 'var(--text)' }}>{t('miniChat.loginTitle')}</p>
+                    <p className="text-xs mb-3" style={{ color: 'var(--text3)' }}>{t('miniChat.loginDesc')}</p>
+                    <Link href="/login">
+                      <button className="text-xs px-4 py-2 rounded-xl font-semibold text-white" style={{ background: 'var(--primary)' }}>{t('miniChat.loginButton')}</button>
+                    </Link>
+                  </div>
+                ) : !miniChatRoom ? (
+                  <p className="text-center text-xs py-4" style={{ color: 'var(--text3)' }}>{t('miniChat.selectRoom')}</p>
+                ) : miniMessages.length === 0 ? (
+                  <p className="text-center text-xs py-4" style={{ color: 'var(--text3)' }}>{t('rooms.openChat')}</p>
+                ) : (
+                  miniMessages.map(m => (
+                    <div key={m.id} className="flex gap-2">
+                      {m.user?.image
+                        ? <Image src={m.user.image} alt={m.user.name} width={20} height={20} className="w-5 h-5 rounded-full flex-shrink-0 object-cover" />
+                        : <div className="w-5 h-5 rounded-full flex-shrink-0 text-[9px] font-bold flex items-center justify-center text-white" style={{ background: 'var(--primary)' }}>{m.user?.name?.[0]}</div>}
+                      <div>
+                        <span className="text-[10px] font-bold" style={{ color: 'var(--primary)' }}>{m.user?.name} </span>
+                        <span className="text-[11px]" style={{ color: 'var(--text2)' }}>{m.content}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+              {/* input */}
+              {session && miniChatRoom && (
+                <div className="flex gap-2 p-2" style={{ borderTop: '1px solid var(--border)' }}>
+                  <input value={miniInput} onChange={e => setMiniInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && sendMini()}
+                    placeholder={`${t('rooms.join')} #${miniChatRoom.name}...`}
+                    className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none"
+                    style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+                  <button onClick={sendMini} className="text-xs px-2 py-1.5 rounded-lg text-white" style={{ background: 'var(--primary)' }}>→</button>
                 </div>
-              ))
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          {/* input */}
-          {session && miniChatRoom && (
-            <div className="flex gap-2 p-2" style={{ borderTop: '1px solid var(--border)' }}>
-              <input value={miniInput} onChange={e => setMiniInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && sendMini()}
-                placeholder={`${t('rooms.join')} #${miniChatRoom.name}...`}
-                className="flex-1 text-xs px-2 py-1.5 rounded-lg outline-none"
-                style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-              <button onClick={sendMini} className="text-xs px-2 py-1.5 rounded-lg text-white" style={{ background: 'var(--primary)' }}>→</button>
-            </div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.button key="mini-closed" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              onClick={() => setIsMiniChatOpen(true)}
+              className="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center relative"
+              style={{ background: 'var(--primary)', color: '#fff' }}
+              title={t('miniChat.title')}>
+              <MessageCircle size={24} />
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-green-400" />
+            </motion.button>
           )}
-        </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

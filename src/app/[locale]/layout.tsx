@@ -4,9 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from "@/components/theme-provider";
-
-import Header from "@/components/header";
-import Footer from "@/components/footer";
+import AppShell from "@/components/app-shell";
 import { getMessages } from "next-intl/server";
 
 const geistSans = localFont({
@@ -42,11 +40,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
             <Providers>
-              <Header />
-              <main style={{ minHeight: 'calc(100vh - var(--nav-h))' }}>
-                {children}
-              </main>
-              <Footer />
+              <AppShell>{children}</AppShell>
             </Providers>
           </NextIntlClientProvider>
         </ThemeProvider>

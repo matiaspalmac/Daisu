@@ -26,7 +26,7 @@ const url = process.env.NEXT_PUBLIC_API_URL;
 const LEVEL_COLORS: Record<string, string> = { 'A1-A2': '#10b981', 'A1': '#10b981', 'B1-B2': '#3b82f6', 'B1': '#3b82f6', 'C1-C2': '#8b5cf6', 'C1': '#8b5cf6' };
 const LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷', '': '' };
 
-type Tab = 'overview' | 'users' | 'rooms' | 'messages' | 'reports';
+type Tab = 'overview' | 'users' | 'rooms' | 'messages' | 'reports' | 'moderation';
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -40,7 +40,14 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [editRoom, setEditRoom] = useState<Room | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<any>({
+    topUsers: [],
+    messagesPerRoom: [],
+    activeUsersTimeline: {},
+    languageStats: [],
+    floodDetection: [],
+    auditLog: [],
+  });
 
   const handleUserImageFile = (file?: File) => {
     if (!file || !editUser) return;
@@ -93,6 +100,36 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => { if (tab === 'messages') fetchMessages(); }, [tab, fetchMessages]);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const [topRes, roomRes, timelineRes, langRes, floodRes, auditRes] = await Promise.all([
+        fetch(`${url}/api/analytics/top-users`),
+        fetch(`${url}/api/analytics/messages-per-room`),
+        fetch(`${url}/api/analytics/active-users-timeline`),
+        fetch(`${url}/api/analytics/languages`),
+        fetch(`${url}/api/analytics/flood-detection`),
+        fetch(`${url}/api/analytics/audit-log?limit=50`),
+      ]);
+      const [top, room, timeline, lang, flood, audit] = await Promise.all([
+        topRes.json(), roomRes.json(), timelineRes.json(), langRes.json(), floodRes.json(), auditRes.json()
+      ]);
+      setAnalyticsData({
+        topUsers: Array.isArray(top) ? top : [],
+        messagesPerRoom: Array.isArray(room) ? room : [],
+        activeUsersTimeline: timeline,
+        languageStats: Array.isArray(lang) ? lang : [],
+        floodDetection: flood?.flagged_users || [],
+        auditLog: Array.isArray(audit) ? audit : [],
+      });
+    } catch (e) {
+      toast.error(t('toast.analyzticError'));
+    }
+  }, [t]);
+
+  useEffect(() => {
+    if (tab === 'overview') fetchAnalytics();
+  }, [tab, fetchAnalytics]);
 
   const deleteUser = async (id: number) => {
     if (!confirm(t('users.deleteConfirm'))) return;
@@ -156,6 +193,40 @@ export default function DashboardPage() {
     setReports(p => p.map(r => r.id === id ? { ...r, status } : r));
   };
 
+  const reviewFloodUser = async (userId: number) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    if (confirm(`¿Banear a ${user.name} por spam? Esta acción puede revertirse.`)) {
+      await banUser(user);
+      setAnalyticsData(p => ({
+        ...p,
+        floodDetection: p.floodDetection.filter((f: any) => f.id !== userId)
+      }));
+      toast.success(`${user.name} ha sido baneado`);
+    }
+  };
+
+  const addBannedWord = async () => {
+    const input = document.getElementById('bannedWordInput') as HTMLInputElement;
+    if (!input || !input.value.trim()) {
+      toast.error('Ingresa una palabra');
+      return;
+    }
+    const word = input.value.trim();
+    try {
+      const res = await fetch(`${url}/api/analytics/banned-words`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word })
+      });
+      if (!res.ok) throw new Error();
+      input.value = '';
+      toast.success(`"${word}" agregada a la lista de prohibidas`);
+    } catch {
+      toast.error('Error al agregar palabra');
+    }
+  };
+
   if (status === 'loading') return (
     <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--bg)' }}>
       <Loader2 className="animate-spin" size={28} style={{ color: 'var(--primary)' }} />
@@ -169,6 +240,7 @@ export default function DashboardPage() {
     { id: 'rooms', labelKey: 'tabs.rooms', icon: Hash, count: rooms.length },
     { id: 'messages', labelKey: 'tabs.messages', icon: MessageCircle },
     { id: 'reports', labelKey: 'tabs.reports', icon: Flag, count: reports.filter(r => r.status === 'pending').length, warn: reports.some(r => r.status === 'pending') },
+    { id: 'moderation', labelKey: 'tabs.moderation', icon: Shield, count: analyticsData.floodDetection.length, warn: analyticsData.floodDetection.length > 0 },
   ];
 
   const filteredUsers = users.filter(u =>
@@ -238,23 +310,102 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+
+            {/* Flood Detection Warning */}
+            {analyticsData.floodDetection.length > 0 && (
+              <div className="mb-6 p-4 rounded-2xl" style={{ background: '#ef444420', border: '1px solid #ef4444' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle size={16} style={{ color: '#ef4444' }} />
+                  <span className="font-bold" style={{ color: '#ef4444' }}>⚠️ Flood Detection</span>
+                </div>
+                <p className="text-sm" style={{ color: '#ef4444' }}>
+                  {analyticsData.floodDetection.length} usuario{analyticsData.floodDetection.length > 1 ? 's' : ''} sospechoso{analyticsData.floodDetection.length > 1 ? 's' : ''} detectado{analyticsData.floodDetection.length > 1 ? 's' : ''}
+                </p>
+                <div className="mt-2 space-y-1">
+                  {analyticsData.floodDetection.slice(0, 5).map((f: any, idx: number) => (
+                    <div key={idx} className="text-xs" style={{ color: '#ef4444' }}>
+                      • {f.name} en #{f.room_name} ({f.recent_messages} msgs en 5 min)
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Top Users */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <div className="p-5 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <h3 className="font-bold mb-3" style={{ color: 'var(--text)' }}>👥 Top 10 Usuarios</h3>
+                <div className="space-y-2">
+                  {analyticsData.topUsers.slice(0, 10).map((u: any, idx: number) => (
+                    <div key={u.id} className="flex items-center gap-2 text-xs">
+                      <span className="font-bold px-1.5 py-0.5 rounded" style={{ background: 'var(--primary)', color: '#fff' }}>{idx + 1}</span>
+                      <span style={{ color: 'var(--text)' }}>{u.name}</span>
+                      <span className="ml-auto font-semibold" style={{ color: 'var(--primary)' }}>{u.message_count} msgs</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Active Users Timeline */}
+              <div className="p-5 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <h3 className="font-bold mb-3" style={{ color: 'var(--text)' }}>📈 Usuarios Activos</h3>
+                <div className="space-y-2">
+                  {[
+                    { label: 'Últimas 24h', key: '24h' },
+                    { label: 'Última semana', key: '7d' },
+                    { label: 'Último mes', key: '30d' },
+                  ].map(period => (
+                    <div key={period.key} className="flex items-center justify-between text-xs">
+                      <span style={{ color: 'var(--text2)' }}>{period.label}</span>
+                      <span className="font-bold" style={{ color: 'var(--primary)' }}>
+                        {analyticsData.activeUsersTimeline[period.key] || 0} usuarios
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Messages per Room */}
+            <div className="p-5 rounded-2xl mb-6" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <h3 className="font-bold mb-3" style={{ color: 'var(--text)' }}>📊 Mensajes por Sala</h3>
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {analyticsData.messagesPerRoom.slice(0, 15).map((r: any) => {
+                  const maxMsg = Math.max(...analyticsData.messagesPerRoom.map((rm: any) => rm.message_count), 1);
+                  const pct = (r.message_count / maxMsg) * 100;
+                  return (
+                    <div key={r.id}>
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span style={{ color: 'var(--text2)' }}>{r.name}</span>
+                        <span style={{ color: 'var(--primary)' }}>{r.message_count} msgs</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface2)' }}>
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--primary)' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Language Distribution */}
             <div className="p-5 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-              <h3 className="font-bold mb-4" style={{ color: 'var(--text)' }}>{t('overview.langDistribution')}</h3>
-              {['es', 'en', 'pt', ''].map(lang => {
-                const count = rooms.filter(r => r.language === lang).length;
-                const pct = rooms.length ? Math.round((count / rooms.length) * 100) : 0;
+              <h3 className="font-bold mb-4" style={{ color: 'var(--text)' }}>🌐 Distribución de Idiomas</h3>
+              {analyticsData.languageStats.length > 0 ? analyticsData.languageStats.map((lang: any) => {
+                const maxMsg = Math.max(...analyticsData.languageStats.map((l: any) => l.message_count), 1);
+                const pct = (lang.message_count / maxMsg) * 100;
                 return (
-                  <div key={lang} className="mb-3">
+                  <div key={lang.language} className="mb-3">
                     <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text2)' }}>
-                      <span>{LANG_FLAGS[lang] || '🌐'} {lang || t('overview.noLang')}</span>
-                      <span>{count} {t('rooms.msgs', { count }).replace('{count} msgs', `${count}`)} ({pct}%)</span>
+                      <span>{LANG_FLAGS[lang.language] || '🌐'} {lang.language || t('overview.noLang')}</span>
+                      <span>{lang.message_count} msgs ({Math.round(pct)}%)</span>
                     </div>
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface2)' }}>
                       <div className="h-full rounded-full" style={{ width: `${pct}%`, background: 'var(--primary)' }} />
                     </div>
                   </div>
                 );
-              })}
+              }) : <p style={{ color: 'var(--text3)' }} className="text-xs">{t('overview.noData')}</p>}
             </div>
           </div>
         )}
@@ -380,6 +531,115 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* MODERATION */}
+        {tab === 'moderation' && (
+          <div className="space-y-6">
+            {/* Flood Detection */}
+            <div className="p-5 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle size={18} style={{ color: '#ef4444' }} />
+                <h3 className="font-bold" style={{ color: 'var(--text)' }}>🚨 Flood Detection</h3>
+                {analyticsData.floodDetection.length > 0 && (
+                  <span className="ml-auto text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#ef444420', color: '#ef4444' }}>
+                    {analyticsData.floodDetection.length} sospechoso{analyticsData.floodDetection.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+              {analyticsData.floodDetection.length === 0 ? (
+                <p className="text-sm" style={{ color: 'var(--text3)' }}>✅ No spam detectado</p>
+              ) : (
+                <div className="space-y-2">
+                  {analyticsData.floodDetection.map((f: any, idx: number) => (
+                    <div key={idx} className="p-3 rounded-xl" style={{ background: 'var(--surface2)', border: '1px solid #ef444430' }}>
+                      <div className="flex items-start justify-between gap-3 mb-1.5">
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{f.name}</p>
+                          <p className="text-xs" style={{ color: 'var(--text3)' }}>
+                            #{f.room_name} • {f.recent_messages} mensajes en 5 min
+                          </p>
+                        </div>
+                        <div className="flex gap-1.5 flex-shrink-0">
+                          <button onClick={() => reviewFloodUser(f.id)} className="text-xs px-2.5 py-1 rounded-lg font-semibold" style={{ background: '#f59e0b20', color: '#f59e0b' }}>
+                            Revisar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Audit Log */}
+            <div className="p-5 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <h3 className="font-bold mb-4" style={{ color: 'var(--text)' }}>📋 Audit Log</h3>
+              {analyticsData.auditLog.length === 0 ? (
+                <p className="text-sm" style={{ color: 'var(--text3)' }}>No hay acciones registradas</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                        <th className="px-3 py-2 text-left" style={{ color: 'var(--text3)' }}>Moderador</th>
+                        <th className="px-3 py-2 text-left" style={{ color: 'var(--text3)' }}>Acción</th>
+                        <th className="px-3 py-2 text-left" style={{ color: 'var(--text3)' }}>Usuario</th>
+                        <th className="px-3 py-2 text-left" style={{ color: 'var(--text3)' }}>Sala</th>
+                        <th className="px-3 py-2 text-left" style={{ color: 'var(--text3)' }}>Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData.auditLog.map((log: any, idx: number) => {
+                        const actionColors: Record<string, string> = {
+                          'ban': '#ef4444',
+                          'unban': '#10b981',
+                          'pin': '#8b5cf6',
+                          'mention': '#3b82f6',
+                          'warn': '#f59e0b',
+                        };
+                        const actionColor = actionColors[log.action] || 'var(--text3)';
+                        return (
+                          <tr key={idx} style={{ borderTop: '1px solid var(--border)' }}>
+                            <td className="px-3 py-2" style={{ color: 'var(--text)' }}>{log.mod_name}</td>
+                            <td className="px-3 py-2">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: `${actionColor}20`, color: actionColor }}>
+                                {log.action}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2" style={{ color: 'var(--text2)' }}>{log.target_name}</td>
+                            <td className="px-3 py-2" style={{ color: 'var(--text3)' }}>{log.room_name || '-'}</td>
+                            <td className="px-3 py-2" style={{ color: 'var(--text3)' }}>
+                              {new Date(log.created_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Banned Words Manager */}
+            <div className="p-5 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <h3 className="font-bold mb-4" style={{ color: 'var(--text)' }}>⛔ Palabras Prohibidas</h3>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  id="bannedWordInput"
+                  placeholder="Agregar palabra prohibida..."
+                  className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
+                  style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                  onKeyPress={e => e.key === 'Enter' && addBannedWord()}
+                />
+                <button onClick={addBannedWord} className="px-4 py-2 rounded-xl font-semibold text-white text-sm" style={{ background: 'var(--primary)' }}>
+                  Agregar
+                </button>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--text3)' }}>Las palabras se detectarán automáticamente en los mensajes</p>
+            </div>
           </div>
         )}
       </div>

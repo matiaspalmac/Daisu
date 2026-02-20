@@ -3,7 +3,7 @@
 import { Link } from '@/i18n/routing';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MessageCircle, Home, User, LogOut, Book, Menu, X, ChevronDown, FileText, Newspaper, Users, Sun, Moon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import LocaleSwitcher from '@/app/[locale]/localeswitcher';
@@ -11,15 +11,54 @@ import { useTheme } from '@/components/theme-provider';
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuLabel,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+const API = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+
+const resolveImageSrc = (src?: string) => {
+    if (!src) return '';
+    const trimmed = src.trim();
+    if (!trimmed || trimmed.startsWith('data:')) return '';
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (!API) return '';
+    return `${API}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
+};
 
 export default function Header() {
     const { data: session } = useSession();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userAvatar, setUserAvatar] = useState('');
     const t = useTranslations('Header');
     const { theme, toggleTheme } = useTheme();
+
+    useEffect(() => {
+        let cancelled = false;
+        const fromSession = resolveImageSrc(session?.user?.image || '');
+        if (fromSession) {
+            setUserAvatar(fromSession);
+            return;
+        }
+        if (!session?.user?.id) {
+            setUserAvatar('');
+            return;
+        }
+
+        fetch(`${API}/api/users/${session.user.id}`)
+            .then(r => r.json())
+            .then((u) => {
+                if (cancelled) return;
+                setUserAvatar(resolveImageSrc(u?.image || ''));
+            })
+            .catch(() => {
+                if (!cancelled) setUserAvatar('');
+            });
+
+        return () => { cancelled = true; };
+    }, [session?.user?.id, session?.user?.image]);
 
     const navItems = [
         { href: "/", icon: Home, label: t('home') },
@@ -100,8 +139,8 @@ export default function Header() {
                                     className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full transition-all duration-150"
                                     style={{ background: 'var(--surface2)' }}
                                 >
-                                    {session.user.image ? (
-                                        <Image src={session.user.image} alt={session.user.name || "User"} width={32} height={32} className="rounded-full" />
+                                    {userAvatar ? (
+                                        <Image src={userAvatar} alt={session.user.name || "User"} width={32} height={32} className="rounded-full object-cover" />
                                     ) : (
                                         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--surface3)' }}>
                                             <User size={16} style={{ color: 'var(--text2)' }} />
@@ -112,6 +151,11 @@ export default function Header() {
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-52 rounded-xl p-1" style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: '0 4px 20px var(--shadow)' }}>
+                                <DropdownMenuLabel className="px-3 py-2">
+                                    <p className="text-xs" style={{ color: 'var(--text3)' }}>Cuenta</p>
+                                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{session.user.name}</p>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
                                 {!!session.user.isAdmin && (
                                     <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
                                         <Link href="/dashboard" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
@@ -124,6 +168,24 @@ export default function Header() {
                                     <Link href="/profile" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
                                         <User size={16} style={{ color: 'var(--primary)' }} />
                                         <span>{t("profile")}</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                    <Link href="/chat" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
+                                        <MessageCircle size={16} style={{ color: 'var(--primary)' }} />
+                                        <span>{t("chat")}</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                    <Link href="/resources" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
+                                        <FileText size={16} style={{ color: 'var(--primary)' }} />
+                                        <span>{t("resources")}</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                    <Link href="/membership" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
+                                        <Users size={16} style={{ color: 'var(--primary)' }} />
+                                        <span>{t("membership")}</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 <div className="h-px my-1" style={{ background: 'var(--border)' }} />
