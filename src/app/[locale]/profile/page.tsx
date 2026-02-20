@@ -3,7 +3,7 @@
 import { showToast as toast } from 'nextjs-toast-notify'
 import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import { User, Mail, FileText, Globe, BookOpen, Camera, Edit2, Check, X, Plus, Tag, Users, Lock, Bell, Palette, Eye, Heart, MessageCircle } from 'lucide-react'
+import { User, Mail, FileText, Globe, BookOpen, Camera, Edit2, Check, X, Plus, Tag, Users, Lock, Bell, Palette, Eye, Heart, MessageCircle, AlertTriangle } from 'lucide-react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
@@ -233,7 +233,7 @@ export default function ProfilePage() {
   const levelColor = LEVEL_COLORS[profile.level] || { bg: 'var(--surface2)', text: 'var(--text2)' }
   const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : ''
 
-  const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
+  const TABS: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
     { id: 'overview', label: '👤 Overview', icon: MessageCircle },
     { id: 'connections', label: '👥 Conexiones', icon: Users },
     { id: 'privacy', label: '🔐 Privacidad', icon: Lock },
@@ -538,7 +538,6 @@ export default function ProfilePage() {
                     className={`w-12 h-12 rounded-lg transition-all ${profile.bubble_color === color ? 'scale-110 ring-2' : ''}`}
                     style={{
                       background: color,
-                      ringColor: color,
                     }} />
                 ))}
               </div>
@@ -589,188 +588,6 @@ export default function ProfilePage() {
             </FieldCard>
           </div>
         )}
-      </div>
-    </div>
-  )
-}
-
-function FieldCard({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
-  return (
-    <div className="p-4 rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-      <div className="flex items-center gap-2 mb-3">
-        <span style={{ color: 'var(--primary)' }}>{icon}</span>
-        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text3)' }}>{label}</p>
-      </div>
-      {children}
-    </div>
-  )
-}
-        {/* Avatar + name row */}
-        <div className="relative -mt-14 mb-6">
-          <div className="relative inline-block">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden" style={{ outline: '4px solid var(--bg)' }}>
-              {profile.image
-                ? <Image src={profile.image} alt={profile.name} fill className="object-cover rounded-full" />
-                : <div className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white" style={{ background: 'var(--primary)' }}>{profile.name[0]}</div>}
-            </div>
-            {isEditing && (
-              <button onClick={() => avatarInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'var(--primary)', border: '2px solid var(--bg)' }}>
-                <Camera size={13} className="text-white" />
-              </button>
-            )}
-            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, 'image')} />
-          </div>
-
-          <div className="absolute top-14 left-28 sm:left-32 flex items-center gap-2 flex-wrap">
-            {profile.isAdmin && <span className="text-[11px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(45,136,255,0.15)', color: '#2d88ff' }}>{t('adminBadge')}</span>}
-            {profile.level && <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold" style={{ background: levelColor.bg, color: levelColor.text }}>{profile.level}</span>}
-          </div>
-
-          <div className="absolute top-0 right-0 flex gap-2">
-            {isEditing ? (
-              <>
-                <button onClick={handleSave} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ background: 'var(--primary)' }}>
-                  <Check size={14} /> {t('saveButton')}
-                </button>
-                <button onClick={() => setIsEditing(false)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)' }}>
-                  <X size={14} />
-                </button>
-              </>
-            ) : (
-              <button onClick={() => setIsEditing(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                <Edit2 size={14} /> {t('editButton')}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Name + meta */}
-        <div className="mb-6">
-          {isEditing
-            ? <input value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} className="text-2xl font-bold outline-none border-b-2 mb-1 w-full" style={{ color: 'var(--text)', borderColor: 'var(--primary)', background: 'transparent' }} />
-            : <h1 className="text-2xl font-bold mb-0.5" style={{ color: 'var(--text)' }}>{profile.name}</h1>}
-          <div className="flex flex-wrap gap-3 text-xs mt-1" style={{ color: 'var(--text3)' }}>
-            {memberSince && <span>{t('since', { date: memberSince })}</span>}
-            {stats?.last_active && <span>{t('lastActive', { hours: Math.round((Date.now() - new Date(stats.last_active).getTime()) / 3600000) })}</span>}
-          </div>
-        </div>
-
-        {/* Stats cards */}
-        {stats && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            {[
-              { icon: '💬', value: stats.messages_this_week, label: t('stats.messagesWeek') },
-              { icon: '📚', value: stats.unique_words_this_week, label: t('stats.uniqueWords') },
-              { icon: '✍️', value: t('stats.longestSentence', { count: stats.longest_sentence_words }), label: t('stats.longestLabel') },
-              { icon: '✅', value: stats.corrections_given, label: t('stats.corrections') },
-            ].map((s, i) => (
-              <div key={i} className="p-3 rounded-xl text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                <p className="text-xl mb-0.5">{s.icon}</p>
-                <p className="text-lg font-bold" style={{ color: 'var(--text)' }}>{s.value}</p>
-                <p className="text-[10px]" style={{ color: 'var(--text3)' }}>{s.label}</p>
-              </div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Main form */}
-        <div className="space-y-4">
-          {/* Bio */}
-          <FieldCard icon={<FileText size={15} />} label={t('sections.bio')}>
-            {isEditing
-              ? <textarea value={profile.bio} onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))} rows={3} placeholder={t('bio.placeholder')} className="w-full resize-none outline-none text-sm p-2 rounded-lg" style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-              : <p className="text-sm" style={{ color: profile.bio ? 'var(--text2)' : 'var(--text3)' }}>{profile.bio || t('bio.empty')}</p>}
-          </FieldCard>
-
-          {/* Country + Email */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <FieldCard icon={<Globe size={15} />} label={t('sections.location')}>
-              {isEditing
-                ? <input value={profile.country} onChange={e => setProfile(p => ({ ...p, country: e.target.value }))} placeholder={t('country.placeholder')} className="w-full outline-none text-sm px-2 py-1.5 rounded-lg" style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-                : <p className="text-sm" style={{ color: 'var(--text2)' }}>{profile.country || t('country.empty')}</p>}
-            </FieldCard>
-            <FieldCard icon={<Mail size={15} />} label={t('sections.email')}>
-              <p className="text-sm" style={{ color: 'var(--text2)' }}>{profile.email}</p>
-            </FieldCard>
-          </div>
-
-          {/* Languages */}
-          <FieldCard icon={<BookOpen size={15} />} label={t('sections.languages')}>
-            <div className="space-y-3">
-              {([
-                { labelKey: 'langs.native', key: 'nativelang' },
-                { labelKey: 'langs.target', key: 'targetLang' },
-              ] as const).map(f => (
-                <div key={f.key} className="flex items-center gap-3">
-                  <span className="text-xs font-semibold w-32 flex-shrink-0" style={{ color: 'var(--text3)' }}>{t(f.labelKey as any)}</span>
-                  {isEditing
-                    ? <select value={(profile as any)[f.key] || ''} onChange={e => setProfile(p => ({ ...p, [f.key]: e.target.value }))}
-                      className="flex-1 px-2 py-1.5 rounded-lg text-sm outline-none"
-                      style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                      <option value="">{t('langs.selectLang')}</option>
-                      {LANG_OPTS.map(l => <option key={l} value={l}>{t(`langs.${l}` as any)}</option>)}
-                    </select>
-                    : <span className="text-sm" style={{ color: 'var(--text2)' }}>{(profile as any)[f.key] ? t(`langs.${(profile as any)[f.key]}` as any) : t('country.empty')}</span>}
-                </div>
-              ))}
-              {/* Level CEFR */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold w-32 flex-shrink-0" style={{ color: 'var(--text3)' }}>{t('langs.level')}</span>
-                {isEditing
-                  ? <div className="flex gap-1.5 flex-wrap">
-                    {LEVEL_OPTIONS.map(l => (
-                      <button key={l} onClick={() => setProfile(p => ({ ...p, level: l }))}
-                        className="text-xs px-2.5 py-1 rounded-full font-bold transition-all"
-                        style={{ background: profile.level === l ? (LEVEL_COLORS[l]?.text || 'var(--primary)') : LEVEL_COLORS[l]?.bg || 'var(--surface2)', color: profile.level === l ? '#fff' : LEVEL_COLORS[l]?.text || 'var(--text2)' }}>
-                        {l}
-                      </button>
-                    ))}
-                  </div>
-                  : <span className="text-sm font-bold px-2.5 py-0.5 rounded-full" style={{ background: levelColor.bg, color: levelColor.text }}>{profile.level || t('country.empty')}</span>}
-              </div>
-            </div>
-          </FieldCard>
-
-          {/* Interests */}
-          <FieldCard icon={<Tag size={15} />} label={t('sections.interests')}>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {profile.interests.map(tag => (
-                <span key={tag} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
-                  #{tag}
-                  {isEditing && <button onClick={() => removeInterest(tag)} className="ml-0.5 opacity-60 hover:opacity-100"><X size={10} /></button>}
-                </span>
-              ))}
-              {profile.interests.length === 0 && !isEditing && <p className="text-sm" style={{ color: 'var(--text3)' }}>{t('interests.noInterests')}</p>}
-            </div>
-            {isEditing && (
-              <>
-                <div className="flex gap-2 mb-2">
-                  <input value={newInterest} onChange={e => setNewInterest(e.target.value)} placeholder={t('interests.add')}
-                    onKeyDown={e => e.key === 'Enter' && addInterest(newInterest)}
-                    className="flex-1 px-3 py-1.5 rounded-lg text-xs outline-none"
-                    style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-                  <button onClick={() => addInterest(newInterest)} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white" style={{ background: 'var(--primary)' }}>
-                    <Plus size={13} />
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {INTEREST_SUGGESTIONS.filter(s => !profile.interests.includes(s)).slice(0, 8).map(s => (
-                    <button key={s} onClick={() => addInterest(s)} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--surface2)', color: 'var(--text3)', border: '1px solid var(--border)' }}>+{s}</button>
-                  ))}
-                </div>
-              </>
-            )}
-          </FieldCard>
-
-          {/* Tandem goal */}
-          <FieldCard icon={<User size={15} />} label={t('sections.tandemGoal')}>
-            {isEditing
-              ? <textarea value={profile.tandem_goal} onChange={e => setProfile(p => ({ ...p, tandem_goal: e.target.value }))} rows={2} placeholder={t('tandemGoal.placeholder')} className="w-full resize-none outline-none text-sm p-2 rounded-lg" style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-              : <p className="text-sm" style={{ color: profile.tandem_goal ? 'var(--text2)' : 'var(--text3)' }}>{profile.tandem_goal || t('tandemGoal.empty')}</p>}
-          </FieldCard>
-        </div>
       </div>
     </div>
   )

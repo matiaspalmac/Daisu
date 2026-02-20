@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
+  const [editRoom, setEditRoom] = useState<Room | null>(null);
   const [analyticsData, setAnalyticsData] = useState<any>({
     topUsers: [],
     messagesPerRoom: [],
@@ -198,7 +199,7 @@ export default function DashboardPage() {
     if (!user) return;
     if (confirm(`¿Banear a ${user.name} por spam? Esta acción puede revertirse.`)) {
       await banUser(user);
-      setAnalyticsData(p => ({
+      setAnalyticsData((p: any) => ({
         ...p,
         floodDetection: p.floodDetection.filter((f: any) => f.id !== userId)
       }));
@@ -212,12 +213,16 @@ export default function DashboardPage() {
       toast.error('Ingresa una palabra');
       return;
     }
+    if (!session?.user?.id) {
+      toast.error(t('toast.error'));
+      return;
+    }
     const word = input.value.trim();
     try {
       const res = await fetch(`${url}/api/analytics/banned-words`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ word })
+        body: JSON.stringify({ word, requestingUserId: session.user.id })
       });
       if (!res.ok) throw new Error();
       input.value = '';
