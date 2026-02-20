@@ -25,7 +25,12 @@ const resolveImageSrc = (src?: string) => {
     if (!trimmed || trimmed.startsWith('data:')) return '';
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
     if (!API) return '';
-    return `${API}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
+
+    // Clean up any double slashes or missing slashes
+    const baseUrl = API.replace(/\/+$/, '');
+    const path = trimmed.replace(/^\/+/, '');
+
+    return `${baseUrl}/${path}`;
 };
 
 export default function Header() {
@@ -140,7 +145,7 @@ export default function Header() {
                                     style={{ background: 'var(--surface2)' }}
                                 >
                                     {userAvatar ? (
-                                        <Image src={userAvatar} alt={session.user.name || "User"} width={32} height={32} className="rounded-full object-cover" />
+                                        <img src={userAvatar} alt={session.user.name || "User"} className="w-8 h-8 rounded-full object-cover" />
                                     ) : (
                                         <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--surface3)' }}>
                                             <User size={16} style={{ color: 'var(--text2)' }} />

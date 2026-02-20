@@ -17,7 +17,7 @@ import Image from 'next/image'
 interface ChatRoom { id: string; name: string; description?: string; language?: string; level?: string; is_default?: number; daily_prompt?: string; }
 interface OnlineUser { userId: string | number; name: string; image?: string; targetLang?: string; }
 interface Reaction { emoji: string; userId: string | number; }
-interface Message { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; detectedLang?: string; senderId?: string | number; sendStatus?: 'sending' | 'sent' | 'error'; clientTempId?: string; }
+interface Message { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; detectedLang?: string; senderId?: string | number; sendStatus?: 'sending' | 'sent' | 'error'; clientTempId?: string; replyTo?: { id: string; username: string; content: string } }
 interface MiniProfile { id: string | number; name: string; image?: string; bio?: string; nativelang?: string; targetLang?: string; level?: string; country?: string; interests?: string[]; }
 interface HistoryMessage { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; senderId?: string | number; detectedLang?: string; }
 interface PrivateInvite { fromUserId: string | number; fromName: string }
@@ -33,8 +33,13 @@ const resolveImageSrc = (src?: string) => {
   if (!trimmed || trimmed.startsWith('data:')) return ''
   if (/^https?:\/\//i.test(trimmed)) return trimmed
   if (!url_env) return ''
-  const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
-  return `${url_env}${normalizedPath}`
+
+  // Clean up any double slashes or missing slashes
+  const baseUrl = url_env.replace(/\/+$/, '')
+  const path = trimmed.replace(/^\/+/, '')
+
+  // If the path already includes 'api/uploads', don't duplicate it
+  return `${baseUrl}/${path}`
 }
 
 const LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷', '': '💬' }
@@ -46,9 +51,9 @@ const EMOJI_REACTIONS = ['👍', '❤️', '😂', '😮', '🔥', '🙌']
 const TARGET_LANG_CODES = ['es', 'en', 'pt'] as const
 const TARGET_LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷' }
 const BUBBLE_THEME_COLORS: Record<Exclude<BubbleTheme, 'custom'>, { mine: string; other: string }> = {
-  neon: { mine: '#2d88ff', other: '#1e2430' },
-  pastel: { mine: '#93c5fd', other: '#f5d0fe' },
-  minimal: { mine: '#4b5563', other: '#e5e7eb' },
+  neon: { mine: '#2d88ff', other: '#222834' },
+  pastel: { mine: '#60a5fa', other: '#f3e8ff' },
+  minimal: { mine: '#374151', other: '#f3f4f6' },
 }
 const FONT_SIZE_MAP: Record<FontSize, string> = { small: '13px', medium: '15px', large: '17px' }
 
@@ -132,7 +137,7 @@ export default function ChatPage() {
   const hasLoadedServerSettingsRef = useRef(false)
   const loadingOlderRef = useRef(false)
   const [roomBgDraft, setRoomBgDraft] = useState('')
-  
+
   // NEW: Mentions, Pins, Roles, Bans, Emojis
   const [mentionInput, setMentionInput] = useState('')
   const [showMentionDropdown, setShowMentionDropdown] = useState(false)
@@ -686,14 +691,16 @@ export default function ChatPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim() || !socketRef.current || !selectedRoom) return
-    const msgToSend = replyTarget
-      ? `↪ @${replyTarget.username}: ${inputValue.trim()}`
-      : inputValue.trim()
+    const msgToSend = inputValue.trim()
     const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
+    const replyMeta = replyTarget ? { id: replyTarget.id, username: replyTarget.username, content: replyTarget.preview } : undefined;
+
     const optimistic: Message = {
       id: tempId,
       clientTempId: tempId,
       content: msgToSend,
+      replyTo: replyMeta,
       username: session?.user?.name || 'me',
       roomId: selectedRoom.id,
       timestamp: new Date().toISOString(),
@@ -704,7 +711,7 @@ export default function ChatPage() {
     }
     setMessages(prev => [...prev, optimistic])
 
-    socketRef.current.emit('chat message', msgToSend, selectedRoom.id, tempId, (ack: { ok: boolean; id?: string; error?: string; clientTempId?: string }) => {
+    socketRef.current.emit('chat message', msgToSend, selectedRoom.id, tempId, replyMeta, (ack: { ok: boolean; id?: string; error?: string; clientTempId?: string }) => {
       if (ack?.ok) {
         setMessages(prev => prev.map(m => m.clientTempId === tempId ? { ...m, sendStatus: 'sent' } : m))
         return
@@ -722,17 +729,17 @@ export default function ChatPage() {
   const handleReact = (messageId: string, emoji: string) => {
     if (!socketRef.current || !selectedRoom) return
     socketRef.current.emit('react', { messageId, emoji, roomId: selectedRoom.id, userId: session?.user?.id })
-    
+
     // Track emoji usage
     fetch(`${url_env}/api/users/${session?.user?.id}/emoji-favorites/${encodeURIComponent(emoji)}`, { method: 'POST' })
       .catch(() => { })
-    
+
     // Update recents
     setEmojiRecents(prev => {
       const updated = [emoji, ...prev.filter(e => e !== emoji)].slice(0, 10)
       return updated
     })
-    
+
     setShowEmojiPicker(null)
   }
 
@@ -810,7 +817,7 @@ export default function ChatPage() {
     const endY = e.changedTouches[0].clientY
     const diffX = endX - swipeStartX
     const diffY = endY - swipeStartY
-    
+
     // Swipe left = react
     if (diffX < -50 && Math.abs(diffY) < 30) {
       setShowEmojiPicker(messageId)
@@ -821,7 +828,7 @@ export default function ChatPage() {
       if (msg) setReplyTarget({ id: msg.id, username: msg.username, preview: msg.content.slice(0, 80) })
     }
     // Double tap (not true swipe but touch-based)
-    
+
     setSwipeStartX(null)
     setSwipeStartY(null)
   }
@@ -1287,6 +1294,7 @@ export default function ChatPage() {
                 const displayName = getDisplayName(msg.senderId, msg.username)
                 return (
                   <motion.div
+                    id={`msg-${msg.id}`}
                     key={msg.id}
                     initial={effectsEnabled ? { opacity: 0, y: 8 } : false}
                     animate={effectsEnabled ? { opacity: 1, y: 0 } : {}}
@@ -1338,6 +1346,25 @@ export default function ChatPage() {
                           maxWidth: '100%',
                           fontSize: chatFontSize,
                         }}>
+                        {msg.replyTo && (
+                          <div
+                            onClick={() => {
+                              const el = document.getElementById(`msg-${msg.replyTo?.id}`)
+                              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                            }}
+                            className="mb-1 p-2 rounded max-h-20 overflow-hidden cursor-pointer opacity-90 border-l-4"
+                            style={{
+                              background: isMe ? 'rgba(0,0,0,0.15)' : 'var(--surface2)',
+                              color: isMe ? '#ececec' : 'var(--text2)',
+                              borderColor: 'var(--primary)',
+                              fontSize: chatFontSize === 'large' ? '14px' : '12px',
+                            }}>
+                            <div className="font-semibold text-[10px] mb-0.5" style={{ color: isMe ? '#fff' : 'var(--primary)' }}>
+                              {msg.replyTo.username}
+                            </div>
+                            <div className="line-clamp-2">{msg.replyTo.content}</div>
+                          </div>
+                        )}
                         {msg.content}
                       </div>
                       {/* Reactions */}
@@ -1373,7 +1400,7 @@ export default function ChatPage() {
                         className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.nickname')}>
                         <UserIcon size={11} style={{ color: 'var(--text3)' }} />
                       </button>
-                      
+
                       {/* NEW: Pin/Unpin (only for mods/owners) */}
                       {!isMe && session?.user?.id && ['mod', 'owner'].includes(getUserRoleInRoom(session.user.id)) && (
                         <button onClick={() => {
@@ -1384,7 +1411,7 @@ export default function ChatPage() {
                           <span style={{ fontSize: '12px' }}>📌</span>
                         </button>
                       )}
-                      
+
                       {/* NEW: Mute/Unmute & Ban (only for non-own messages) */}
                       {!isMe && msg.senderId !== undefined && msg.senderId !== null && (
                         <>
@@ -1396,7 +1423,7 @@ export default function ChatPage() {
                             className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.blockToggle')}>
                             <span style={{ fontSize: '11px' }}>🚫</span>
                           </button>
-                          
+
                           {/* NEW: Ban (only mods/owners) */}
                           {session?.user?.id && ['mod', 'owner'].includes(getUserRoleInRoom(session.user.id)) && (
                             <button onClick={() => {
@@ -1411,7 +1438,7 @@ export default function ChatPage() {
                           )}
                         </>
                       )}
-                      
+
                       {!isMe && (
                         <button onClick={() => { setShowReport(msg.id); setReportReason('') }}
                           className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }}>
@@ -1458,9 +1485,18 @@ export default function ChatPage() {
         {/* Input */}
         <div className="px-4 py-3 flex-shrink-0" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
           {replyTarget && (
-            <div className="mb-2 px-3 py-2 rounded-lg text-xs flex items-center justify-between" style={{ background: 'var(--surface2)', color: 'var(--text2)' }}>
-              <span>{t('replyingTo', { user: replyTarget.username, preview: replyTarget.preview })}</span>
-              <button onClick={() => setReplyTarget(null)} className="ml-2" style={{ color: 'var(--text3)' }}>✕</button>
+            <div className="px-4 py-2 border-b flex items-center justify-between" style={{ background: 'var(--surface2)', borderColor: 'var(--border)' }}>
+              <div className="flex flex-col border-l-4 pl-2" style={{ borderColor: 'var(--primary)' }}>
+                <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>{t('messages.replyingTo', { name: replyTarget.username })}</span>
+                <span className="text-sm truncate opacity-80" style={{ color: 'var(--text)', maxWidth: '250px' }}>{replyTarget.preview}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReplyTarget(null)}
+                className="p-1 rounded-full opacity-70 hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10"
+                style={{ color: 'var(--text2)' }}>
+                <X size={16} />
+              </button>
             </div>
           )}
           <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
@@ -1477,7 +1513,7 @@ export default function ChatPage() {
                 style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e as any) } }}
               />
-              
+
               {/* NEW: @Mention autocomplete dropdown */}
               {showMentionDropdown && selectedRoom && onlineUsers.length > 0 && (
                 <div className="absolute bottom-full mb-2 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 max-h-[200px] overflow-y-auto z-50"
@@ -1665,8 +1701,8 @@ export default function ChatPage() {
               <div className="h-16" style={{ background: 'linear-gradient(135deg, var(--primary), #8b5cf6)' }} />
               <div className="px-5 pb-5">
                 <div className="-mt-8 mb-3">
-                    {resolveImageSrc(miniProfile.image)
-                      ? <img src={resolveImageSrc(miniProfile.image)} alt={miniProfile.name} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-14 h-14 rounded-full border-4 object-cover" style={{ borderColor: 'var(--surface)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
+                  {resolveImageSrc(miniProfile.image)
+                    ? <img src={resolveImageSrc(miniProfile.image)} alt={miniProfile.name} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-14 h-14 rounded-full border-4 object-cover" style={{ borderColor: 'var(--surface)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
                     : <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white border-4"
                       style={{ background: 'var(--primary)', borderColor: 'var(--surface)' }}>{miniProfile.name[0]}</div>}
                 </div>
