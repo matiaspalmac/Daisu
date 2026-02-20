@@ -6,6 +6,7 @@ import { Globe, BookOpen, MessageCircle, Heart, Twitter, Instagram, Github } fro
 
 export default function Footer() {
   const t = useTranslations('Footer');
+  const tc = useTranslations('Common');
 
   return (
     <footer className="border-t mt-auto" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
@@ -19,6 +20,17 @@ export default function Footer() {
             <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text2)' }}>
               {t('description') || 'Conectando el mundo a través del intercambio de idiomas y culturas.'}
             </p>
+            <div className="flex items-center gap-1.5 flex-wrap mb-5">
+              {(['es', 'en', 'pt'] as const).map(code => (
+                <span
+                  key={code}
+                  className="text-[11px] px-2 py-1 rounded-full font-semibold"
+                  style={{ background: 'var(--surface2)', color: 'var(--text2)', border: '1px solid var(--border)' }}
+                >
+                  {tc(`languages.${code}` as any)}
+                </span>
+              ))}
+            </div>
             <div className="flex gap-3">
               {[
                 { icon: Twitter, label: 'Twitter' },
@@ -107,7 +119,7 @@ export default function Footer() {
           <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text3)' }}>
             <span>{t('madeWith') || 'Made with'}</span>
             <Heart size={12} className="text-red-400" />
-            <span>{t('inChile') || 'in Chile'}</span>
+            <span>{t('inChile') || 'in Chile'} · Daisu</span>
           </div>
         </div>
       </div>

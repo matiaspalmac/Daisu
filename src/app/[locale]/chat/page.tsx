@@ -16,10 +16,10 @@ import Image from 'next/image'
 // ──── Types ────────────────────────────────────────────────────────────────
 interface ChatRoom { id: string; name: string; description?: string; language?: string; level?: string; is_default?: number; daily_prompt?: string; }
 interface OnlineUser { userId: string | number; name: string; image?: string; targetLang?: string; }
-interface Reaction { emoji: string; userId: string | number; }
+interface Reaction { emoji: string; userId: string | number; userImage?: string; userName?: string; }
 interface Message { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; detectedLang?: string; senderId?: string | number; sendStatus?: 'sending' | 'sent' | 'error'; clientTempId?: string; replyTo?: { id: string; username: string; content: string } }
 interface MiniProfile { id: string | number; name: string; image?: string; bio?: string; nativelang?: string; targetLang?: string; level?: string; country?: string; interests?: string[]; }
-interface HistoryMessage { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; senderId?: string | number; detectedLang?: string; }
+interface HistoryMessage { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; senderId?: string | number; detectedLang?: string; replyTo?: { id: string; username: string; content: string } }
 interface PrivateInvite { fromUserId: string | number; fromName: string }
 
 type FontSize = 'small' | 'medium' | 'large'
@@ -30,7 +30,9 @@ const url_env = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '')
 const resolveImageSrc = (src?: string) => {
   if (!src) return ''
   const trimmed = src.trim()
-  if (!trimmed || trimmed.startsWith('data:')) return ''
+  if (!trimmed) return ''
+  if (/^data:image\//i.test(trimmed)) return trimmed
+  if (trimmed.startsWith('data:')) return ''
   if (/^https?:\/\//i.test(trimmed)) return trimmed
   if (!url_env) return ''
 
@@ -51,11 +53,20 @@ const EMOJI_REACTIONS = ['👍', '❤️', '😂', '😮', '🔥', '🙌']
 const TARGET_LANG_CODES = ['es', 'en', 'pt'] as const
 const TARGET_LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷' }
 const BUBBLE_THEME_COLORS: Record<Exclude<BubbleTheme, 'custom'>, { mine: string; other: string }> = {
-  neon: { mine: '#2d88ff', other: '#222834' },
-  pastel: { mine: '#60a5fa', other: '#f3e8ff' },
-  minimal: { mine: '#374151', other: '#f3f4f6' },
+  neon: { mine: '#2563eb', other: '#1f2937' },
+  pastel: { mine: '#7c3aed', other: '#f5f3ff' },
+  minimal: { mine: '#111827', other: '#e5e7eb' },
 }
 const FONT_SIZE_MAP: Record<FontSize, string> = { small: '13px', medium: '15px', large: '17px' }
+const FONT_AVATAR_SIZE: Record<FontSize, number> = { small: 28, medium: 34, large: 40 }
+const CUSTOM_BUBBLE_PRESETS: Array<{ id: string; mine: string; other: string }> = [
+  { id: 'ocean', mine: '#2563eb', other: '#0f172a' },
+  { id: 'violet', mine: '#7c3aed', other: '#312e81' },
+  { id: 'sunset', mine: '#f97316', other: '#7c2d12' },
+  { id: 'forest', mine: '#16a34a', other: '#14532d' },
+  { id: 'rose', mine: '#e11d48', other: '#4c0519' },
+  { id: 'slate', mine: '#334155', other: '#cbd5e1' },
+]
 
 // Simple heuristic lang detection (front-end, for instant feedback)
 function detectLangHeuristic(text: string): string | null {
@@ -72,6 +83,7 @@ function detectLangHeuristic(text: string): string | null {
 export default function ChatPage() {
   const { data: session, status } = useSession()
   const t = useTranslations('ChatPage')
+  const [isAdminOverride, setIsAdminOverride] = useState(false)
 
   const [rooms, setRooms] = useState<ChatRoom[]>([])
   const [filteredLang, setFilteredLang] = useState<string>('')
@@ -103,7 +115,9 @@ export default function ChatPage() {
   const [bubbleTheme, setBubbleTheme] = useState<BubbleTheme>('neon')
   const [myBubbleColor, setMyBubbleColor] = useState('#2d88ff')
   const [otherBubbleColor, setOtherBubbleColor] = useState('#1e2430')
-  const [fontSize, setFontSize] = useState<FontSize>('medium')
+  const [myBubbleDraft, setMyBubbleDraft] = useState('#2d88ff')
+  const [otherBubbleDraft, setOtherBubbleDraft] = useState('#1e2430')
+  const [fontSize, setFontSize] = useState<FontSize>('large')
   const [effectsEnabled, setEffectsEnabled] = useState(true)
   const [textOnlyMode, setTextOnlyMode] = useState(false)
   const [dataSaverMode, setDataSaverMode] = useState(false)
@@ -134,19 +148,27 @@ export default function ChatPage() {
   const privateInviteCooldownRef = useRef<Map<string, number>>(new Map())
   const touchStartXRef = useRef<number | null>(null)
   const saveSettingsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastSettingsPayloadRef = useRef('')
   const hasLoadedServerSettingsRef = useRef(false)
   const loadingOlderRef = useRef(false)
+  const userMetaCacheRef = useRef<{ userId?: string; ts: number; image: string; isAdmin: boolean }>({ ts: 0, image: '', isAdmin: false })
   const [roomBgDraft, setRoomBgDraft] = useState('')
 
-  // NEW: Mentions, Pins, Roles, Bans, Emojis
+  // NEW: Mentions, Roles, Bans, Emojis
   const [mentionInput, setMentionInput] = useState('')
   const [showMentionDropdown, setShowMentionDropdown] = useState(false)
-  const [pinnedMessages, setPinnedMessages] = useState<any[]>([])
   const [userRoles, setUserRoles] = useState<Record<string, string>>({})
   const [emojiRecents, setEmojiRecents] = useState<string[]>(['👍', '❤️', '😂', '👏', '🔥', '😮', '💯', '✨', '🎉', '😢'])
   const [swipeStartX, setSwipeStartX] = useState<number | null>(null)
   const [swipeStartY, setSwipeStartY] = useState<number | null>(null)
   const [activeReaction, setActiveReaction] = useState<{ messageId: string; x: number; y: number } | null>(null)
+  const [miniProfileFollow, setMiniProfileFollow] = useState<{ isFollowing: boolean; followsYou: boolean; followersCount: number; followingCount: number; loading: boolean }>({
+    isFollowing: false,
+    followsYou: false,
+    followersCount: 0,
+    followingCount: 0,
+    loading: false,
+  })
 
   const preventMediaActions = (e: React.SyntheticEvent) => e.preventDefault()
 
@@ -154,6 +176,7 @@ export default function ChatPage() {
     ? { mine: myBubbleColor, other: otherBubbleColor }
     : BUBBLE_THEME_COLORS[bubbleTheme]
   const chatFontSize = FONT_SIZE_MAP[fontSize]
+  const chatAvatarSize = FONT_AVATAR_SIZE[fontSize]
   const shouldLoadImages = !textOnlyMode && !disableProfileImages && !dataSaverMode
 
   const getUserKey = useCallback((senderId?: string | number, username?: string) => {
@@ -202,34 +225,85 @@ export default function ChatPage() {
   }, [session?.user?.id, selectedRoom?.language, selectedRoom?.level, t])
 
   useEffect(() => {
+    setIsAdminOverride(Boolean(session?.user?.isAdmin))
+  }, [session?.user?.isAdmin])
+
+  useEffect(() => {
     let cancelled = false
+    if (status !== 'authenticated' || !session?.user?.id) {
+      setCurrentUserAvatar('')
+      return
+    }
+
     if (!shouldLoadImages) {
       setCurrentUserAvatar('')
       return
     }
+
+    const userId = String(session.user.id)
+    const now = Date.now()
+    const cacheTtlMs = 2 * 60 * 1000
     const fromSession = resolveImageSrc(session?.user?.image || '')
-    if (fromSession) {
-      setCurrentUserAvatar(fromSession)
+
+    const cachedRef = userMetaCacheRef.current
+    const hasFreshRefCache = cachedRef.userId === userId && (now - cachedRef.ts) < cacheTtlMs
+    if (hasFreshRefCache) {
+      if (!fromSession && cachedRef.image) {
+        setCurrentUserAvatar(cachedRef.image)
+      } else if (fromSession) {
+        setCurrentUserAvatar(fromSession)
+      }
+      setIsAdminOverride(Boolean(cachedRef.isAdmin || session?.user?.isAdmin))
       return
     }
 
-    if (!session?.user?.id) {
-      setCurrentUserAvatar('')
-      return
+    const metaCacheKey = `daisu-user-meta-${userId}`
+    try {
+      const cachedRaw = sessionStorage.getItem(metaCacheKey)
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw)
+        if (cached?.ts && (now - Number(cached.ts)) < cacheTtlMs) {
+          const cachedImage = resolveImageSrc(cached?.image || '')
+          if (!fromSession && cachedImage) setCurrentUserAvatar(cachedImage)
+          else if (fromSession) setCurrentUserAvatar(fromSession)
+          if (typeof cached?.isAdmin === 'boolean') setIsAdminOverride(cached.isAdmin)
+          userMetaCacheRef.current = { userId, ts: now, image: cachedImage || fromSession || '', isAdmin: Boolean(cached?.isAdmin) }
+          return
+        }
+      }
+    } catch { }
+
+    if (fromSession) {
+      setCurrentUserAvatar(fromSession)
+      if (typeof session?.user?.isAdmin === 'boolean') {
+        setIsAdminOverride(Boolean(session.user.isAdmin))
+        userMetaCacheRef.current = { userId, ts: now, image: fromSession, isAdmin: Boolean(session.user.isAdmin) }
+        try {
+          sessionStorage.setItem(metaCacheKey, JSON.stringify({ ts: now, image: fromSession, isAdmin: Boolean(session.user.isAdmin) }))
+        } catch { }
+        return
+      }
     }
 
     fetch(`${url_env}/api/users/${session.user.id}`)
       .then(r => r.json())
       .then((u) => {
         if (cancelled) return
-        setCurrentUserAvatar(resolveImageSrc(u?.image || ''))
+        const resolvedImage = resolveImageSrc(u?.image || '')
+        const adminValue = Boolean(u?.isAdmin)
+        setCurrentUserAvatar(fromSession || resolvedImage)
+        setIsAdminOverride(adminValue)
+        userMetaCacheRef.current = { userId, ts: Date.now(), image: resolvedImage || fromSession || '', isAdmin: adminValue }
+        try {
+          sessionStorage.setItem(metaCacheKey, JSON.stringify({ ts: Date.now(), image: resolvedImage || '', isAdmin: adminValue }))
+        } catch { }
       })
       .catch(() => {
         if (!cancelled) setCurrentUserAvatar('')
       })
 
     return () => { cancelled = true }
-  }, [session?.user?.id, session?.user?.image, shouldLoadImages])
+  }, [status, session?.user?.id, session?.user?.image, session?.user?.isAdmin, shouldLoadImages])
 
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user?.id) return
@@ -265,30 +339,41 @@ export default function ChatPage() {
     if (saveSettingsTimeoutRef.current) clearTimeout(saveSettingsTimeoutRef.current)
 
     saveSettingsTimeoutRef.current = setTimeout(() => {
+      const payloadObj = {
+        bubbleTheme,
+        myBubbleColor,
+        otherBubbleColor,
+        fontSize,
+        effectsEnabled,
+        textOnlyMode,
+        dataSaverMode,
+        disableProfileImages,
+        roomBackgrounds,
+        nicknames,
+        lastRoomId: selectedRoom?.id || '',
+        roomDrafts,
+      }
+      const payload = JSON.stringify(payloadObj)
+      if (payload === lastSettingsPayloadRef.current) return
+      lastSettingsPayloadRef.current = payload
+
       fetch(`${url_env}/api/users/${session.user.id}/chat-settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bubbleTheme,
-          myBubbleColor,
-          otherBubbleColor,
-          fontSize,
-          effectsEnabled,
-          textOnlyMode,
-          dataSaverMode,
-          disableProfileImages,
-          roomBackgrounds,
-          nicknames,
-          lastRoomId: selectedRoom?.id || '',
-          roomDrafts,
-        }),
+        body: payload,
       }).catch(() => { })
-    }, 450)
+    }, 1200)
 
     return () => {
       if (saveSettingsTimeoutRef.current) clearTimeout(saveSettingsTimeoutRef.current)
     }
   }, [session?.user?.id, bubbleTheme, myBubbleColor, otherBubbleColor, fontSize, effectsEnabled, textOnlyMode, dataSaverMode, disableProfileImages, roomBackgrounds, nicknames, selectedRoom?.id, roomDrafts])
+
+  useEffect(() => {
+    if (!showChatSettings) return
+    setMyBubbleDraft(myBubbleColor)
+    setOtherBubbleDraft(otherBubbleColor)
+  }, [showChatSettings, myBubbleColor, otherBubbleColor])
 
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user?.id) return
@@ -371,6 +456,13 @@ export default function ChatPage() {
           reactions: m.reactions || [],
           senderId: m.senderId,
           detectedLang: m.detectedLang || undefined,
+          replyTo: m.replyTo
+            ? {
+              id: String(m.replyTo.id),
+              username: m.replyTo.username || m.username,
+              content: m.replyTo.content || '',
+            }
+            : undefined,
         }))
         : []
 
@@ -393,7 +485,7 @@ export default function ChatPage() {
     const historyFallbackTimer = setTimeout(async () => {
       if (historyReadyRef.current) return
       try {
-        const historyLimit = dataSaverMode ? 25 : 60
+        const historyLimit = 30
         const blockedIds = Object.entries(moderationMap).filter(([, v]) => v.blocked).map(([k]) => k)
         const excludeUserIds = blockedIds.join(',')
         const r = await fetch(`${url_env}/api/chats?room_id=${room.id}&limit=${historyLimit}${excludeUserIds ? `&excludeUserIds=${encodeURIComponent(excludeUserIds)}` : ''}`)
@@ -409,6 +501,13 @@ export default function ChatPage() {
             reactions: [],
             senderId: m.user?.id,
             detectedLang: undefined,
+            replyTo: m.replyTo
+              ? {
+                id: String(m.replyTo.id),
+                username: m.replyTo.username || (m.user?.name || 'unknown'),
+                content: m.replyTo.content || '',
+              }
+              : undefined,
           }))
           : []
 
@@ -428,10 +527,29 @@ export default function ChatPage() {
       }
     }, 900)
 
-    s.on('chat message', (msg: string, id: string, username: string, roomId: string, timestamp: string, userImage: string, reactions: Reaction[], senderId?: string | number, detectedLangFromServer?: string, clientTempId?: string) => {
+    s.on('chat message', (msg: string, id: string, username: string, roomId: string, timestamp: string, userImage: string, reactions: Reaction[], senderId?: string | number, detectedLangFromServer?: string, replyToMeta?: { id?: string; username?: string; content?: string }, clientTempId?: string) => {
       if (isBlockedUser(senderId)) return
       const detectedLang = detectedLangFromServer || detectLangHeuristic(msg) || undefined
-      const incoming: Message = { id, content: msg, username, roomId, timestamp, userImage, reactions: reactions || [], detectedLang, senderId, sendStatus: 'sent', clientTempId }
+      const incoming: Message = {
+        id,
+        content: msg,
+        username,
+        roomId,
+        timestamp,
+        userImage,
+        reactions: reactions || [],
+        detectedLang,
+        senderId,
+        sendStatus: 'sent',
+        clientTempId,
+        replyTo: replyToMeta?.id
+          ? {
+            id: String(replyToMeta.id),
+            username: replyToMeta.username || username,
+            content: replyToMeta.content || '',
+          }
+          : undefined,
+      }
 
       if (!historyReadyRef.current) {
         pendingMessagesRef.current.push(incoming)
@@ -442,7 +560,7 @@ export default function ChatPage() {
       setMessages(prev => {
         if (prev.some(m => m.id === id)) return prev
         if (clientTempId) {
-          const replaced = prev.map(m => m.clientTempId === clientTempId ? { ...incoming } : m)
+          const replaced = prev.map(m => m.clientTempId === clientTempId ? { ...incoming, replyTo: incoming.replyTo || m.replyTo } : m)
           if (replaced.some(m => m.id === id)) return replaced
           return replaced
         }
@@ -512,7 +630,7 @@ export default function ChatPage() {
         return
       }
 
-      if (!session?.user?.isAdmin) {
+      if (!isAdminOverride) {
         const fifteenMinutes = 15 * 60 * 1000
         privateInviteCooldownRef.current.set(String(fromUserId), Date.now() + fifteenMinutes)
       }
@@ -537,17 +655,6 @@ export default function ChatPage() {
     })
 
     // NEW: Socket listeners for new features
-    s.on('message-pinned', ({ messageId, roomId: pinRoomId, pinnedBy }: any) => {
-      if (String(pinRoomId) === String(selectedRoom?.id)) {
-        void loadPinned()
-        toast.success(t('toast.messagePinnedBy', { name: pinnedBy }))
-      }
-    })
-    s.on('message-unpinned', ({ messageId, roomId: unpinRoomId }: any) => {
-      if (String(unpinRoomId) === String(selectedRoom?.id)) {
-        void loadPinned()
-      }
-    })
     s.on('user-banned', ({ userId, reason, isPermanent, expiresAt }: any) => {
       toast.error(reason ? t('toast.userBannedWithReason', { reason }) : t('toast.userBanned'))
     })
@@ -574,7 +681,7 @@ export default function ChatPage() {
       if (reason !== 'io client disconnect') setIsReconnecting(true)
       clearTimeout(historyFallbackTimer)
     })
-  }, [session, selectedRoom, targetLang, isAtBottom, isCurrentUserMessage, t, buildPrivateRoom, dataSaverMode, moderationMap, isBlockedUser, isMutedUser, roomDrafts])
+  }, [session, selectedRoom, targetLang, isAtBottom, isCurrentUserMessage, t, buildPrivateRoom, dataSaverMode, moderationMap, isBlockedUser, isMutedUser, roomDrafts, isAdminOverride])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -630,7 +737,7 @@ export default function ChatPage() {
         setIsLoadingOlder(true)
         const previousHeight = el.scrollHeight
         try {
-          const historyLimit = dataSaverMode ? 25 : 60
+          const historyLimit = 30
           const blockedIds = Object.entries(moderationMap).filter(([, v]) => v.blocked).map(([k]) => k)
           const excludeUserIds = blockedIds.join(',')
           const r = await fetch(`${url_env}/api/chats?room_id=${selectedRoom.id}&limit=${historyLimit}&offset=${historyOffset}${excludeUserIds ? `&excludeUserIds=${encodeURIComponent(excludeUserIds)}` : ''}`)
@@ -647,6 +754,13 @@ export default function ChatPage() {
               senderId: m.user?.id,
               detectedLang: undefined,
               sendStatus: 'sent',
+              replyTo: m.replyTo
+                ? {
+                  id: String(m.replyTo.id),
+                  username: m.replyTo.username || (m.user?.name || 'unknown'),
+                  content: m.replyTo.content || '',
+                }
+                : undefined,
             }))
             : []
 
@@ -763,29 +877,6 @@ export default function ChatPage() {
     setMentionInput('')
   }
 
-  // NEW: Pin / Unpin message
-  const handlePinMessage = (messageId: string) => {
-    if (!socketRef.current || !selectedRoom) return
-    socketRef.current.emit('pin-message', { messageId, roomId: selectedRoom.id }, (ack: any) => {
-      if (ack?.ok) {
-        toast.success(t('toast.messagePinned'))
-      } else {
-        toast.error(ack?.error || t('toast.insufficientPermissions'))
-      }
-    })
-  }
-
-  const handleUnpinMessage = (messageId: string) => {
-    if (!socketRef.current || !selectedRoom) return
-    socketRef.current.emit('unpin-message', { messageId, roomId: selectedRoom.id }, (ack: any) => {
-      if (ack?.ok) {
-        toast.success(t('toast.messageUnpinned'))
-      } else {
-        toast.error(t('toast.unpinError'))
-      }
-    })
-  }
-
   // NEW: Ban user
   const handleBanUser = (userId: string | number, reason: string, durationMinutes: number) => {
     if (!socketRef.current || !selectedRoom) return
@@ -852,25 +943,12 @@ export default function ChatPage() {
 
   // NEW: Get user role for current room
   const getUserRoleInRoom = useCallback((userId: string | number) => {
+    if (String(session?.user?.id) === String(userId) && isAdminOverride) {
+      return 'owner'
+    }
     if (!selectedRoom) return 'user'
     return userRoles[`${selectedRoom.id}-${userId}`] || 'user'
-  }, [selectedRoom, userRoles])
-
-  // NEW: Load pinned messages
-  const loadPinned = useCallback(async () => {
-    if (!selectedRoom) return
-    try {
-      const r = await fetch(`${url_env}/api/rooms/${selectedRoom.id}/pinned`)
-      const pins = await r.json()
-      setPinnedMessages(Array.isArray(pins) ? pins : [])
-    } catch (_) {
-      setPinnedMessages([])
-    }
-  }, [selectedRoom])
-
-  useEffect(() => {
-    loadPinned()
-  }, [selectedRoom, loadPinned])
+  }, [selectedRoom, userRoles, session?.user?.id, isAdminOverride])
 
   // NEW: Load user role
   useEffect(() => {
@@ -892,7 +970,7 @@ export default function ChatPage() {
 
     const targetId = String(user.userId)
     const cooldownUntil = privateInviteCooldownRef.current.get(targetId) || 0
-    const isAdmin = Boolean(session.user.isAdmin)
+    const isAdmin = isAdminOverride
     if (!isAdmin && Date.now() < cooldownUntil) {
       const leftMs = cooldownUntil - Date.now()
       const leftMin = Math.max(1, Math.ceil(leftMs / 60000))
@@ -969,7 +1047,9 @@ export default function ChatPage() {
     setBubbleTheme('neon')
     setMyBubbleColor('#2d88ff')
     setOtherBubbleColor('#1e2430')
-    setFontSize('medium')
+    setMyBubbleDraft('#2d88ff')
+    setOtherBubbleDraft('#1e2430')
+    setFontSize('large')
     setEffectsEnabled(true)
     setTextOnlyMode(false)
     setDataSaverMode(false)
@@ -979,6 +1059,13 @@ export default function ChatPage() {
     setReplyTarget(null)
     setRoomBgDraft('')
     toast.success(t('toast.settingsReset'))
+  }
+
+  const applyCustomBubbleColors = () => {
+    setBubbleTheme('custom')
+    setMyBubbleColor(myBubbleDraft)
+    setOtherBubbleColor(otherBubbleDraft)
+    toast.success(t('toast.preferencesUpdated'))
   }
 
   const respondPrivateInvite = (accepted: boolean) => {
@@ -1002,14 +1089,76 @@ export default function ChatPage() {
 
   // ── Mini profile ─────────────────────────────────────────────────────────
   const fetchProfile = async (userId: string | number) => {
+    setMiniProfileFollow({ isFollowing: false, followsYou: false, followersCount: 0, followingCount: 0, loading: true })
     try {
-      const res = await fetch(`${url_env}/api/users/${userId}`)
-      if (!res.ok) return
-      const user = await res.json()
+      const [profileRes, followRes] = await Promise.all([
+        fetch(`${url_env}/api/users/${userId}`),
+        session?.user?.id
+          ? fetch(`${url_env}/api/users/${userId}/follow-status?viewerId=${encodeURIComponent(String(session.user.id))}`)
+          : Promise.resolve(null as Response | null),
+      ])
+
+      if (!profileRes.ok) return
+      const user = await profileRes.json()
       let interests = user.interests
       try { interests = typeof interests === 'string' ? JSON.parse(interests) : interests } catch { interests = [] }
       setMiniProfile({ ...user, interests })
+
+      if (followRes?.ok) {
+        const followData = await followRes.json()
+        setMiniProfileFollow({
+          isFollowing: Boolean(followData?.isFollowing),
+          followsYou: Boolean(followData?.followsYou),
+          followersCount: Number(followData?.followersCount || 0),
+          followingCount: Number(followData?.followingCount || 0),
+          loading: false,
+        })
+      } else {
+        setMiniProfileFollow(prev => ({ ...prev, loading: false }))
+      }
     } catch { }
+    finally {
+      setMiniProfileFollow(prev => ({ ...prev, loading: false }))
+    }
+  }
+
+  const toggleFollowMiniProfile = async () => {
+    if (!miniProfile?.id || !session?.user?.id) return
+    if (String(miniProfile.id) === String(session.user.id)) return
+
+    const wasFollowing = miniProfileFollow.isFollowing
+    setMiniProfileFollow(prev => ({
+      ...prev,
+      isFollowing: !wasFollowing,
+      followersCount: Math.max(0, prev.followersCount + (wasFollowing ? -1 : 1)),
+      loading: true,
+    }))
+
+    try {
+      const endpoint = wasFollowing ? 'unfollow' : 'follow'
+      const res = await fetch(`${url_env}/api/users/${miniProfile.id}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ followerId: session.user.id }),
+      })
+      if (!res.ok) throw new Error('follow request failed')
+      const data = await res.json()
+      setMiniProfileFollow(prev => ({
+        ...prev,
+        isFollowing: !wasFollowing,
+        followersCount: Number(data?.followersCount ?? prev.followersCount),
+        loading: false,
+      }))
+      toast.success(wasFollowing ? t('toast.unfollowed') : t('toast.following'))
+    } catch {
+      setMiniProfileFollow(prev => ({
+        ...prev,
+        isFollowing: wasFollowing,
+        followersCount: Math.max(0, prev.followersCount + (wasFollowing ? 1 : -1)),
+        loading: false,
+      }))
+      toast.error(t('toast.followActionError'))
+    }
   }
 
   // ── Report message ───────────────────────────────────────────────────────
@@ -1241,20 +1390,6 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* NEW: Pinned messages banner */}
-        {selectedRoom && pinnedMessages.length > 0 && (
-          <div className="px-3 py-2 text-xs flex gap-2 overflow-x-auto" style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)', color: 'var(--text3)' }}>
-            <span className="font-bold flex-shrink-0">📌 {t('pinned.title')}</span>
-            {pinnedMessages.slice(0, 3).map((pin: any) => (
-              <button key={pin.id} onClick={() => { }}
-                className="px-2 py-1 rounded-sm flex-shrink-0 hover:opacity-80 transition-opacity"
-                style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
-                {pin.user_name}: {pin.content.slice(0, 30)}...
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Messages */}
         <div
           ref={messagesContainerRef}
@@ -1292,6 +1427,28 @@ export default function ChatPage() {
               {grouped.map(({ msg, showHeader }) => {
                 const isMe = isCurrentUserMessage(msg.senderId, msg.username)
                 const displayName = getDisplayName(msg.senderId, msg.username)
+                const senderRole = msg.senderId ? getUserRoleInRoom(msg.senderId) : 'user'
+                const showStaffShield = ['owner', 'mod'].includes(senderRole)
+                const reactionSummary = (msg.reactions || []).reduce<Record<string, { count: number; reactors: Array<{ userId: string; userImage: string; userName: string }> }>>((acc, reaction) => {
+                  const key = reaction.emoji
+                  if (!acc[key]) {
+                    acc[key] = {
+                      count: 0,
+                      reactors: [],
+                    }
+                  }
+                  acc[key].count += 1
+
+                  const reactorId = String(reaction.userId)
+                  if (!acc[key].reactors.some(r => r.userId === reactorId)) {
+                    acc[key].reactors.push({
+                      userId: reactorId,
+                      userImage: resolveImageSrc(reaction.userImage || ''),
+                      userName: reaction.userName || '',
+                    })
+                  }
+                  return acc
+                }, {})
                 return (
                   <motion.div
                     id={`msg-${msg.id}`}
@@ -1303,12 +1460,20 @@ export default function ChatPage() {
                   >
                     {/* Avatar */}
                     {!textOnlyMode && (
-                      <div className="w-8 flex-shrink-0" style={{ marginBottom: 2 }}>
-                        <button onClick={() => msg.senderId && fetchProfile(msg.senderId)} className="block" title={`Ver perfil de ${displayName}`}>
+                      <div className="flex-shrink-0" style={{ width: chatAvatarSize + 4, marginBottom: 2 }}>
+                        <button onClick={() => msg.senderId && fetchProfile(msg.senderId)} className="block relative" title={`Ver perfil de ${displayName}`}>
                           {shouldLoadImages && resolveImageSrc(msg.userImage)
-                            ? <img src={resolveImageSrc(msg.userImage)} alt={displayName} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-7 h-7 rounded-full object-cover" style={{ border: '2px solid var(--border)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
-                            : <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
-                              style={{ background: 'var(--primary)', color: '#fff' }}>{displayName[0]}</div>}
+                            ? <img src={resolveImageSrc(msg.userImage)} alt={displayName} draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="rounded-full object-cover" style={{ width: chatAvatarSize, height: chatAvatarSize, border: '2px solid var(--border)', WebkitTouchCallout: 'none', userSelect: 'none' }} />
+                            : <div className="rounded-full flex items-center justify-center text-sm font-bold"
+                              style={{ width: chatAvatarSize, height: chatAvatarSize, background: 'var(--primary)', color: '#fff' }}>{displayName[0]}</div>}
+                          {showStaffShield && (
+                            <span
+                              className="absolute -top-2 -right-2 w-4 h-4 rounded-full flex items-center justify-center text-[10px]"
+                              style={{ background: senderRole === 'owner' ? '#fbbf24' : '#60a5fa', color: '#fff', border: '1px solid var(--surface)' }}
+                            >
+                              🛡
+                            </span>
+                          )}
                         </button>
                       </div>
                     )}
@@ -1370,11 +1535,23 @@ export default function ChatPage() {
                       {/* Reactions */}
                       {msg.reactions && msg.reactions.length > 0 && (
                         <div className="flex flex-wrap gap-0.5 mt-0.5 px-1">
-                          {Object.entries(msg.reactions.reduce<Record<string, number>>((a, r) => { a[r.emoji] = (a[r.emoji] || 0) + 1; return a }, {})).map(([emoji, count]) => (
+                          {Object.entries(reactionSummary).map(([emoji, data]) => (
                             <button key={emoji} onClick={() => handleReact(msg.id, emoji)}
                               className="flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded-full"
                               style={{ background: 'var(--surface2)', border: '1px solid var(--border)' }}>
-                              {emoji} {count > 1 && <span style={{ color: 'var(--text3)' }}>{count}</span>}
+                              <span>{emoji}</span>
+                              {data.reactors.length > 0 && (
+                                <span className="flex items-center -space-x-1.5 ml-0.5">
+                                  {data.reactors.slice(0, 3).map((reactor) => (
+                                    reactor.userImage
+                                      ? <img key={reactor.userId} src={reactor.userImage} alt={reactor.userName || 'user'} className="w-3.5 h-3.5 rounded-full object-cover ring-1" style={{ ringColor: 'var(--surface)' } as any} />
+                                      : <span key={reactor.userId} className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold text-white ring-1" style={{ background: 'var(--primary)', ringColor: 'var(--surface)' } as any}>
+                                        {(reactor.userName || '?')[0]}
+                                      </span>
+                                  ))}
+                                </span>
+                              )}
+                              {data.count > 1 && <span style={{ color: 'var(--text3)' }}>{data.count}</span>}
                             </button>
                           ))}
                         </div>
@@ -1400,17 +1577,6 @@ export default function ChatPage() {
                         className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.nickname')}>
                         <UserIcon size={11} style={{ color: 'var(--text3)' }} />
                       </button>
-
-                      {/* NEW: Pin/Unpin (only for mods/owners) */}
-                      {!isMe && session?.user?.id && ['mod', 'owner'].includes(getUserRoleInRoom(session.user.id)) && (
-                        <button onClick={() => {
-                          const isPinned = pinnedMessages.some((p: any) => String(p.message_id) === String(msg.id))
-                          isPinned ? handleUnpinMessage(msg.id) : handlePinMessage(msg.id)
-                        }}
-                          className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'var(--surface2)' }} title={t('actions.pinToggle')}>
-                          <span style={{ fontSize: '12px' }}>📌</span>
-                        </button>
-                      )}
 
                       {/* NEW: Mute/Unmute & Ban (only for non-own messages) */}
                       {!isMe && msg.senderId !== undefined && msg.senderId !== null && (
@@ -1487,7 +1653,7 @@ export default function ChatPage() {
           {replyTarget && (
             <div className="px-4 py-2 border-b flex items-center justify-between" style={{ background: 'var(--surface2)', borderColor: 'var(--border)' }}>
               <div className="flex flex-col border-l-4 pl-2" style={{ borderColor: 'var(--primary)' }}>
-                <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>{t('messages.replyingTo', { name: replyTarget.username })}</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>{t('messages.quickReply')} · {replyTarget.username}</span>
                 <span className="text-sm truncate opacity-80" style={{ color: 'var(--text)', maxWidth: '250px' }}>{replyTarget.preview}</span>
               </div>
               <button
@@ -1501,8 +1667,8 @@ export default function ChatPage() {
           )}
           <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
             {shouldLoadImages && currentUserAvatar
-              ? <img src={currentUserAvatar} alt="" draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="w-7 h-7 rounded-full flex-shrink-0 object-cover" style={{ WebkitTouchCallout: 'none', userSelect: 'none' }} />
-              : <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--primary)' }}>
+              ? <img src={currentUserAvatar} alt="" draggable={false} onContextMenu={preventMediaActions} onDragStart={preventMediaActions} className="rounded-full flex-shrink-0 object-cover" style={{ width: chatAvatarSize, height: chatAvatarSize, WebkitTouchCallout: 'none', userSelect: 'none' }} />
+              : <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: chatAvatarSize, height: chatAvatarSize, background: 'var(--primary)' }}>
                 <span className="text-xs font-bold text-white">{session?.user?.name?.[0]}</span>
               </div>}
             <div className="flex-1 relative">
@@ -1568,22 +1734,56 @@ export default function ChatPage() {
               <div className="space-y-4 text-sm">
                 <div>
                   <p className="font-semibold mb-2" style={{ color: 'var(--text)' }}>{t('settings.bubbleTheme')}</p>
-                  <div className="flex flex-wrap gap-2 mb-2">
+                  <div className="grid grid-cols-2 gap-2 mb-3">
                     {(['neon', 'pastel', 'minimal', 'custom'] as BubbleTheme[]).map(theme => (
-                      <button key={theme} onClick={() => setBubbleTheme(theme)} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                        style={{ background: bubbleTheme === theme ? 'var(--primary)' : 'var(--surface2)', color: bubbleTheme === theme ? '#fff' : 'var(--text2)' }}>
-                        {t(`settings.themes.${theme}` as any)}
+                      <button key={theme} onClick={() => setBubbleTheme(theme)} className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between"
+                        style={{ background: bubbleTheme === theme ? 'var(--primary)' : 'var(--surface2)', color: bubbleTheme === theme ? '#fff' : 'var(--text2)', border: `1px solid ${bubbleTheme === theme ? 'var(--primary)' : 'var(--border)'}` }}>
+                        <span>{t(`settings.themes.${theme}` as any)}</span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-3 h-3 rounded-full" style={{ background: theme === 'custom' ? myBubbleDraft : BUBBLE_THEME_COLORS[theme as Exclude<BubbleTheme, 'custom'>].mine }} />
+                          <span className="w-3 h-3 rounded-full" style={{ background: theme === 'custom' ? otherBubbleDraft : BUBBLE_THEME_COLORS[theme as Exclude<BubbleTheme, 'custom'>].other, border: '1px solid var(--border)' }} />
+                        </span>
                       </button>
                     ))}
                   </div>
                   {bubbleTheme === 'custom' && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="text-xs" style={{ color: 'var(--text3)' }}>{t('settings.myMessages')}
-                        <input type="color" value={myBubbleColor} onChange={e => setMyBubbleColor(e.target.value)} className="w-full h-8 mt-1" />
-                      </label>
-                      <label className="text-xs" style={{ color: 'var(--text3)' }}>{t('settings.otherMessages')}
-                        <input type="color" value={otherBubbleColor} onChange={e => setOtherBubbleColor(e.target.value)} className="w-full h-8 mt-1" />
-                      </label>
+                    <div className="space-y-3 p-3 rounded-xl" style={{ background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold" style={{ color: 'var(--text2)' }}>{t('settings.myMessages')}</span>
+                        <input type="color" value={myBubbleDraft} onChange={e => setMyBubbleDraft(e.target.value)} className="w-8 h-8 p-0 border-0 rounded-md cursor-pointer" />
+                        <span className="text-xs" style={{ color: 'var(--text3)' }}>{myBubbleDraft.toUpperCase()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold" style={{ color: 'var(--text2)' }}>{t('settings.otherMessages')}</span>
+                        <input type="color" value={otherBubbleDraft} onChange={e => setOtherBubbleDraft(e.target.value)} className="w-8 h-8 p-0 border-0 rounded-md cursor-pointer" />
+                        <span className="text-xs" style={{ color: 'var(--text3)' }}>{otherBubbleDraft.toUpperCase()}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {CUSTOM_BUBBLE_PRESETS.map(preset => (
+                          <button
+                            key={preset.id}
+                            onClick={() => { setMyBubbleDraft(preset.mine); setOtherBubbleDraft(preset.other) }}
+                            className="px-2 py-2 rounded-lg text-[10px] font-semibold"
+                            style={{ background: 'var(--surface)', color: 'var(--text2)', border: '1px solid var(--border)' }}
+                          >
+                            <span className="flex items-center justify-center gap-1 mb-1">
+                              <span className="w-2.5 h-2.5 rounded-full" style={{ background: preset.mine }} />
+                              <span className="w-2.5 h-2.5 rounded-full" style={{ background: preset.other, border: '1px solid var(--border)' }} />
+                            </span>
+                            {preset.id}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="rounded-xl p-2" style={{ background: 'var(--surface)' }}>
+                        <div className="text-[10px] mb-1" style={{ color: 'var(--text3)' }}>Preview</div>
+                        <div className="flex flex-col gap-1">
+                          <div className="self-end px-2.5 py-1.5 rounded-xl text-xs text-white" style={{ background: myBubbleDraft }}>Hola 👋</div>
+                          <div className="self-start px-2.5 py-1.5 rounded-xl text-xs" style={{ background: otherBubbleDraft, color: 'var(--text)' }}>Hi! How are you?</div>
+                        </div>
+                      </div>
+                      <button onClick={applyCustomBubbleColors} className="w-full py-2 rounded-lg text-xs font-semibold text-white" style={{ background: 'var(--primary)' }}>
+                        {t('settings.saveBackground')}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1710,11 +1910,39 @@ export default function ChatPage() {
                   <h4 className="font-bold" style={{ color: 'var(--text)' }}>{miniProfile.name}</h4>
                   {miniProfile.country && <span className="text-sm">{miniProfile.country}</span>}
                 </div>
+                {miniProfileFollow.followsYou && String(miniProfile.id) !== String(session?.user?.id) && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full inline-block mb-2" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                    {t('miniProfile.followsYou')}
+                  </span>
+                )}
                 {miniProfile.level && (
                   <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold inline-block mb-2"
                     style={{ background: `${LEVEL_COLORS[miniProfile.level] || 'var(--primary)'}20`, color: LEVEL_COLORS[miniProfile.level] || 'var(--primary)' }}>
                     {t('miniProfile.level', { level: miniProfile.level })}
                   </span>
+                )}
+                <div className="flex items-center gap-2 mb-3 text-[11px]" style={{ color: 'var(--text3)' }}>
+                  <span>{t('miniProfile.followersCount', { count: miniProfileFollow.followersCount })}</span>
+                  <span>·</span>
+                  <span>{t('miniProfile.followingCount', { count: miniProfileFollow.followingCount })}</span>
+                </div>
+                {String(miniProfile.id) !== String(session?.user?.id) && (
+                  <button
+                    onClick={toggleFollowMiniProfile}
+                    disabled={miniProfileFollow.loading}
+                    className="w-full mb-3 py-2 rounded-xl text-xs font-semibold disabled:opacity-60"
+                    style={{
+                      background: miniProfileFollow.isFollowing ? 'var(--surface2)' : 'var(--primary)',
+                      color: miniProfileFollow.isFollowing ? 'var(--text2)' : '#fff',
+                      border: miniProfileFollow.isFollowing ? '1px solid var(--border)' : 'none',
+                    }}
+                  >
+                    {miniProfileFollow.loading
+                      ? t('miniProfile.loading')
+                      : miniProfileFollow.isFollowing
+                        ? t('miniProfile.unfollow')
+                        : t('miniProfile.follow')}
+                  </button>
                 )}
                 {miniProfile.bio && <p className="text-xs mb-3 leading-relaxed" style={{ color: 'var(--text2)' }}>{miniProfile.bio}</p>}
                 <div className="flex flex-wrap gap-1 text-[11px] mb-3">

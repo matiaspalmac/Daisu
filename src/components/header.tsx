@@ -22,7 +22,9 @@ const API = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
 const resolveImageSrc = (src?: string) => {
     if (!src) return '';
     const trimmed = src.trim();
-    if (!trimmed || trimmed.startsWith('data:')) return '';
+    if (!trimmed) return '';
+    if (/^data:image\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith('data:')) return '';
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
     if (!API) return '';
 
@@ -52,11 +54,38 @@ export default function Header() {
             return;
         }
 
+        const userId = String(session.user.id);
+        const cacheKey = `daisu-user-meta-${userId}`;
+        const now = Date.now();
+        const cacheTtlMs = 2 * 60 * 1000;
+
+        try {
+            const cachedRaw = sessionStorage.getItem(cacheKey);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+                if (cached?.ts && (now - Number(cached.ts)) < cacheTtlMs) {
+                    const cachedImage = resolveImageSrc(cached?.image || '');
+                    if (cachedImage) {
+                        setUserAvatar(cachedImage);
+                        return;
+                    }
+                }
+            }
+        } catch { }
+
         fetch(`${API}/api/users/${session.user.id}`)
             .then(r => r.json())
             .then((u) => {
                 if (cancelled) return;
-                setUserAvatar(resolveImageSrc(u?.image || ''));
+                const resolvedImage = resolveImageSrc(u?.image || '');
+                setUserAvatar(resolvedImage);
+                try {
+                    sessionStorage.setItem(cacheKey, JSON.stringify({
+                        ts: Date.now(),
+                        image: u?.image || '',
+                        isAdmin: Boolean(u?.isAdmin),
+                    }));
+                } catch { }
             })
             .catch(() => {
                 if (!cancelled) setUserAvatar('');

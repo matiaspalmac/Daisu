@@ -34,6 +34,7 @@ type Tab = 'overview' | 'connections' | 'privacy' | 'customization'
 export default function ProfilePage() {
   const t = useTranslations('ProfilePage')
   const { data: session, update } = useSession()
+  const profileFetchRef = useRef<{ userId?: number; ts: number }>({ ts: 0 })
   const [tab, setTab] = useState<Tab>('overview')
   const [profile, setProfile] = useState<UserProfile>({
     id: 0, name: '', email: '', image: '', cover_image: '', isAdmin: false,
@@ -49,6 +50,7 @@ export default function ProfilePage() {
   const [profileViews, setProfileViews] = useState<Array<{id: number; name: string; viewed_at: string}>>([])
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
+  const profileCacheTtlMs = 2 * 60 * 1000
 
   // Suggestions from locale keys
   const INTEREST_SUGGESTIONS = Array.from({ length: 14 }, (_, i) => t(`interests.s${i}` as any))
@@ -58,23 +60,81 @@ export default function ProfilePage() {
     const s = session.user as any
     let interests: string[] = []
     try { interests = Array.isArray(s.interests) ? s.interests : JSON.parse(s.interests || '[]') } catch { interests = [] }
-    setProfile({
-      id: s.id, name: s.name || '', email: s.email || '', image: s.image || '',
-      cover_image: s.cover_image || '', isAdmin: Boolean(s.isAdmin),
-      bio: s.bio || '', nativelang: s.nativelang || '', learninglang: s.learninglang || '',
-      targetLang: s.targetLang || '', level: s.level || 'A1',
-      country: s.country || '', interests, tandem_goal: s.tandem_goal || '',
-      created_at: s.created_at || '', bubble_color: s.bubble_color || '#2d88ff',
-      is_public: s.is_public !== false, hide_old_messages: s.hide_old_messages || false,
-    })
+    setProfile(prev => ({
+      ...prev,
+      id: s.id ?? prev.id,
+      name: s.name ?? prev.name,
+      email: s.email ?? prev.email,
+      image: s.image || prev.image,
+      cover_image: s.cover_image || prev.cover_image,
+      isAdmin: typeof s.isAdmin === 'boolean' ? s.isAdmin : Boolean(s.isAdmin ?? prev.isAdmin),
+      bio: s.bio ?? prev.bio,
+      nativelang: s.nativelang ?? prev.nativelang,
+      learninglang: s.learninglang ?? prev.learninglang,
+      targetLang: s.targetLang ?? prev.targetLang,
+      level: s.level ?? prev.level,
+      country: s.country ?? prev.country,
+      interests: interests.length > 0 ? interests : prev.interests,
+      tandem_goal: s.tandem_goal ?? prev.tandem_goal,
+      created_at: s.created_at ?? prev.created_at,
+      bubble_color: s.bubble_color ?? prev.bubble_color,
+      is_public: s.is_public !== undefined ? s.is_public !== false : prev.is_public,
+      hide_old_messages: s.hide_old_messages !== undefined ? Boolean(s.hide_old_messages) : prev.hide_old_messages,
+    }))
   }, [session])
 
   useEffect(() => {
     if (!session?.user?.id) return
+    const userId = Number(session.user.id)
+    const cacheKey = `daisu-profile-${userId}`
+    const now = Date.now()
+
+    if (profileFetchRef.current.userId === userId && (now - profileFetchRef.current.ts) < profileCacheTtlMs) {
+      return
+    }
+
+    try {
+      const cachedRaw = sessionStorage.getItem(cacheKey)
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw)
+        if (cached?.ts && (now - Number(cached.ts)) < profileCacheTtlMs && cached?.profile) {
+          const u = cached.profile
+          let interests: string[] = []
+          try { interests = Array.isArray(u.interests) ? u.interests : JSON.parse(u.interests || '[]') } catch { interests = [] }
+          setProfile(p => ({
+            ...p,
+            id: u.id ?? p.id,
+            name: u.name || p.name,
+            email: u.email || p.email,
+            image: u.image || p.image,
+            cover_image: u.cover_image || p.cover_image,
+            isAdmin: Boolean(u.isAdmin),
+            bio: u.bio || p.bio,
+            nativelang: u.nativelang || p.nativelang,
+            learninglang: u.learninglang || p.learninglang,
+            targetLang: u.targetLang || p.targetLang,
+            level: u.level || p.level,
+            country: u.country || p.country,
+            interests: interests.length > 0 ? interests : p.interests,
+            tandem_goal: u.tandem_goal || p.tandem_goal,
+            created_at: u.created_at || p.created_at,
+            bubble_color: u.bubble_color || p.bubble_color,
+            is_public: u.is_public !== false,
+            hide_old_messages: Boolean(u.hide_old_messages),
+          }))
+          profileFetchRef.current = { userId, ts: now }
+        }
+      }
+    } catch { }
+
     fetch(`${url_env}/api/users/${session.user.id}`)
       .then(r => r.json())
       .then(u => {
         if (!u || u.error) return
+        profileFetchRef.current = { userId, ts: Date.now() }
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), profile: u }))
+        } catch { }
         let interests: string[] = []
         try { interests = Array.isArray(u.interests) ? u.interests : JSON.parse(u.interests || '[]') } catch { interests = [] }
         setProfile(p => ({
@@ -106,7 +166,7 @@ export default function ProfilePage() {
     if (!session?.user?.id) return
     fetch(`${url_env}/api/user/stats/${session.user.id}`)
       .then(r => r.json()).then(d => { if (!d.error) setStats(d) }).catch(() => { })
-  }, [session])
+  }, [session?.user?.id])
 
   // Fetch social data
   useEffect(() => {
@@ -232,6 +292,13 @@ export default function ProfilePage() {
 
   const levelColor = LEVEL_COLORS[profile.level] || { bg: 'var(--surface2)', text: 'var(--text2)' }
   const memberSince = profile.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : ''
+  const getHoursSinceLastActive = (value?: string) => {
+    if (!value) return 0
+    const parsed = new Date(value)
+    if (Number.isNaN(parsed.getTime())) return 0
+    const diffMs = Date.now() - parsed.getTime()
+    return Math.max(0, Math.round(diffMs / 3600000))
+  }
 
   const TABS: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
     { id: 'overview', label: `👤 ${t('tabs.overview')}`, icon: MessageCircle },
@@ -308,7 +375,7 @@ export default function ProfilePage() {
             : <h1 className="text-2xl font-bold mb-0.5" style={{ color: 'var(--text)' }}>{profile.name}</h1>}
           <div className="flex flex-wrap gap-3 text-xs mt-1" style={{ color: 'var(--text3)' }}>
             {memberSince && <span>{t('since', { date: memberSince })}</span>}
-            {stats?.last_active && <span>{t('lastActive', { hours: Math.round((Date.now() - new Date(stats.last_active).getTime()) / 3600000) })}</span>}
+            {stats?.last_active && <span>{t('lastActive', { hours: getHoursSinceLastActive(stats.last_active) })}</span>}
           </div>
         </div>
 

@@ -28,7 +28,7 @@
             "subtitleHighlight": "Correções IA · Chat ao Vivo · Comunidade Global",
             "statsActive": "usuários ativos agora",
             "statsMessages": "mensagens hoje",
-            "statsLanguages": "3 idiomas: Espanhol · Inglês · Português",
+            "statsLanguages": "Idiomas disponíveis",
             "ctaPrimary": "Comece a conversar de graça",
             "ctaSecondary": "Ver assinaturas"
         },
@@ -234,6 +234,12 @@
             "level": "Nível {level}",
             "nativelang": "Idioma nativo: {lang}",
             "targetLang": "Idioma alvo: {lang}",
+            "followersCount": "{count} seguidores",
+            "followingCount": "{count} seguindo",
+            "followsYou": "Segue você",
+            "follow": "Seguir",
+            "unfollow": "Deixar de seguir",
+            "loading": "Carregando...",
             "close": "Fechar"
         },
         "profile": {
@@ -328,7 +334,10 @@
             "moderationUpdateError": "Não foi possível atualizar a moderação",
             "backgroundUpdated": "Fundo atualizado para este chat",
             "backgroundCleared": "Fundo removido deste chat",
-            "settingsReset": "Configurações restauradas"
+            "settingsReset": "Configurações restauradas",
+            "following": "Agora você segue este usuário",
+            "unfollowed": "Você deixou de seguir este usuário",
+            "followActionError": "Não foi possível atualizar o status de seguir"
         },
         "activeChats": "Chats Ativos",
         "selectChat": "Selecione um chat para começar.",
@@ -703,8 +712,17 @@
         }
     },
     "Acknowledgments": {
+        "badge": "Reconhecimento oficial",
         "title": "Agradecimentos",
-        "description": "O Daisu agradece a todos os colaboradores que tornaram esta plataforma possível.",
+        "description": "Esta página reconhece oficialmente quem criou, desenhou e fundou o Daisu do zero.",
+        "mainRole": "Fundador do Daisu · Desenvolvimento e design de produto",
+        "roles": {
+            "creator": "Visão e direção",
+            "founderDeveloper": "Arquitetura e desenvolvimento",
+            "designer": "Design de experiência"
+        },
+        "messageToCommunity": "Obrigado por confiar neste projeto. O Daisu nasceu com uma ideia simples: qualquer pessoa poder praticar idiomas com uma comunidade real e ferramentas úteis. Vou continuar melhorando a plataforma para vocês, com mais estabilidade, melhor experiência e recursos que realmente ajudam a aprender.",
+        "signature": "— Matias Palma",
         "thankYouMessage": "Agradecemos profundamente sua contribuição ao Daisu!",
         "frontend-developer": "Desenvolvedor Front-End",
         "backend-developer": "Desenvolvedor Back-End",

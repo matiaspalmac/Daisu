@@ -28,7 +28,7 @@
       "subtitleHighlight": "AI Corrections · Live Chat · Global Community",
       "statsActive": "active users right now",
       "statsMessages": "messages today",
-      "statsLanguages": "3 languages: Spanish · English · Portuguese",
+      "statsLanguages": "Available languages",
       "ctaPrimary": "Start chatting for free",
       "ctaSecondary": "See memberships"
     },
@@ -234,6 +234,12 @@
       "level": "Level {level}",
       "nativelang": "Native language: {lang}",
       "targetLang": "Target language: {lang}",
+      "followersCount": "{count} followers",
+      "followingCount": "{count} following",
+      "followsYou": "Follows you",
+      "follow": "Follow",
+      "unfollow": "Unfollow",
+      "loading": "Loading...",
       "close": "Close"
     },
     "profile": {
@@ -328,7 +334,10 @@
       "moderationUpdateError": "Could not update moderation",
       "backgroundUpdated": "Background updated for this chat",
       "backgroundCleared": "Background removed from this chat",
-      "settingsReset": "Settings restored"
+      "settingsReset": "Settings restored",
+      "following": "You are now following this user",
+      "unfollowed": "You unfollowed this user",
+      "followActionError": "Could not update follow status"
     },
     "activeChats": "Active Chats",
     "selectChat": "Select a chat to start.",
@@ -703,8 +712,17 @@
     }
   },
   "Acknowledgments": {
+    "badge": "Official recognition",
     "title": "Acknowledgments",
-    "description": "Daisu would like to thank all the contributors who made this platform possible.",
+    "description": "This page officially recognizes the person who created, designed, and founded Daisu from scratch.",
+    "mainRole": "Daisu founder · Product development and design",
+    "roles": {
+      "creator": "Vision and direction",
+      "founderDeveloper": "Architecture and development",
+      "designer": "Experience design"
+    },
+    "messageToCommunity": "Thank you for trusting this project. Daisu was built with a simple idea: anyone should be able to practice languages with a real community and useful tools. I will keep improving the platform for you with better stability, better UX, and features that truly help people learn.",
+    "signature": "— Matias Palma",
     "thankYouMessage": "We deeply appreciate your contribution to Daisu!",
     "frontend-developer": "Front-End Developer",
     "backend-developer": "Back-End Developer",

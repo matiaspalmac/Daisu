@@ -20,6 +20,7 @@ const LEVEL_COLORS: Record<string, string> = { 'A1-A2': '#10b981', 'A1': '#10b98
 
 export default function HomePage() {
   const t = useTranslations('HomePage');
+  const tc = useTranslations('Common');
   const { data: session } = useSession();
   const [featuredRooms, setFeaturedRooms] = useState<Room[]>([]);
   const [miniChatRoom, setMiniChatRoom] = useState<Room | null>(null);
@@ -106,13 +107,29 @@ export default function HomePage() {
           {/* Live stats */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex flex-wrap justify-center gap-6 mb-8">
             {[
-              { value: liveUsers.toLocaleString(), label: t('hero.statsActive') },
-              { value: liveMessages.toLocaleString(), label: t('hero.statsMessages') },
-              { value: t('hero.statsLanguages'), label: null },
+              { value: liveUsers.toLocaleString(), label: t('hero.statsActive'), type: 'metric' as const },
+              { value: liveMessages.toLocaleString(), label: t('hero.statsMessages'), type: 'metric' as const },
+              { value: t('hero.statsLanguages'), label: null, type: 'languages' as const },
             ].map((s, i) => (
               <div key={i} className="text-center">
-                <p className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{s.value}</p>
-                {s.label && <p className="text-xs" style={{ color: 'var(--text3)' }}>{s.label}</p>}
+                {s.type === 'languages' ? (
+                  <div>
+                    <p className="text-xs mb-2 font-semibold" style={{ color: 'var(--text3)' }}>{s.value}</p>
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                      {(['es', 'en', 'pt'] as const).map(code => (
+                        <span key={code} className="text-[11px] px-2 py-1 rounded-full font-semibold"
+                          style={{ background: 'var(--surface)', color: 'var(--text2)', border: '1px solid var(--border)' }}>
+                          {tc(`languages.${code}` as any)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{s.value}</p>
+                    {s.label && <p className="text-xs" style={{ color: 'var(--text3)' }}>{s.label}</p>}
+                  </>
+                )}
               </div>
             ))}
           </motion.div>
