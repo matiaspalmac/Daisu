@@ -4,23 +4,31 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
   MessageCircle, Search, Plus, Loader2, Send, Hash, X,
-  User as UserIcon, Smile, Flag, Users, ChevronDown, Menu, Settings, Reply
+  User as UserIcon, Smile, Flag, Users, ChevronDown, Menu, Settings, Reply, Bell, UserPlus,
+  PenLine, ThumbsUp, Languages // eslint-disable-line
 } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
+import { useMessageTranslation } from '@/hooks/useMessageTranslation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
 import { showToast as toast } from 'nextjs-toast-notify'
 import { io, Socket } from 'socket.io-client'
 import Image from 'next/image'
+import RoomInviteModal from '@/components/chat/RoomInviteModal'
+import RoomMembersPanel from '@/components/chat/RoomMembersPanel'
+import RoomInvitationsPanel from '@/components/chat/RoomInvitationsPanel'
 
 // ──── Types ────────────────────────────────────────────────────────────────
 interface ChatRoom { id: string; name: string; description?: string; language?: string; level?: string; is_default?: number; daily_prompt?: string; }
 interface OnlineUser { userId: string | number; name: string; image?: string; targetLang?: string; }
 interface Reaction { emoji: string; userId: string | number; userImage?: string; userName?: string; }
-interface Message { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; detectedLang?: string; senderId?: string | number; sendStatus?: 'sending' | 'sent' | 'error'; clientTempId?: string; replyTo?: { id: string; username: string; content: string } }
+interface PeerCorrection { id: string; correctorId: string | number; correctorName: string; correctedText: string; explanation?: string; isHelpful?: boolean; createdAt?: string }
+interface Message { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; detectedLang?: string; senderId?: string | number; sendStatus?: 'sending' | 'sent' | 'error'; clientTempId?: string; replyTo?: { id: string; username: string; content: string }; isDeleted?: boolean; corrections?: PeerCorrection[] }
 interface MiniProfile { id: string | number; name: string; image?: string; bio?: string; nativelang?: string; targetLang?: string; level?: string; country?: string; interests?: string[]; }
 interface HistoryMessage { id: string; content: string; username: string; roomId: string; timestamp: string; userImage?: string; reactions?: Reaction[]; senderId?: string | number; detectedLang?: string; replyTo?: { id: string; username: string; content: string } }
 interface PrivateInvite { fromUserId: string | number; fromName: string }
+interface RoomInvite { id: string | number; roomId: string; roomName: string; fromUserId: string | number; fromName: string; fromImage?: string; createdAt?: string }
 
 type FontSize = 'small' | 'medium' | 'large'
 type BubbleTheme = 'neon' | 'pastel' | 'minimal' | 'custom'
@@ -80,6 +88,64 @@ function detectLangHeuristic(text: string): string | null {
 }
 
 // ──── Main Component ────────────────────────────────────────────────────────
+// ---- Inline Translation Sub-component ----
+function MessageTranslateButton({ text, nativeLang, chatFontSize }: { text: string; nativeLang: string; chatFontSize: string }) {
+  const t = useTranslations('ChatPage')
+  const { state, translate, toggleVisible } = useMessageTranslation(nativeLang)
+  return (
+    <>
+      <button
+        onClick={() => state.status === 'done' ? toggleVisible() : translate(text)}
+        disabled={state.status === 'loading'}
+        className="mt-1 flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
+        style={{
+          background: state.status === 'done' ? 'var(--primary)' : 'var(--surface2)',
+          color: state.status === 'done' ? '#fff' : 'var(--text3)',
+          border: '1px solid var(--border)',
+          opacity: state.status === 'loading' ? 0.5 : 1,
+          cursor: state.status === 'loading' ? 'wait' : 'pointer',
+        }}
+        title={t('actions.translateTitle')}
+      >
+        <Languages size={11} />
+        <span className="ml-1">{state.status === 'done' ? (state.visible ? t('translation.hide') : t('translation.show')) : t('actions.translate')}</span>
+      </button>
+      {state.status === 'loading' && (
+        <div className="mt-1 px-3 py-1.5 rounded-xl text-xs italic"
+          style={{ background: 'var(--surface2)', color: 'var(--text3)', border: '1px solid var(--border)' }}>
+          {t('translation.loading')}
+        </div>
+      )}
+      {state.status === 'done' && state.visible && (
+        <div className="mt-1 px-3 py-2 rounded-xl w-full"
+          style={{ background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+          <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--primary)' }}>
+            {t('translation.label', { lang: state.result.to.toUpperCase() })}
+          </span>
+          <p className="text-sm break-words mt-1" style={{ color: 'var(--text)', fontSize: chatFontSize }}>{state.result.translated_text}</p>
+          <p className="text-[10px] mt-1" style={{ color: 'var(--text3)' }}>
+            {state.result.usage.limit === null
+              ? t('translation.usageUnlimited')
+              : t('translation.usage', { used: state.result.usage.used, limit: state.result.usage.limit })}
+          </p>
+        </div>
+      )}
+      {state.status === 'limit_reached' && (
+        <div className="mt-1 px-3 py-1.5 rounded-xl text-xs"
+          style={{ background: '#ef444415', border: '1px solid #ef444440', color: '#ef4444' }}>
+          {t('translation.limitReached')}
+        </div>
+      )}
+      {state.status === 'error' && (
+        <div className="mt-1 px-3 py-1.5 rounded-xl text-xs"
+          style={{ background: '#f59e0b15', border: '1px solid #f59e0b40', color: '#f59e0b' }}>
+          {t('translation.error')}
+        </div>
+      )}
+    </>
+  )
+}
+
 export default function ChatPage() {
   const { data: session, status } = useSession()
   const t = useTranslations('ChatPage')
@@ -170,7 +236,107 @@ export default function ChatPage() {
     loading: false,
   })
 
+  // Peer corrections
+  const [showSubmitCorrection, setShowSubmitCorrection] = useState<string | null>(null)
+  const [showViewCorrections, setShowViewCorrections] = useState<string | null>(null)
+  const [correctionDraft, setCorrectionDraft] = useState('')
+  const [correctionExplanation, setCorrectionExplanation] = useState('')
+  const [correctionSubmitting, setCorrectionSubmitting] = useState(false)
+  const [viewCorrectionsList, setViewCorrectionsList] = useState<PeerCorrection[]>([])
+  const [viewCorrectionsLoading, setViewCorrectionsLoading] = useState(false)
+  const [correctionHelpfulLoading, setCorrectionHelpfulLoading] = useState<string | null>(null)
+
+  // Room invitations & membership (TAREA 17)
+  const [pendingInvitations, setPendingInvitations] = useState<RoomInvite[]>([])
+  const [showInvitationsPanel, setShowInvitationsPanel] = useState(false)
+  const [showRoomInviteModal, setShowRoomInviteModal] = useState(false)
+  const [showRoomMembersPanel, setShowRoomMembersPanel] = useState(false)
+  const [roomMembership, setRoomMembership] = useState<Record<string, 'owner' | 'mod' | 'member' | null>>({})
+  const [joiningRoom, setJoiningRoom] = useState(false)
+  const [leavingRoom, setLeavingRoom] = useState(false)
+
   const preventMediaActions = (e: React.SyntheticEvent) => e.preventDefault()
+
+  // Fetch pending invitations (poll every 30s)
+  useEffect(() => {
+    if (status !== 'authenticated' || !session?.user?.accessToken) return
+    const token = session.user.accessToken as string
+    const fetchInvitations = async () => {
+      try {
+        const res = await apiFetch('/api/invites', { method: 'GET', token })
+        const data = await res.json()
+        if (Array.isArray(data)) setPendingInvitations(data as RoomInvite[])
+      } catch { /* silent */ }
+    }
+    fetchInvitations()
+    const interval = setInterval(fetchInvitations, 30000)
+    return () => clearInterval(interval)
+  }, [status, session?.user?.accessToken])
+
+  // Fetch room membership when selectedRoom changes
+  useEffect(() => {
+    if (!selectedRoom || status !== 'authenticated' || !session?.user?.accessToken) return
+    const token = session.user.accessToken as string
+    const roomId = selectedRoom.id
+    if (roomMembership[roomId] !== undefined) return
+    apiFetch('/api/rooms/' + roomId + '/members', { method: 'GET', token }).then(r => r.json())
+      .then((data: any) => {
+        if (Array.isArray(data)) {
+          const me = data.find((m: any) => String(m.id) === String(session?.user?.id))
+          setRoomMembership(prev => ({ ...prev, [roomId]: me ? me.role : null }))
+        }
+      })
+      .catch(() => setRoomMembership(prev => ({ ...prev, [roomId]: null })))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRoom?.id, status, session?.user?.accessToken])
+
+  // Derived membership values
+  const currentRoomRole = selectedRoom ? (roomMembership[selectedRoom.id] ?? null) : null
+  const isMemberOfRoom = currentRoomRole !== null
+  const isModOrOwner = currentRoomRole === 'mod' || currentRoomRole === 'owner'
+  const isPrivateRoom = (selectedRoom as any)?.type === 'private'
+  const isPublicRoom = selectedRoom && !isPrivateRoom && !selectedRoom.id.startsWith('private-')
+
+  const handleJoinRoom = useCallback(async () => {
+    if (!selectedRoom || !session?.user?.accessToken) return
+    setJoiningRoom(true)
+    try {
+      await apiFetch('/api/rooms/' + selectedRoom.id + '/join', { method: 'POST', token: session.user.accessToken as string })
+      setRoomMembership(prev => ({ ...prev, [selectedRoom.id]: 'member' }))
+      toast.success(t('toast.roomJoined'))
+    } catch { toast.error('Error') }
+    finally { setJoiningRoom(false) }
+  }, [selectedRoom, session?.user?.accessToken, t])
+
+  const handleLeaveRoom = useCallback(async () => {
+    if (!selectedRoom || !session?.user?.accessToken) return
+    setLeavingRoom(true)
+    try {
+      await apiFetch('/api/rooms/' + selectedRoom.id + '/leave', { method: 'POST', token: session.user.accessToken as string })
+      setRoomMembership(prev => ({ ...prev, [selectedRoom.id]: null }))
+      toast.success(t('toast.roomLeft'))
+    } catch { toast.error('Error') }
+    finally { setLeavingRoom(false) }
+  }, [selectedRoom, session?.user?.accessToken, t])
+
+  const handleAcceptInvitation = useCallback(async (invite: RoomInvite) => {
+    if (!session?.user?.accessToken) return
+    try {
+      await apiFetch('/api/invites/' + invite.id + '/accept', { method: 'POST', token: session.user.accessToken as string })
+      setPendingInvitations(prev => prev.filter(i => i.id !== invite.id))
+      setRoomMembership(prev => ({ ...prev, [invite.roomId]: 'member' }))
+      toast.success(t('toast.inviteAccepted'))
+    } catch { toast.error('Error') }
+  }, [session?.user?.accessToken, t])
+
+  const handleDeclineInvitation = useCallback(async (inviteId: string | number) => {
+    if (!session?.user?.accessToken) return
+    try {
+      await apiFetch('/api/invites/' + inviteId + '/decline', { method: 'POST', token: session.user.accessToken as string })
+      setPendingInvitations(prev => prev.filter(i => i.id !== inviteId))
+      toast.success(t('toast.inviteDeclined'))
+    } catch { toast.error('Error') }
+  }, [session?.user?.accessToken, t])
 
   const currentBubbleColors = bubbleTheme === 'custom'
     ? { mine: myBubbleColor, other: otherBubbleColor }
@@ -677,6 +843,23 @@ export default function ChatPage() {
       }
     })
 
+    s.on('peer-correction', ({ messageId, correctorId, correctorName, correctedText, explanation, correctionId }: any) => {
+      const correction: PeerCorrection = {
+        id: String(correctionId || Date.now()),
+        correctorId,
+        correctorName,
+        correctedText,
+        explanation: explanation || undefined,
+        isHelpful: false,
+        createdAt: new Date().toISOString(),
+      }
+      setMessages(prev => prev.map(m =>
+        String(m.id) === String(messageId)
+          ? { ...m, corrections: [...(m.corrections || []).filter(c => c.id !== correction.id), correction] }
+          : m
+      ))
+    })
+
     s.on('disconnect', (reason) => {
       if (reason !== 'io client disconnect') setIsReconnecting(true)
       clearTimeout(historyFallbackTimer)
@@ -894,6 +1077,105 @@ export default function ChatPage() {
         toast.error(ack?.error || t('toast.banUserError'))
       }
     })
+  }
+
+  // Peer corrections helpers
+  function computeInlineDiff(original: string, corrected: string): Array<{ text: string; type: 'equal' | 'removed' | 'added' }> {
+    const origTokens = original.split(/(\s+)/)
+    const corrTokens = corrected.split(/(\s+)/)
+    const m = origTokens.length
+    const n = corrTokens.length
+    const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = origTokens[i - 1] === corrTokens[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1])
+      }
+    }
+    const result: Array<{ text: string; type: 'equal' | 'removed' | 'added' }> = []
+    let i = m, j = n
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && origTokens[i - 1] === corrTokens[j - 1]) {
+        result.unshift({ text: origTokens[i - 1], type: 'equal' }); i--; j--
+      } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+        result.unshift({ text: corrTokens[j - 1], type: 'added' }); j--
+      } else {
+        result.unshift({ text: origTokens[i - 1], type: 'removed' }); i--
+      }
+    }
+    return result
+  }
+
+  const openSubmitCorrection = (msg: Message) => {
+    setCorrectionDraft(msg.content)
+    setCorrectionExplanation('')
+    setShowSubmitCorrection(msg.id)
+  }
+
+  const submitCorrection = async (messageId: string, originalContent: string) => {
+    if (!correctionDraft.trim() || correctionDraft.trim() === originalContent.trim()) return
+    setCorrectionSubmitting(true)
+    try {
+      const res = await apiFetch(`/api/messages/${messageId}/correct`, {
+        method: 'POST',
+        body: JSON.stringify({ corrected_text: correctionDraft.trim(), explanation: correctionExplanation.trim() || undefined }),
+      })
+      if (!res.ok) throw new Error('failed')
+      const data = await res.json()
+      const correction: PeerCorrection = {
+        id: String(data.id || data.correctionId || Date.now()),
+        correctorId: session?.user?.id ?? '',
+        correctorName: session?.user?.name ?? '',
+        correctedText: correctionDraft.trim(),
+        explanation: correctionExplanation.trim() || undefined,
+        isHelpful: false,
+        createdAt: new Date().toISOString(),
+      }
+      setMessages(prev => prev.map(m =>
+        m.id === messageId ? { ...m, corrections: [...(m.corrections || []), correction] } : m
+      ))
+      socketRef.current?.emit('peer-correct', {
+        messageId,
+        correctedText: correctionDraft.trim(),
+        explanation: correctionExplanation.trim(),
+        roomId: selectedRoom?.id,
+      })
+      setShowSubmitCorrection(null)
+    } catch { }
+    finally { setCorrectionSubmitting(false) }
+  }
+
+  const openViewCorrections = async (msg: Message) => {
+    setViewCorrectionsList(msg.corrections || [])
+    setShowViewCorrections(msg.id)
+    setViewCorrectionsLoading(true)
+    try {
+      const res = await apiFetch(`/api/messages/${msg.id}/corrections`)
+      if (res.ok) {
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setViewCorrectionsList(data.map((cc: any) => ({
+            id: String(cc.id),
+            correctorId: cc.correctorId ?? cc.corrector_id ?? '',
+            correctorName: cc.correctorName ?? cc.corrector_name ?? '',
+            correctedText: cc.correctedText ?? cc.corrected_text ?? '',
+            explanation: cc.explanation ?? undefined,
+            isHelpful: Boolean(cc.isHelpful ?? cc.is_helpful),
+            createdAt: cc.createdAt ?? cc.created_at ?? undefined,
+          })))
+        }
+      }
+    } catch { }
+    finally { setViewCorrectionsLoading(false) }
+  }
+
+  const toggleCorrectionHelpful = async (correctionId: string) => {
+    setCorrectionHelpfulLoading(correctionId)
+    try {
+      const res = await apiFetch(`/api/corrections/${correctionId}/helpful`, { method: 'POST' })
+      if (!res.ok) throw new Error()
+      setViewCorrectionsList(prev => prev.map(cc => cc.id === correctionId ? { ...cc, isHelpful: !cc.isHelpful } : cc))
+    } catch { }
+    finally { setCorrectionHelpfulLoading(null) }
   }
 
   // NEW: Swipe handlers
@@ -1262,6 +1544,20 @@ export default function ChatPage() {
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
             <h2 className="text-sm font-bold" style={{ color: 'var(--text)' }}>{t('sidebar.title')}</h2>
             <div className="flex items-center gap-1.5">
+              {/* Invitations bell */}
+              <button
+                onClick={() => setShowInvitationsPanel(true)}
+                title={t('invitations.title')}
+                className="relative p-1.5 rounded-full transition-colors"
+                style={{ background: pendingInvitations.length > 0 ? 'var(--primary-light)' : 'transparent', color: pendingInvitations.length > 0 ? 'var(--primary)' : 'var(--text3)' }}
+              >
+                <Bell size={14} />
+                {pendingInvitations.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 flex items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ background: 'var(--primary)' }}>
+                    {pendingInvitations.length > 9 ? '9+' : pendingInvitations.length}
+                  </span>
+                )}
+              </button>
               {/* Target lang indicator */}
               {targetLang && (
                 <button onClick={() => setShowLangSelector(true)} title={t('sidebar.changeLang')}
@@ -1374,6 +1670,42 @@ export default function ChatPage() {
                     {t('header.online', { count: onlineUsers.length })}
                   </span>
                 )}
+              </div>
+              {/* Room action buttons */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {isPrivateRoom && !isMemberOfRoom && (
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'var(--surface3)', color: 'var(--text3)' }}>
+                    {'🔒'} {t('header.inviteOnly')}
+                  </span>
+                )}
+                {isPublicRoom && !isMemberOfRoom && (
+                  <button onClick={handleJoinRoom} disabled={joiningRoom}
+                    className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors"
+                    style={{ background: 'var(--primary)', color: '#fff' }}>
+                    {joiningRoom ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />}
+                    {t('header.join')}
+                  </button>
+                )}
+                {isMemberOfRoom && currentRoomRole !== 'owner' && (
+                  <button onClick={handleLeaveRoom} disabled={leavingRoom}
+                    className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg transition-colors"
+                    style={{ background: 'var(--surface3)', color: 'var(--text2)' }}>
+                    {leavingRoom ? <Loader2 size={11} className="animate-spin" /> : <X size={11} />}
+                    {t('header.leave')}
+                  </button>
+                )}
+                {isModOrOwner && (
+                  <button onClick={() => setShowRoomInviteModal(true)}
+                    className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg transition-colors"
+                    style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                    <UserPlus size={11} /> {t('header.invite')}
+                  </button>
+                )}
+                <button onClick={() => setShowRoomMembersPanel(true)}
+                  className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg transition-colors"
+                  style={{ background: 'var(--surface3)', color: 'var(--text2)' }}>
+                  <Users size={11} /> {t('header.members')}
+                </button>
               </div>
             </>
           ) : (
@@ -1532,6 +1864,16 @@ export default function ChatPage() {
                         )}
                         {msg.content}
                       </div>
+                      {/* Inline translation panel */}
+                      {!msg.isDeleted && msg.content && session?.user?.nativelang && (
+                        <div className="flex flex-col items-start w-full px-1">
+                          <MessageTranslateButton
+                            text={msg.content}
+                            nativeLang={session.user.nativelang}
+                            chatFontSize={chatFontSize}
+                          />
+                        </div>
+                      )}
                       {/* Reactions */}
                       {msg.reactions && msg.reactions.length > 0 && (
                         <div className="flex flex-wrap gap-0.5 mt-0.5 px-1">
@@ -1555,6 +1897,16 @@ export default function ChatPage() {
                             </button>
                           ))}
                         </div>
+                      )}
+                      {/* Corrections badge */}
+                      {!msg.isDeleted && (msg.corrections?.length ?? 0) > 0 && (
+                        <button onClick={() => openViewCorrections(msg)}
+                          className="flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                          style={{ background: '#3b82f615', color: '#3b82f6', border: '1px solid #3b82f640' }}
+                          title={t('corrections.badgeTooltip')}>
+                          <PenLine size={10} />
+                          {t('corrections.badge', { count: msg.corrections!.length })}
+                        </button>
                       )}
                       {/* Time */}
                       {showHeader && msg.timestamp && (
@@ -1603,6 +1955,15 @@ export default function ChatPage() {
                             </button>
                           )}
                         </>
+                      )}
+
+                      {!isMe && !msg.isDeleted && (
+                        <button onClick={() => openSubmitCorrection(msg)}
+                          className="w-6 h-6 rounded-full flex items-center justify-center"
+                          style={{ background: '#3b82f615', border: '1px solid #3b82f640' }}
+                          title={t('corrections.buttonTitle')}>
+                          <PenLine size={11} style={{ color: '#3b82f6' }} />
+                        </button>
                       )}
 
                       {!isMe && (
@@ -1963,6 +2324,135 @@ export default function ChatPage() {
         )}
       </AnimatePresence>
 
+      {/* ── Submit Correction Modal ─────────────────── */}
+      <AnimatePresence>
+        {showSubmitCorrection && (() => {
+          const tgtMsg = messages.find(m => m.id === showSubmitCorrection)
+          if (!tgtMsg) return null
+          return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}
+              onClick={() => setShowSubmitCorrection(null)}>
+              <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+                className="w-full max-w-md rounded-2xl p-5 flex flex-col gap-4"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base" style={{ color: 'var(--text)' }}>{t('corrections.modalTitle')}</h3>
+                  <button onClick={() => setShowSubmitCorrection(null)} style={{ color: 'var(--text3)' }}><X size={18} /></button>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text3)' }}>{t('corrections.originalLabel')}</p>
+                  <div className="px-3 py-2 rounded-xl text-sm italic" style={{ background: 'var(--surface2)', color: 'var(--text2)', border: '1px solid var(--border)' }}>{tgtMsg.content}</div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text3)' }}>{t('corrections.correctedLabel')}</p>
+                  <textarea value={correctionDraft} onChange={e => setCorrectionDraft(e.target.value)} rows={3} autoFocus
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none resize-none"
+                    style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--primary)' }}
+                    placeholder={t('corrections.correctedPlaceholder')} />
+                </div>
+                {correctionDraft.trim() && correctionDraft.trim() !== tgtMsg.content.trim() && (
+                  <div>
+                    <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text3)' }}>{t('corrections.diffPreview')}</p>
+                    <div className="px-3 py-2 rounded-xl text-sm leading-relaxed break-words" style={{ background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+                      {computeInlineDiff(tgtMsg.content, correctionDraft).map((tok, idx) => {
+                        if (tok.type === 'equal') return <span key={idx}>{tok.text}</span>
+                        if (tok.type === 'removed') return <span key={idx} className="line-through px-0.5 rounded" style={{ background: '#ef444425', color: '#ef4444' }}>{tok.text}</span>
+                        return <span key={idx} className="px-0.5 rounded font-semibold" style={{ background: '#22c55e25', color: '#16a34a' }}>{tok.text}</span>
+                      })}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text3)' }}>{t('corrections.explanationLabel')}</p>
+                  <input value={correctionExplanation} onChange={e => setCorrectionExplanation(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl text-sm outline-none"
+                    style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
+                    placeholder={t('corrections.explanationPlaceholder')} />
+                </div>
+                <button onClick={() => submitCorrection(tgtMsg.id, tgtMsg.content)}
+                  disabled={correctionSubmitting || !correctionDraft.trim() || correctionDraft.trim() === tgtMsg.content.trim()}
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40"
+                  style={{ background: 'var(--primary)' }}>
+                  {correctionSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  {t('corrections.submit')}
+                </button>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
+
+      {/* ── View Corrections Modal ───────────────────── */}
+      <AnimatePresence>
+        {showViewCorrections && (() => {
+          const tgtMsg = messages.find(m => m.id === showViewCorrections)
+          if (!tgtMsg) return null
+          const isAuthor = isCurrentUserMessage(tgtMsg.senderId, tgtMsg.username)
+          return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}
+              onClick={() => setShowViewCorrections(null)}>
+              <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
+                className="w-full max-w-lg rounded-2xl p-5 flex flex-col gap-4 max-h-[85vh] overflow-hidden"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between flex-shrink-0">
+                  <h3 className="font-bold text-base" style={{ color: 'var(--text)' }}>
+                    {t('corrections.viewTitle')} ({viewCorrectionsLoading ? '...' : viewCorrectionsList.length})
+                  </h3>
+                  <button onClick={() => setShowViewCorrections(null)} style={{ color: 'var(--text3)' }}><X size={18} /></button>
+                </div>
+                <div className="flex-shrink-0">
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text3)' }}>{t('corrections.originalLabel')}</p>
+                  <div className="px-3 py-2 rounded-xl text-sm italic" style={{ background: 'var(--surface2)', color: 'var(--text2)', border: '1px solid var(--border)' }}>{tgtMsg.content}</div>
+                </div>
+                <div className="flex-1 overflow-y-auto flex flex-col gap-3 min-h-0">
+                  {viewCorrectionsLoading ? (
+                    <div className="flex justify-center py-6"><Loader2 size={20} className="animate-spin" style={{ color: 'var(--primary)' }} /></div>
+                  ) : viewCorrectionsList.length === 0 ? (
+                    <p className="text-sm text-center py-6" style={{ color: 'var(--text3)' }}>{t('corrections.noCorrections')}</p>
+                  ) : viewCorrectionsList.map(cc => (
+                    <div key={cc.id} className="rounded-xl p-3 flex flex-col gap-2"
+                      style={{ background: 'var(--surface2)', border: cc.isHelpful ? '1.5px solid #22c55e' : '1px solid var(--border)' }}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>{cc.correctorName}</span>
+                        {cc.isHelpful && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1" style={{ background: '#22c55e20', color: '#16a34a' }}>
+                            {t('corrections.markedHelpful')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="px-2 py-1.5 rounded-lg text-sm leading-relaxed break-words" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                        {computeInlineDiff(tgtMsg.content, cc.correctedText).map((tok, idx) => {
+                          if (tok.type === 'equal') return <span key={idx}>{tok.text}</span>
+                          if (tok.type === 'removed') return <span key={idx} className="line-through px-0.5 rounded" style={{ background: '#ef444425', color: '#ef4444' }}>{tok.text}</span>
+                          return <span key={idx} className="px-0.5 rounded font-semibold" style={{ background: '#22c55e25', color: '#16a34a' }}>{tok.text}</span>
+                        })}
+                      </div>
+                      {cc.explanation && (
+                        <p className="text-xs px-1" style={{ color: 'var(--text2)' }}>
+                          <span className="font-semibold">{t('corrections.explanationLabel')}:</span>{' '}{cc.explanation}
+                        </p>
+                      )}
+                      {isAuthor && String(cc.correctorId) !== String(session?.user?.id) && (
+                        <button onClick={() => toggleCorrectionHelpful(cc.id)} disabled={correctionHelpfulLoading === cc.id}
+                          className="self-start flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all disabled:opacity-50"
+                          style={{ background: cc.isHelpful ? '#22c55e20' : 'var(--surface)', color: cc.isHelpful ? '#16a34a' : 'var(--text3)', border: '1px solid ' + (cc.isHelpful ? '#22c55e' : 'var(--border)') }}>
+                          {correctionHelpfulLoading === cc.id ? <Loader2 size={11} className="animate-spin" /> : <ThumbsUp size={11} />}
+                          {cc.isHelpful ? t('corrections.unhelpful') : t('corrections.markHelpful')}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
+
       {/* ── Report Modal ───────────────────────────── */}
       <AnimatePresence>
         {showReport && (
@@ -2017,6 +2507,40 @@ export default function ChatPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Room Invite Modal */}
+      {selectedRoom && session?.user?.accessToken && (
+        <RoomInviteModal
+          show={showRoomInviteModal}
+          roomId={selectedRoom.id}
+          roomName={selectedRoom.name}
+          token={session.user.accessToken as string}
+          onClose={() => setShowRoomInviteModal(false)}
+        />
+      )}
+
+      {/* Room Members Panel */}
+      {selectedRoom && session?.user?.accessToken && (
+        <RoomMembersPanel
+          show={showRoomMembersPanel}
+          roomId={selectedRoom.id}
+          roomName={selectedRoom.name}
+          token={session.user.accessToken as string}
+          onClose={() => setShowRoomMembersPanel(false)}
+        />
+      )}
+
+      {/* Invitations Panel */}
+      {session?.user?.accessToken && (
+        <RoomInvitationsPanel
+          show={showInvitationsPanel}
+          invitations={pendingInvitations}
+          token={session.user.accessToken as string}
+          onClose={() => setShowInvitationsPanel(false)}
+          onAccepted={handleAcceptInvitation}
+          onDeclined={handleDeclineInvitation}
+        />
+      )}
     </div>
   )
 }
