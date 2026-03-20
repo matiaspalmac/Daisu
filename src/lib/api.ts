@@ -31,9 +31,7 @@ export async function apiFetch(path: string, options: ApiFetchOptions = {}): Pro
   const url = path.startsWith('http') ? path : `${API_URL}${path}`
   const res = await fetch(url, { ...options, headers })
 
-  if (res.status === 401 && typeof window !== 'undefined') {
-    window.location.href = '/login'
-  }
+  // No auto-redirect on 401 — let each page handle it
 
   return res
 }

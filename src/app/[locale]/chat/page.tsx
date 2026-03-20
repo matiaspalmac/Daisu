@@ -295,7 +295,7 @@ export default function ChatPage() {
   const isMemberOfRoom = currentRoomRole !== null
   const isModOrOwner = currentRoomRole === 'mod' || currentRoomRole === 'owner'
   const isPrivateRoom = (selectedRoom as any)?.type === 'private'
-  const isPublicRoom = selectedRoom && !isPrivateRoom && !selectedRoom.id.startsWith('private-')
+  const isPublicRoom = selectedRoom && !isPrivateRoom && !String(selectedRoom.id).startsWith('private-')
 
   const handleJoinRoom = useCallback(async () => {
     if (!selectedRoom || !session?.user?.accessToken) return
