@@ -110,6 +110,27 @@
       "loginDesc": "Sign in to chat with native speakers in real time",
       "loginButton": "Sign in",
       "selectRoom": "Select a room above"
+    },
+    "trending": {
+      "badge": "Trending now",
+      "title": "What's happening on Daisu",
+      "subtitle": "Real-time activity from our community in the last 7 days",
+      "rooms": {
+        "title": "Hottest rooms",
+        "badge": "24h activity"
+      },
+      "users": {
+        "title": "Most active users",
+        "badge": "Last 7 days"
+      },
+      "words": {
+        "title": "Trending words",
+        "badge": "Last 7 days"
+      },
+      "reactions": {
+        "title": "Top reactions",
+        "badge": "Last 7 days"
+      }
     }
   },
   "Header": {
@@ -126,7 +147,8 @@
     "news": "News",
     "about": "About",
     "contact": "Contact",
-    "membership": "Membership"
+    "membership": "Membership",
+    "quiz": "Daily Quiz"
   },
   "Footer": {
     "aboutTitle": "About Daisu",
@@ -177,7 +199,12 @@
     "header": {
       "online": "{count} online",
       "selectRoom": "Select a room",
-      "dailyPrompt": "Daily prompt"
+      "dailyPrompt": "Daily prompt",
+      "invite": "Invite",
+      "members": "Members",
+      "join": "Join",
+      "leave": "Leave",
+      "inviteOnly": "Invite only"
     },
     "prompt": {
       "topic": "✨ Topic of the day:",
@@ -298,6 +325,24 @@
       "resetDefaults": "Restore defaults",
       "nicknamePrompt": "Nickname for {name} (empty to remove):"
     },
+    "corrections": {
+      "buttonTitle": "Suggest a correction",
+      "badge": "{count} correction(s)",
+      "badgeTooltip": "View peer corrections",
+      "modalTitle": "Suggest a correction",
+      "viewTitle": "Peer corrections",
+      "originalLabel": "Original message",
+      "correctedLabel": "Corrected text",
+      "correctedPlaceholder": "Write the corrected version...",
+      "diffPreview": "Preview",
+      "explanationLabel": "Explanation (optional)",
+      "explanationPlaceholder": "Why is this correction needed?",
+      "submit": "Send correction",
+      "noCorrections": "No corrections yet.",
+      "markedHelpful": "Helpful",
+      "markHelpful": "Mark as helpful",
+      "unhelpful": "Remove helpful mark"
+    },
     "actions": {
       "nickname": "Nickname",
       "pinToggle": "Pin/Unpin",
@@ -305,7 +350,9 @@
       "blockToggle": "Block/Unblock",
       "banUser": "Ban user",
       "banPrompt": "Ban duration in minutes (0 for permanent):",
-      "banDefaultReason": "Inappropriate behavior"
+      "banDefaultReason": "Inappropriate behavior",
+      "translate": "Translate",
+      "translateTitle": "Translate this message"
     },
     "toast": {
       "roomCreated": "Room created",
@@ -337,7 +384,11 @@
       "settingsReset": "Settings restored",
       "following": "You are now following this user",
       "unfollowed": "You unfollowed this user",
-      "followActionError": "Could not update follow status"
+      "followActionError": "Could not update follow status",
+      "roomJoined": "Joined room!",
+      "roomLeft": "Left room",
+      "inviteAccepted": "Invitation accepted!",
+      "inviteDeclined": "Invitation declined"
     },
     "activeChats": "Active Chats",
     "selectChat": "Select a chat to start.",
@@ -348,7 +399,40 @@
     "create": "Create",
     "roomName": "Room Name",
     "rooms": "Rooms",
-    "writeMessage": "Write a message"
+    "writeMessage": "Write a message",
+    "translation": {
+      "label": "Translation ({lang})",
+      "hide": "Hide translation",
+      "show": "Show translation",
+      "loading": "Translating...",
+      "usage": "Translations used today: {used}/{limit}",
+      "usageUnlimited": "Unlimited translations (premium)",
+      "limitReached": "Daily translation limit reached. Upgrade your plan to get more.",
+      "error": "Translation error. Please try again."
+    },
+    "invitations": {
+      "title": "Room Invitations",
+      "empty": "No pending invitations",
+      "from": "From",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "roomInvite": {
+      "title": "Invite to room",
+      "searchPlaceholder": "Search users...",
+      "invite": "Invite",
+      "invited": "Invited",
+      "inviting": "Inviting...",
+      "noResults": "No users found",
+      "errorInviting": "Error sending invitation"
+    },
+    "roomMembers": {
+      "title": "Room members",
+      "empty": "No members found",
+      "owner": "Owner",
+      "mod": "Moderator",
+      "member": "Member"
+    }
   },
   "Dashboard": {
     "title": "Admin Dashboard",
@@ -505,7 +589,9 @@
       "overview": "Overview",
       "connections": "Connections",
       "privacy": "Privacy",
-      "customization": "Customization"
+      "customization": "Customization",
+      "stats": "Stats",
+      "achievements": "Achievements"
     },
     "overview": {
       "favoriteRooms": "Favorite rooms",
@@ -538,7 +624,27 @@
       "notificationsTitle": "🔔 Notifications",
       "notificationsDesc": "Notification options are in your system account",
       "oldMessagesHidden": "Old messages hidden",
-      "oldMessagesVisible": "Old messages visible"
+      "oldMessagesVisible": "Old messages visible",
+      "changePasswordTitle": "🔑 Change password",
+      "currentPasswordPlaceholder": "Current password",
+      "newPasswordPlaceholder": "New password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "changePasswordSubmit": "Change password",
+      "changePasswordSubmitting": "Changing...",
+      "changePasswordSuccess": "Password changed successfully",
+      "changePasswordErrorMismatch": "Passwords do not match",
+      "changePasswordErrorCurrent": "Current password is incorrect",
+      "changePasswordError": "Error changing password",
+      "exportDataTitle": "📦 Export my data",
+      "exportDataDesc": "Download a copy of all your messages and activity.",
+      "exportData": "Export data",
+      "exportDataSuccess": "Your data export is ready!",
+      "exportDataError": "Error exporting data",
+      "deleteAccountTitle": "⚠️ Delete account",
+      "deleteAccountDesc": "Permanently delete your account and all your data.",
+      "deleteAccount": "Delete account",
+      "deleteAccountConfirm": "Are you sure?",
+      "deleteAccountSuccess": "Account deleted"
     },
     "customization": {
       "bubbleColor": "🎨 Bubble color"
@@ -603,6 +709,60 @@
     },
     "audio": {
       "available": "Audio available"
+    },
+    "statsTab": {
+      "title": "📊 Stats Dashboard",
+      "messagesSent": "Messages sent",
+      "wordsSent": "Words sent",
+      "streak": "Current streak",
+      "uniqueWords": "Unique words",
+      "longestSentence": "Longest sentence (words)",
+      "weeklyDigest": "📅 Weekly Digest",
+      "messagesThisWeek": "Messages this week",
+      "vocabThisWeek": "New vocabulary",
+      "currentStreak": "Current streak",
+      "days": "days",
+      "mostActiveRoom": "Most active room",
+      "languageDistribution": "Language distribution",
+      "heatmapTitle": "📆 Activity (365 days)",
+      "progressTitle": "📈 Weekly Progress (12 weeks)",
+      "messages": "Messages",
+      "vocabulary": "Vocabulary",
+      "noData": "No stats available yet. Start chatting to see your progress!"
+    },
+    "achievements": {
+      "title": "🏆 Achievements",
+      "xpTitle": "XP & Level",
+      "level": "Level {level}",
+      "xpProgress": "{xp} XP",
+      "xpToNext": "{remaining} XP to next level",
+      "earnedOn": "Earned on {date}",
+      "noAchievements": "No achievements yet. Keep practicing!",
+      "earned": "Earned",
+      "locked": "Locked",
+      "categories": {
+        "all": "All",
+        "chat": "Chat",
+        "streak": "Streak",
+        "vocabulary": "Vocabulary",
+        "social": "Social",
+        "special": "Special"
+      },
+      "xpReward": "+{xp} XP"
+    },
+    "membership": {
+      "title": "Membership",
+      "freeTier": "Free Plan",
+      "active": "Active",
+      "upgrade": "Upgrade",
+      "upgradeHint": "Upgrade to unlock AI corrections, premium resources and more.",
+      "expiresAt": "Expires {date}"
+    },
+    "presence": {
+      "online": "Online",
+      "offline": "Offline",
+      "away": "Away",
+      "lastSeen": "Last seen {time}"
     }
   },
   "News": {
@@ -1012,6 +1172,46 @@
         "title": "7. Changes to this policy",
         "content": "We may update this privacy policy periodically. We will notify you of any significant changes by posting the new privacy policy on this page."
       }
+    }
+  },
+  "QuizPage": {
+    "title": "Daily Quiz",
+    "subtitle": "Practice every day and level up",
+    "loading": "Loading quiz...",
+    "errorLoad": "Could not load the quiz. Please try again.",
+    "errorSubmit": "Error submitting answers. Please try again.",
+    "retry": "Retry",
+    "tab": {
+      "quiz": "Today's Quiz",
+      "history": "History"
+    },
+    "questionOf": "Question {current} of {total}",
+    "next": "Next",
+    "finish": "Finish",
+    "submitting": "Submitting...",
+    "alreadyAttempted": "You already completed today's quiz. Come back tomorrow.",
+    "questionType": {
+      "translate": "Translation",
+      "fill_blank": "Fill in",
+      "grammar": "Grammar",
+      "vocabulary": "Vocabulary"
+    },
+    "result": {
+      "perfect": "Perfect! Maximum score",
+      "good": "Great job! Keep it up",
+      "tryAgain": "Keep practicing",
+      "corrections": "Answer review",
+      "yourAnswer": "Your answer",
+      "correctAnswer": "Correct answer"
+    },
+    "history": {
+      "empty": "Could not load history",
+      "noAttempts": "You haven't completed any quiz yet",
+      "pastAttempts": "Past attempts",
+      "streak": "Streak",
+      "best": "Best",
+      "total": "Completed",
+      "correct": "correct"
     }
   }
 }

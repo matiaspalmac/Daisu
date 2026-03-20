@@ -110,6 +110,27 @@
       "loginDesc": "Inicia sesión para chatear con hablantes nativos en tiempo real",
       "loginButton": "Iniciar sesión",
       "selectRoom": "Selecciona una sala arriba"
+    },
+    "trending": {
+      "badge": "Tendencia ahora",
+      "title": "Lo que pasa en Daisu",
+      "subtitle": "Actividad en tiempo real de nuestra comunidad en los últimos 7 días",
+      "rooms": {
+        "title": "Salas más activas",
+        "badge": "Actividad 24h"
+      },
+      "users": {
+        "title": "Usuarios más activos",
+        "badge": "Últimos 7 días"
+      },
+      "words": {
+        "title": "Palabras en tendencia",
+        "badge": "Últimos 7 días"
+      },
+      "reactions": {
+        "title": "Reacciones top",
+        "badge": "Últimos 7 días"
+      }
     }
   },
   "Header": {
@@ -126,7 +147,8 @@
     "news": "Noticias",
     "about": "Acerca de",
     "contact": "Contacto",
-    "membership": "Membresía"
+    "membership": "Membresía",
+    "quiz": "Quiz Diario"
   },
   "Footer": {
     "aboutTitle": "Acerca de Daisu",
@@ -177,7 +199,12 @@
     "header": {
       "online": "{count} online",
       "selectRoom": "Selecciona una sala",
-      "dailyPrompt": "Tema del día"
+      "dailyPrompt": "Tema del día",
+      "invite": "Invitar",
+      "members": "Miembros",
+      "join": "Unirse",
+      "leave": "Salir",
+      "inviteOnly": "Solo por invitación"
     },
     "prompt": {
       "topic": "✨ Tema del día:",
@@ -298,6 +325,24 @@
       "resetDefaults": "Restaurar valores predeterminados",
       "nicknamePrompt": "Apodo para {name} (vacío para quitar):"
     },
+    "corrections": {
+      "buttonTitle": "Sugerir una corrección",
+      "badge": "{count} corrección(es)",
+      "badgeTooltip": "Ver correcciones de compañeros",
+      "modalTitle": "Sugerir una corrección",
+      "viewTitle": "Correcciones de compañeros",
+      "originalLabel": "Mensaje original",
+      "correctedLabel": "Texto corregido",
+      "correctedPlaceholder": "Escribe la versión corregida...",
+      "diffPreview": "Vista previa",
+      "explanationLabel": "Explicación (opcional)",
+      "explanationPlaceholder": "¿Por qué se necesita esta corrección?",
+      "submit": "Enviar corrección",
+      "noCorrections": "Aún no hay correcciones.",
+      "markedHelpful": "Útil",
+      "markHelpful": "Marcar como útil",
+      "unhelpful": "Quitar marca de útil"
+    },
     "actions": {
       "nickname": "Apodo",
       "pinToggle": "Fijar/Desfijar",
@@ -305,7 +350,9 @@
       "blockToggle": "Bloquear/Desbloquear",
       "banUser": "Banear usuario",
       "banPrompt": "Duración del baneo en minutos (0 para permanente):",
-      "banDefaultReason": "Comportamiento inapropiado"
+      "banDefaultReason": "Comportamiento inapropiado",
+      "translate": "Traducir",
+      "translateTitle": "Traducir este mensaje"
     },
     "toast": {
       "roomCreated": "Sala creada",
@@ -337,7 +384,11 @@
       "settingsReset": "Configuración restaurada",
       "following": "Ahora sigues a este usuario",
       "unfollowed": "Has dejado de seguir a este usuario",
-      "followActionError": "No se pudo actualizar el seguimiento"
+      "followActionError": "No se pudo actualizar el seguimiento",
+      "roomJoined": "¡Te uniste a la sala!",
+      "roomLeft": "Saliste de la sala",
+      "inviteAccepted": "¡Invitación aceptada!",
+      "inviteDeclined": "Invitación rechazada"
     },
     "activeChats": "Chats Activos",
     "selectChat": "Selecciona un chat para empezar.",
@@ -348,7 +399,40 @@
     "create": "Crear",
     "roomName": "Nombre de la Sala",
     "rooms": "Salas",
-    "writeMessage": "Escribe un mensaje"
+    "writeMessage": "Escribe un mensaje",
+    "translation": {
+      "label": "Traducción ({lang})",
+      "hide": "Ocultar traducción",
+      "show": "Mostrar traducción",
+      "loading": "Traduciendo...",
+      "usage": "Traducciones usadas hoy: {used}/{limit}",
+      "usageUnlimited": "Traducciones ilimitadas (premium)",
+      "limitReached": "Límite diario alcanzado. Actualiza tu plan para obtener más.",
+      "error": "Error al traducir. Intenta de nuevo."
+    },
+    "invitations": {
+      "title": "Invitaciones a salas",
+      "empty": "Sin invitaciones pendientes",
+      "from": "De",
+      "accept": "Aceptar",
+      "decline": "Rechazar"
+    },
+    "roomInvite": {
+      "title": "Invitar a la sala",
+      "searchPlaceholder": "Buscar usuarios...",
+      "invite": "Invitar",
+      "invited": "Invitado",
+      "inviting": "Invitando...",
+      "noResults": "No se encontraron usuarios",
+      "errorInviting": "Error al enviar invitación"
+    },
+    "roomMembers": {
+      "title": "Miembros de la sala",
+      "empty": "No hay miembros",
+      "owner": "Dueño",
+      "mod": "Moderador",
+      "member": "Miembro"
+    }
   },
   "Dashboard": {
     "title": "Dashboard Admin",
@@ -505,7 +589,9 @@
       "overview": "Resumen",
       "connections": "Conexiones",
       "privacy": "Privacidad",
-      "customization": "Personalización"
+      "customization": "Personalización",
+      "stats": "Estadísticas",
+      "achievements": "Logros"
     },
     "overview": {
       "favoriteRooms": "Salas favoritas",
@@ -538,7 +624,27 @@
       "notificationsTitle": "🔔 Notificaciones",
       "notificationsDesc": "Las opciones de notificación se encuentran en tu cuenta de sistema",
       "oldMessagesHidden": "Mensajes antiguos ocultados",
-      "oldMessagesVisible": "Mensajes antiguos visibles"
+      "oldMessagesVisible": "Mensajes antiguos visibles",
+      "changePasswordTitle": "🔑 Cambiar contraseña",
+      "currentPasswordPlaceholder": "Contraseña actual",
+      "newPasswordPlaceholder": "Nueva contraseña",
+      "confirmPasswordPlaceholder": "Confirmar nueva contraseña",
+      "changePasswordSubmit": "Cambiar contraseña",
+      "changePasswordSubmitting": "Cambiando...",
+      "changePasswordSuccess": "Contraseña cambiada correctamente",
+      "changePasswordErrorMismatch": "Las contraseñas no coinciden",
+      "changePasswordErrorCurrent": "Contraseña actual incorrecta",
+      "changePasswordError": "Error al cambiar la contraseña",
+      "exportDataTitle": "📦 Exportar mis datos",
+      "exportDataDesc": "Descarga una copia de todos tus mensajes y actividad.",
+      "exportData": "Exportar datos",
+      "exportDataSuccess": "¡Tu exportación está lista!",
+      "exportDataError": "Error al exportar datos",
+      "deleteAccountTitle": "⚠️ Eliminar cuenta",
+      "deleteAccountDesc": "Elimina permanentemente tu cuenta y todos tus datos.",
+      "deleteAccount": "Eliminar cuenta",
+      "deleteAccountConfirm": "¿Estás seguro?",
+      "deleteAccountSuccess": "Cuenta eliminada"
     },
     "customization": {
       "bubbleColor": "🎨 Color de burbuja"
@@ -603,6 +709,60 @@
     },
     "audio": {
       "available": "Audio disponible"
+    },
+    "statsTab": {
+      "title": "📊 Panel de estadísticas",
+      "messagesSent": "Mensajes enviados",
+      "wordsSent": "Palabras enviadas",
+      "streak": "Racha actual",
+      "uniqueWords": "Palabras únicas",
+      "longestSentence": "Frase más larga (palabras)",
+      "weeklyDigest": "📅 Resumen semanal",
+      "messagesThisWeek": "Mensajes esta semana",
+      "vocabThisWeek": "Vocabulario nuevo",
+      "currentStreak": "Racha actual",
+      "days": "días",
+      "mostActiveRoom": "Sala más activa",
+      "languageDistribution": "Distribución de idiomas",
+      "heatmapTitle": "📆 Actividad (365 días)",
+      "progressTitle": "📈 Progreso semanal (12 semanas)",
+      "messages": "Mensajes",
+      "vocabulary": "Vocabulario",
+      "noData": "Aún no hay estadísticas. ¡Empieza a chatear para ver tu progreso!"
+    },
+    "achievements": {
+      "title": "🏆 Logros",
+      "xpTitle": "XP y Nivel",
+      "level": "Nivel {level}",
+      "xpProgress": "{xp} XP",
+      "xpToNext": "{remaining} XP para el siguiente nivel",
+      "earnedOn": "Obtenido el {date}",
+      "noAchievements": "Sin logros aún. ¡Sigue practicando!",
+      "earned": "Obtenido",
+      "locked": "Bloqueado",
+      "categories": {
+        "all": "Todos",
+        "chat": "Chat",
+        "streak": "Racha",
+        "vocabulary": "Vocabulario",
+        "social": "Social",
+        "special": "Especial"
+      },
+      "xpReward": "+{xp} XP"
+    },
+    "membership": {
+      "title": "Membresía",
+      "freeTier": "Plan Gratuito",
+      "active": "Activo",
+      "upgrade": "Mejorar",
+      "upgradeHint": "Mejora tu plan para desbloquear correcciones de IA, recursos premium y más.",
+      "expiresAt": "Vence el {date}"
+    },
+    "presence": {
+      "online": "En línea",
+      "offline": "Desconectado",
+      "away": "Ausente",
+      "lastSeen": "Visto hace {time}"
     }
   },
   "News": {
@@ -1012,6 +1172,46 @@
         "title": "7. Cambios a esta política",
         "content": "Podemos actualizar esta política de privacidad periódicamente. Te notificaremos sobre cambios significativos publicando la nueva política en esta página."
       }
+    }
+  },
+  "QuizPage": {
+    "title": "Quiz Diario",
+    "subtitle": "Practica cada día y mejora tu nivel",
+    "loading": "Cargando quiz...",
+    "errorLoad": "No se pudo cargar el quiz. Intenta de nuevo.",
+    "errorSubmit": "Error al enviar respuestas. Intenta de nuevo.",
+    "retry": "Reintentar",
+    "tab": {
+      "quiz": "Quiz de hoy",
+      "history": "Historial"
+    },
+    "questionOf": "Pregunta {current} de {total}",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "submitting": "Enviando...",
+    "alreadyAttempted": "Ya completaste el quiz de hoy. Vuelve mañana.",
+    "questionType": {
+      "translate": "Traducción",
+      "fill_blank": "Completar",
+      "grammar": "Gramática",
+      "vocabulary": "Vocabulario"
+    },
+    "result": {
+      "perfect": "¡Perfecto! Puntuación máxima",
+      "good": "¡Muy bien! Sigue así",
+      "tryAgain": "Sigue practicando",
+      "corrections": "Revisión de respuestas",
+      "yourAnswer": "Tu respuesta",
+      "correctAnswer": "Respuesta correcta"
+    },
+    "history": {
+      "empty": "No se pudo cargar el historial",
+      "noAttempts": "Aún no has completado ningún quiz",
+      "pastAttempts": "Intentos anteriores",
+      "streak": "Racha",
+      "best": "Mejor",
+      "total": "Completados",
+      "correct": "correctas"
     }
   }
 }
