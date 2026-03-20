@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Globe, BookOpen, Zap, ChevronDown, ChevronRight, Star, Users } from 'lucide-react';
+import { MessageCircle, Globe, BookOpen, Zap, ChevronDown, ChevronRight, Star, Users, TrendingUp, Hash, Smile } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
@@ -14,6 +14,12 @@ const API = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
 interface Room { id: string; name: string; language: string; level: string; onlineCount?: number; }
 interface Message { id: string; content: string; user: { name: string; image: string }; sent_at: string; }
 interface HomeStats { users?: number; messages?: number; }
+
+// Trending types
+interface TrendingRoom { id: string; name: string; language: string; messageCount: number; }
+interface TrendingUser { id: string; name: string; image?: string; messageCount: number; language?: string; }
+interface TrendingWord { word: string; count: number; language?: string; }
+interface TrendingReaction { emoji: string; count: number; }
 
 const LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷' };
 const LEVEL_COLORS: Record<string, string> = { 'A1-A2': '#10b981', 'A1': '#10b981', 'B1-B2': '#3b82f6', 'B1': '#3b82f6', 'C1-C2': '#8b5cf6' };
@@ -33,6 +39,12 @@ export default function HomePage() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Trending state
+  const [trendingRooms, setTrendingRooms] = useState<TrendingRoom[]>([]);
+  const [trendingUsers, setTrendingUsers] = useState<TrendingUser[]>([]);
+  const [trendingWords, setTrendingWords] = useState<TrendingWord[]>([]);
+  const [trendingReactions, setTrendingReactions] = useState<TrendingReaction[]>([]);
+
   // Real counters from backend stats
   useEffect(() => {
     fetch(`${API}/api/stats`)
@@ -49,6 +61,21 @@ export default function HomePage() {
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setFeaturedRooms(d.slice(0, 6)); })
       .catch(() => { });
+  }, []);
+
+  // Fetch all trending data in parallel
+  useEffect(() => {
+    Promise.allSettled([
+      fetch(`${API}/api/trending/rooms`).then(r => r.json()),
+      fetch(`${API}/api/trending/users`).then(r => r.json()),
+      fetch(`${API}/api/trending/words?language=es`).then(r => r.json()),
+      fetch(`${API}/api/trending/reactions`).then(r => r.json()),
+    ]).then(([rooms, users, words, reactions]) => {
+      if (rooms.status === 'fulfilled' && Array.isArray(rooms.value)) setTrendingRooms(rooms.value.slice(0, 10));
+      if (users.status === 'fulfilled' && Array.isArray(users.value)) setTrendingUsers(users.value.slice(0, 20));
+      if (words.status === 'fulfilled' && Array.isArray(words.value)) setTrendingWords(words.value.slice(0, 20));
+      if (reactions.status === 'fulfilled' && Array.isArray(reactions.value)) setTrendingReactions(reactions.value.slice(0, 12));
+    });
   }, []);
 
   useEffect(() => {
@@ -209,6 +236,151 @@ export default function HomePage() {
                   </div>
                 </motion.div>
               ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── TRENDING ─────────────────────────── */}
+      {(trendingRooms.length > 0 || trendingUsers.length > 0 || trendingWords.length > 0 || trendingReactions.length > 0) && (
+        <section className="py-16 px-4" style={{ background: 'var(--surface)' }}>
+          <div className="max-w-5xl mx-auto">
+            {/* Section header */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-3"
+                style={{ background: 'var(--primary-light)', color: 'var(--primary)', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)' }}>
+                <TrendingUp size={14} />
+                {t('trending.badge')}
+              </div>
+              <h2 className="text-2xl font-extrabold" style={{ color: 'var(--text)' }}>{t('trending.title')}</h2>
+              <p className="text-sm mt-1" style={{ color: 'var(--text3)' }}>{t('trending.subtitle')}</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* ── Trending Rooms ── */}
+              {trendingRooms.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  className="p-5 rounded-2xl" style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                      style={{ background: 'color-mix(in srgb, var(--primary) 12%, transparent)', color: 'var(--primary)' }}>
+                      <Hash size={16} />
+                    </div>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text)' }}>{t('trending.rooms.title')}</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold ml-auto"
+                      style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                      {t('trending.rooms.badge')}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {trendingRooms.map((room, i) => (
+                      <div key={room.id} className="flex items-center gap-3 py-1.5">
+                        <span className="w-5 text-[11px] font-bold text-right flex-shrink-0" style={{ color: 'var(--text3)' }}>#{i + 1}</span>
+                        <span className="text-base flex-shrink-0">{LANG_FLAGS[room.language] || '🌐'}</span>
+                        <span className="font-semibold text-sm flex-1 truncate" style={{ color: 'var(--text)' }}>#{room.name}</span>
+                        <div className="flex items-center gap-1 text-xs flex-shrink-0" style={{ color: 'var(--text3)' }}>
+                          <MessageCircle size={11} />
+                          <span className="font-medium">{room.messageCount.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ── Active Users ── */}
+              {trendingUsers.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} viewport={{ once: true }}
+                  className="p-5 rounded-2xl" style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#10b98120', color: '#10b981' }}>
+                      <Users size={16} />
+                    </div>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text)' }}>{t('trending.users.title')}</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold ml-auto" style={{ background: '#10b98115', color: '#10b981' }}>
+                      {t('trending.users.badge')}
+                    </span>
+                  </div>
+                  {/* Avatar strip */}
+                  <div className="flex flex-wrap gap-3">
+                    {trendingUsers.slice(0, 12).map((user) => (
+                      <div key={user.id} className="flex flex-col items-center gap-1 w-14">
+                        {user.image
+                          ? <Image src={user.image} alt={user.name} width={36} height={36} className="w-9 h-9 rounded-full object-cover"
+                              style={{ border: '2px solid var(--border)' }} />
+                          : <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm text-white"
+                              style={{ background: `hsl(${(user.name.charCodeAt(0) * 37) % 360}, 60%, 50%)`, border: '2px solid var(--border)' }}>
+                              {user.name[0]?.toUpperCase()}
+                            </div>
+                        }
+                        <span className="text-[10px] text-center font-medium leading-tight truncate w-full" style={{ color: 'var(--text2)' }}>
+                          {user.name.split(' ')[0]}
+                        </span>
+                        <span className="text-[9px]" style={{ color: 'var(--text3)' }}>{user.messageCount} msgs</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ── Trending Words ── */}
+              {trendingWords.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} viewport={{ once: true }}
+                  className="p-5 rounded-2xl" style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#8b5cf620', color: '#8b5cf6' }}>
+                      <Globe size={16} />
+                    </div>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text)' }}>{t('trending.words.title')}</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold ml-auto" style={{ background: '#8b5cf615', color: '#8b5cf6' }}>
+                      {t('trending.words.badge')}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {trendingWords.map((w, i) => {
+                      // Scale font size from large to small based on count ratio
+                      const maxCount = trendingWords[0]?.count || 1;
+                      const ratio = w.count / maxCount;
+                      const fontSize = ratio > 0.75 ? '1rem' : ratio > 0.5 ? '0.875rem' : ratio > 0.25 ? '0.75rem' : '0.6875rem';
+                      const fontWeight = ratio > 0.75 ? 800 : ratio > 0.5 ? 700 : ratio > 0.25 ? 600 : 500;
+                      const opacity = ratio > 0.5 ? 1 : ratio > 0.25 ? 0.8 : 0.6;
+                      return (
+                        <span key={i} className="px-2.5 py-1 rounded-full cursor-default transition-transform hover:scale-105"
+                          style={{ fontSize, fontWeight, opacity, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)' }}>
+                          {w.word}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* ── Trending Reactions ── */}
+              {trendingReactions.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.11 }} viewport={{ once: true }}
+                  className="p-5 rounded-2xl" style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#f59e0b20', color: '#f59e0b' }}>
+                      <Smile size={16} />
+                    </div>
+                    <h3 className="font-bold text-sm" style={{ color: 'var(--text)' }}>{t('trending.reactions.title')}</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold ml-auto" style={{ background: '#f59e0b15', color: '#f59e0b' }}>
+                      {t('trending.reactions.badge')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {trendingReactions.map((r, i) => (
+                      <div key={i} className="flex flex-col items-center gap-1 p-2 rounded-xl cursor-default transition-colors"
+                        style={{ background: 'transparent' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <span className="text-2xl leading-none">{r.emoji}</span>
+                        <span className="text-[10px] font-semibold" style={{ color: 'var(--text3)' }}>{r.count.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
         </section>
