@@ -8,6 +8,7 @@ import { MessageCircle, Home, User, LogOut, Book, Menu, X, ChevronDown, FileText
 import { useTranslations } from 'next-intl';
 import LocaleSwitcher from '@/app/[locale]/localeswitcher';
 import { useTheme } from '@/components/theme-provider';
+import { apiFetch } from '@/lib/api';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -73,7 +74,7 @@ export default function Header() {
             }
         } catch { }
 
-        fetch(`${API}/api/users/${session.user.id}`)
+        apiFetch(`/api/users/${session.user.id}`)
             .then(r => r.json())
             .then((u) => {
                 if (cancelled) return;
