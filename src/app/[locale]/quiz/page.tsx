@@ -140,6 +140,10 @@ export default function QuizPage() {
       const res = await apiFetch(`/api/quizzes/daily?language=${locale}`)
       if (!res.ok) throw new Error(String(res.status))
       const data = await res.json()
+      if (!data || !Array.isArray(data.questions)) {
+        setQuizError(t('noQuiz'))
+        return
+      }
       setQuiz(data)
       // If already attempted, load results immediately
       if (data.alreadyAttempted && data.id) {
@@ -345,7 +349,11 @@ function QuizView({
   onNext: () => void
   t: any
 }) {
+  if (!quiz.questions || quiz.questions.length === 0) {
+    return <p className="text-center text-sm py-8" style={{ color: 'var(--text3)' }}>{t('noQuiz')}</p>
+  }
   const question = quiz.questions[currentIndex]
+  if (!question) return null
   const total = quiz.questions.length
   const progress = ((currentIndex) / total) * 100
   const isLast = currentIndex === total - 1

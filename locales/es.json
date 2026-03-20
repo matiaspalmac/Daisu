@@ -1179,6 +1179,7 @@
     "subtitle": "Practica cada día y mejora tu nivel",
     "loading": "Cargando quiz...",
     "errorLoad": "No se pudo cargar el quiz. Intenta de nuevo.",
+    "noQuiz": "No hay quiz disponible para hoy. Vuelve más tarde.",
     "errorSubmit": "Error al enviar respuestas. Intenta de nuevo.",
     "retry": "Reintentar",
     "tab": {

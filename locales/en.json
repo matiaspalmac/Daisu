@@ -1179,6 +1179,7 @@
     "subtitle": "Practice every day and level up",
     "loading": "Loading quiz...",
     "errorLoad": "Could not load the quiz. Please try again.",
+    "noQuiz": "No quiz available for today. Check back later.",
     "errorSubmit": "Error submitting answers. Please try again.",
     "retry": "Retry",
     "tab": {
