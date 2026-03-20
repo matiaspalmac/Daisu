@@ -4,7 +4,7 @@ import { Link } from '@/i18n/routing';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { MessageCircle, Home, User, LogOut, Book, Menu, X, ChevronDown, FileText, Newspaper, Users, Sun, Moon } from 'lucide-react';
+import { MessageCircle, Home, User, LogOut, Book, Menu, X, ChevronDown, FileText, Newspaper, Users, Sun, Moon, Brain } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import LocaleSwitcher from '@/app/[locale]/localeswitcher';
 import { useTheme } from '@/components/theme-provider';
@@ -100,6 +100,7 @@ export default function Header() {
         { href: "/resources", icon: FileText, label: t('resources') },
         { href: "/news", icon: Newspaper, label: t('news') },
         { href: "/membership", icon: Users, label: t('membership') },
+        { href: "/quiz", icon: Brain, label: t('quiz') },
         { href: "/chat", icon: MessageCircle, label: t('chat') },
     ];
 
@@ -220,6 +221,12 @@ export default function Header() {
                                     <Link href="/membership" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
                                         <Users size={16} style={{ color: 'var(--primary)' }} />
                                         <span>{t("membership")}</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                    <Link href="/quiz" className="flex items-center gap-3 py-2 px-3" style={{ color: 'var(--text)' }}>
+                                        <Brain size={16} style={{ color: 'var(--primary)' }} />
+                                        <span>{t("quiz")}</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 <div className="h-px my-1" style={{ background: 'var(--border)' }} />
