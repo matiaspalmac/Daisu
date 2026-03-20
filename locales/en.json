@@ -1140,6 +1140,21 @@
       }
     }
   },
+  "ErrorPages": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "home": "Go home",
+      "back": "Go back",
+      "search": "Search"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again.",
+      "retry": "Try again",
+      "home": "Go home"
+    }
+  },
   "PrivacyPage": {
     "title": "Privacy Policy",
     "updated": "Last updated: February 2026",

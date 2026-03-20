@@ -1097,6 +1097,21 @@
       }
     }
   },
+  "ErrorPages": {
+    "notFound": {
+      "title": "Página não encontrada",
+      "description": "A página que você procura não existe ou foi movida.",
+      "home": "Ir para o início",
+      "back": "Voltar",
+      "search": "Pesquisar"
+    },
+    "error": {
+      "title": "Algo deu errado",
+      "description": "Ocorreu um erro inesperado. Tente novamente.",
+      "retry": "Tentar novamente",
+      "home": "Ir para o início"
+    }
+  },
   "PrivacyPage": {
     "title": "Política de Privacidade",
     "updated": "Última atualização: fevereiro 2026",
