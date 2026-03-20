@@ -61,6 +61,8 @@ const handler = NextAuth({
               isAdmin: Boolean(user.isAdmin),
               nativelang: normalizeString(user.nativelang, 12),
               learninglang: normalizeString(user.learninglang, 12),
+              accessToken: typeof user.token === 'string' ? user.token : '',
+              membership_tier: normalizeString(user.membership_tier, 20) || 'free',
             };
           }
           return null;
@@ -81,6 +83,8 @@ const handler = NextAuth({
         token.isAdmin = Boolean(user.isAdmin);
         token.nativelang = normalizeString(user.nativelang, 12);
         token.learninglang = normalizeString(user.learninglang, 12);
+        token.accessToken = user.accessToken || '';
+        token.membership_tier = user.membership_tier || 'free';
       }
       return token;
     },
@@ -93,6 +97,8 @@ const handler = NextAuth({
         session.user.isAdmin = token.isAdmin as boolean;
         session.user.nativelang = token.nativelang as string;
         session.user.learninglang = token.learninglang as string;
+        session.user.accessToken = (token.accessToken as string) || '';
+        session.user.membership_tier = (token.membership_tier as string) || 'free';
       }
       return session;
     }

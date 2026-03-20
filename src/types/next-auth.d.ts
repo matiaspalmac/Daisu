@@ -9,6 +9,8 @@ declare module "next-auth" {
       nativelang?: string;
       learninglang?: string;
       created_at?: string;
+      accessToken?: string;
+      membership_tier?: string;
     } & DefaultSession["user"]
   }
 
@@ -19,6 +21,8 @@ declare module "next-auth" {
     nativelang?: string;
     learninglang?: string;
     created_at?: string;
+    accessToken?: string;
+    membership_tier?: string;
   }
 }
 
@@ -30,5 +34,7 @@ declare module "next-auth/jwt" {
     nativelang?: string;
     learninglang?: string;
     created_at?: string;
+    accessToken?: string;
+    membership_tier?: string;
   }
 }
