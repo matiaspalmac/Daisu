@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import io, { Socket } from 'socket.io-client';
+import { apiFetch } from '@/lib/api';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
 
@@ -47,7 +48,7 @@ export default function HomePage() {
 
   // Real counters from backend stats
   useEffect(() => {
-    fetch(`${API}/api/stats`)
+    apiFetch('/api/stats')
       .then(r => r.json())
       .then((s: HomeStats) => {
         if (typeof s?.users === 'number') setLiveUsers(s.users);
@@ -57,7 +58,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API}/api/rooms?limit=6`)
+    apiFetch('/api/rooms?limit=6')
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setFeaturedRooms(d.slice(0, 6)); })
       .catch(() => { });
@@ -66,10 +67,10 @@ export default function HomePage() {
   // Fetch all trending data in parallel
   useEffect(() => {
     Promise.allSettled([
-      fetch(`${API}/api/trending/rooms`).then(r => r.json()),
-      fetch(`${API}/api/trending/users`).then(r => r.json()),
-      fetch(`${API}/api/trending/words?language=es`).then(r => r.json()),
-      fetch(`${API}/api/trending/reactions`).then(r => r.json()),
+      apiFetch('/api/trending/rooms').then(r => r.json()),
+      apiFetch('/api/trending/users').then(r => r.json()),
+      apiFetch('/api/trending/words?language=es').then(r => r.json()),
+      apiFetch('/api/trending/reactions').then(r => r.json()),
     ]).then(([rooms, users, words, reactions]) => {
       if (rooms.status === 'fulfilled' && Array.isArray(rooms.value)) setTrendingRooms(rooms.value.slice(0, 10));
       if (users.status === 'fulfilled' && Array.isArray(users.value)) setTrendingUsers(users.value.slice(0, 20));

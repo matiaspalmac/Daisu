@@ -451,7 +451,7 @@ export default function ChatPage() {
       }
     }
 
-    fetch(`${url_env}/api/users/${session.user.id}`)
+    apiFetch(`/api/users/${session.user.id}`)
       .then(r => r.json())
       .then((u) => {
         if (cancelled) return
@@ -475,7 +475,7 @@ export default function ChatPage() {
     if (status !== 'authenticated' || !session?.user?.id) return
     let cancelled = false
 
-    fetch(`${url_env}/api/users/${session.user.id}/chat-settings`)
+    apiFetch(`/api/users/${session.user.id}/chat-settings`)
       .then(r => r.json())
       .then((settings) => {
         if (cancelled || !settings) return
@@ -523,9 +523,8 @@ export default function ChatPage() {
       if (payload === lastSettingsPayloadRef.current) return
       lastSettingsPayloadRef.current = payload
 
-      fetch(`${url_env}/api/users/${session.user.id}/chat-settings`, {
+      apiFetch(`/api/users/${session.user.id}/chat-settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: payload,
       }).catch(() => { })
     }, 1200)
@@ -543,7 +542,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (status !== 'authenticated' || !session?.user?.id) return
-    fetch(`${url_env}/api/users/${session.user.id}/moderation`)
+    apiFetch(`/api/users/${session.user.id}/moderation`)
       .then(r => r.json())
       .then((data) => {
         if (data?.entries && typeof data.entries === 'object') {
@@ -561,7 +560,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (status !== 'authenticated') return
     setIsLoadingRooms(true)
-    fetch(`${url_env}/api/rooms`)
+    apiFetch(`/api/rooms`)
       .then(r => r.json()).then(d => Array.isArray(d) && setRooms(d))
       .catch(() => { }).finally(() => setIsLoadingRooms(false))
   }, [status])
@@ -654,7 +653,7 @@ export default function ChatPage() {
         const historyLimit = 30
         const blockedIds = Object.entries(moderationMap).filter(([, v]) => v.blocked).map(([k]) => k)
         const excludeUserIds = blockedIds.join(',')
-        const r = await fetch(`${url_env}/api/chats?room_id=${room.id}&limit=${historyLimit}${excludeUserIds ? `&excludeUserIds=${encodeURIComponent(excludeUserIds)}` : ''}`)
+        const r = await apiFetch(`/api/chats?room_id=${room.id}&limit=${historyLimit}${excludeUserIds ? `&excludeUserIds=${encodeURIComponent(excludeUserIds)}` : ''}`)
         const rows = await r.json()
         const normalized: Message[] = Array.isArray(rows)
           ? rows.slice().reverse().map((m: any) => ({
@@ -923,7 +922,7 @@ export default function ChatPage() {
           const historyLimit = 30
           const blockedIds = Object.entries(moderationMap).filter(([, v]) => v.blocked).map(([k]) => k)
           const excludeUserIds = blockedIds.join(',')
-          const r = await fetch(`${url_env}/api/chats?room_id=${selectedRoom.id}&limit=${historyLimit}&offset=${historyOffset}${excludeUserIds ? `&excludeUserIds=${encodeURIComponent(excludeUserIds)}` : ''}`)
+          const r = await apiFetch(`/api/chats?room_id=${selectedRoom.id}&limit=${historyLimit}&offset=${historyOffset}${excludeUserIds ? `&excludeUserIds=${encodeURIComponent(excludeUserIds)}` : ''}`)
           const rows = await r.json()
           const older: Message[] = Array.isArray(rows)
             ? rows.slice().reverse().map((m: any) => ({
@@ -1028,7 +1027,7 @@ export default function ChatPage() {
     socketRef.current.emit('react', { messageId, emoji, roomId: selectedRoom.id, userId: session?.user?.id })
 
     // Track emoji usage
-    fetch(`${url_env}/api/users/${session?.user?.id}/emoji-favorites/${encodeURIComponent(emoji)}`, { method: 'POST' })
+    apiFetch(`/api/users/${session?.user?.id}/emoji-favorites/${encodeURIComponent(emoji)}`, { method: 'POST' })
       .catch(() => { })
 
     // Update recents
@@ -1235,7 +1234,7 @@ export default function ChatPage() {
   // NEW: Load user role
   useEffect(() => {
     if (!selectedRoom || !session?.user?.id) return
-    fetch(`${url_env}/api/users/${session.user.id}/room-role/${selectedRoom.id}`)
+    apiFetch(`/api/users/${session.user.id}/room-role/${selectedRoom.id}`)
       .then(r => r.json())
       .then(d => {
         setUserRoles(prev => ({
@@ -1278,9 +1277,8 @@ export default function ChatPage() {
 
     setModerationMap(prev => ({ ...prev, [key]: merged }))
     try {
-      await fetch(`${url_env}/api/users/${session.user.id}/moderation/${key}`, {
+      await apiFetch(`/api/users/${session.user.id}/moderation/${key}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(merged),
       })
       toast.success(merged.blocked ? t('toast.userBlocked') : merged.muted ? t('toast.userMuted') : t('toast.preferencesUpdated'))
@@ -1374,9 +1372,9 @@ export default function ChatPage() {
     setMiniProfileFollow({ isFollowing: false, followsYou: false, followersCount: 0, followingCount: 0, loading: true })
     try {
       const [profileRes, followRes] = await Promise.all([
-        fetch(`${url_env}/api/users/${userId}`),
+        apiFetch(`/api/users/${userId}`),
         session?.user?.id
-          ? fetch(`${url_env}/api/users/${userId}/follow-status?viewerId=${encodeURIComponent(String(session.user.id))}`)
+          ? apiFetch(`/api/users/${userId}/follow-status?viewerId=${encodeURIComponent(String(session.user.id))}`)
           : Promise.resolve(null as Response | null),
       ])
 
@@ -1418,9 +1416,8 @@ export default function ChatPage() {
 
     try {
       const endpoint = wasFollowing ? 'unfollow' : 'follow'
-      const res = await fetch(`${url_env}/api/users/${miniProfile.id}/${endpoint}`, {
+      const res = await apiFetch(`/api/users/${miniProfile.id}/${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ followerId: session.user.id }),
       })
       if (!res.ok) throw new Error('follow request failed')
@@ -1446,8 +1443,8 @@ export default function ChatPage() {
   // ── Report message ───────────────────────────────────────────────────────
   const submitReport = async () => {
     if (!showReport || !reportReason.trim() || !session?.user) return
-    await fetch(`${url_env}/api/report`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    await apiFetch(`/api/report`, {
+      method: 'POST',
       body: JSON.stringify({ messageId: showReport, reporterId: session.user.id, reason: reportReason }),
     })
     toast.success(t('toast.reportSent'))
@@ -1459,8 +1456,8 @@ export default function ChatPage() {
     setTargetLang(lang)
     localStorage.setItem('daisu-targetLang', lang)
     if (session?.user?.id) {
-      fetch(`${url_env}/api/users/${session.user.id}/targetlang`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      apiFetch(`/api/users/${session.user.id}/targetlang`, {
+        method: 'PATCH',
         body: JSON.stringify({ targetLang: lang }),
       }).catch(() => { })
     }
@@ -1471,8 +1468,8 @@ export default function ChatPage() {
   // ── Create room ──────────────────────────────────────────────────────────
   const handleCreateRoom = () => {
     if (!newRoomName.trim()) return
-    fetch(`${url_env}/api/rooms`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    apiFetch(`/api/rooms`, {
+      method: 'POST',
       body: JSON.stringify({ name: newRoomName }),
     }).then(r => r.json()).then(room => {
       if (room.id) { setRooms(p => [...p, room]); setNewRoomName(''); setShowCreateRoom(false); toast.success(t('toast.roomCreated')) }

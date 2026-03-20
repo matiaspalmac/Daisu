@@ -10,7 +10,6 @@ import { useTranslations, useLocale } from 'next-intl'
 import { apiFetch } from '@/lib/api'
 import { OnlineIndicator, usePresence, PresenceBadge } from '@/components/OnlineIndicator'
 
-const url_env = process.env.NEXT_PUBLIC_API_URL
 
 const LEVEL_OPTIONS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const
 const LEVEL_COLORS: Record<string, { bg: string; text: string }> = {
@@ -189,7 +188,7 @@ export default function ProfilePage() {
       }
     } catch { }
 
-    fetch(`${url_env}/api/users/${session.user.id}`)
+    apiFetch(`/api/users/${session.user.id}`)
       .then(r => r.json())
       .then(u => {
         if (!u || u.error) return
@@ -226,7 +225,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!session?.user?.id) return
-    fetch(`${url_env}/api/user/stats/${session.user.id}`)
+    apiFetch(`/api/user/stats/${session.user.id}`)
       .then(r => r.json()).then(d => { if (!d.error) setStats(d) }).catch(() => { })
   }, [session?.user?.id])
 
@@ -242,9 +241,9 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!session?.user?.id) return
     Promise.all([
-      fetch(`${url_env}/api/users/${session.user.id}/followers`).then(r => r.json()).catch(() => ({})),
-      fetch(`${url_env}/api/users/${session.user.id}/blocked`).then(r => r.json()).catch(() => ({})),
-      fetch(`${url_env}/api/users/${session.user.id}/profile-views`).then(r => r.json()).catch(() => ({})),
+      apiFetch(`/api/users/${session.user.id}/followers`).then(r => r.json()).catch(() => ({})),
+      apiFetch(`/api/users/${session.user.id}/blocked`).then(r => r.json()).catch(() => ({})),
+      apiFetch(`/api/users/${session.user.id}/profile-views`).then(r => r.json()).catch(() => ({})),
     ]).then(([followers, blocked, views]) => {
       if (Array.isArray(followers)) setFollowers(followers)
       if (Array.isArray(blocked)) setBlockedUsers(blocked)
@@ -308,8 +307,8 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`${url_env}/api/updateuser`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      const res = await apiFetch(`/api/updateuser`, {
+        method: 'PUT',
         body: JSON.stringify({ ...profile, isAdmin: profile.isAdmin ? 1 : 0 }),
       })
       const data = await res.json()
@@ -353,8 +352,8 @@ export default function ProfilePage() {
     const newValue = !profile.is_public
     const updated = { ...profile, is_public: newValue }
     setProfile(updated)
-    await fetch(`${url_env}/api/updateuser`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    await apiFetch(`/api/updateuser`, {
+      method: 'PUT',
       body: JSON.stringify({ ...updated, isAdmin: updated.isAdmin ? 1 : 0 }),
     }).then(() => toast.success(newValue ? t('social.public') : t('social.private')))
       .catch(() => { setProfile(p => ({ ...p, is_public: !newValue })); toast.error(t('toast.error')) })
@@ -364,8 +363,8 @@ export default function ProfilePage() {
     const newValue = !profile.hide_old_messages
     const updated = { ...profile, hide_old_messages: newValue }
     setProfile(updated)
-    await fetch(`${url_env}/api/updateuser`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    await apiFetch(`/api/updateuser`, {
+      method: 'PUT',
       body: JSON.stringify({ ...updated, isAdmin: updated.isAdmin ? 1 : 0 }),
     }).then(() => toast.success(newValue ? t('privacy.oldMessagesHidden') : t('privacy.oldMessagesVisible')))
       .catch(() => { setProfile(p => ({ ...p, hide_old_messages: !newValue })); toast.error(t('toast.error')) })
@@ -443,9 +442,8 @@ export default function ProfilePage() {
   }
 
   const unblockUser = async (userId: number) => {
-    await fetch(`${url_env}/api/users/${session?.user?.id}/unblock`, {
+    await apiFetch(`/api/users/${session?.user?.id}/unblock`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ blockedUserId: userId })
     })
       .then(() => {

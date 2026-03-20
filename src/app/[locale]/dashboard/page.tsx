@@ -11,6 +11,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { showToast as toast } from 'nextjs-toast-notify';
 import { useTranslations } from 'next-intl';
+import { apiFetch } from '@/lib/api';
 
 interface User {
   id: number; name: string; email: string; image: string;
@@ -22,7 +23,7 @@ interface Room { id: string; name: string; language: string; level: string; type
 interface Report { id: number; reason: string; status: string; created_at: string; notes: string; message_content: string; message_id: number; room_id: number; reporter_name: string; reporter_id: number; author_name: string; author_id: number; }
 interface Stats { users: number; rooms: number; messages: number; }
 
-const url = process.env.NEXT_PUBLIC_API_URL;
+
 const LEVEL_COLORS: Record<string, string> = { 'A1-A2': '#10b981', 'A1': '#10b981', 'B1-B2': '#3b82f6', 'B1': '#3b82f6', 'C1-C2': '#8b5cf6', 'C1': '#8b5cf6' };
 const LANG_FLAGS: Record<string, string> = { es: '🇪🇸', en: '🇬🇧', pt: '🇧🇷', '': '' };
 
@@ -79,10 +80,10 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const [uRes, rRes, sRes, repRes] = await Promise.all([
-        fetch(`${url}/api/getusers`),
-        fetch(`${url}/api/rooms`),
-        fetch(`${url}/api/stats`),
-        fetch(`${url}/api/reports`),
+        apiFetch('/api/getusers'),
+        apiFetch('/api/rooms'),
+        apiFetch('/api/stats'),
+        apiFetch('/api/reports'),
       ]);
       const [u, r, s, rep] = await Promise.all([uRes.json(), rRes.json(), sRes.json(), repRes.json()]);
       if (Array.isArray(u)) setUsers(u);
@@ -95,7 +96,7 @@ export default function DashboardPage() {
   useEffect(() => { if (status === 'authenticated' && session?.user?.isAdmin) fetchAll(); }, [status, session, fetchAll]);
 
   const fetchMessages = useCallback(async () => {
-    const res = await fetch(`${url}/api/chats?limit=50`);
+    const res = await apiFetch('/api/chats?limit=50');
     const d = await res.json();
     if (Array.isArray(d)) setMessages(d);
   }, []);
@@ -105,12 +106,12 @@ export default function DashboardPage() {
   const fetchAnalytics = useCallback(async () => {
     try {
       const [topRes, roomRes, timelineRes, langRes, floodRes, auditRes] = await Promise.all([
-        fetch(`${url}/api/analytics/top-users`),
-        fetch(`${url}/api/analytics/messages-per-room`),
-        fetch(`${url}/api/analytics/active-users-timeline`),
-        fetch(`${url}/api/analytics/languages`),
-        fetch(`${url}/api/analytics/flood-detection`),
-        fetch(`${url}/api/analytics/audit-log?limit=50`),
+        apiFetch('/api/analytics/top-users'),
+        apiFetch('/api/analytics/messages-per-room'),
+        apiFetch('/api/analytics/active-users-timeline'),
+        apiFetch('/api/analytics/languages'),
+        apiFetch('/api/analytics/flood-detection'),
+        apiFetch('/api/analytics/audit-log?limit=50'),
       ]);
       const [top, room, timeline, lang, flood, audit] = await Promise.all([
         topRes.json(), roomRes.json(), timelineRes.json(), langRes.json(), floodRes.json(), auditRes.json()
@@ -134,27 +135,27 @@ export default function DashboardPage() {
 
   const deleteUser = async (id: number) => {
     if (!confirm(t('users.deleteConfirm'))) return;
-    await fetch(`${url}/api/deleteuser/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/deleteuser/${id}`, { method: 'DELETE' });
     setUsers(p => p.filter(u => u.id !== id));
     toast.success(t('toast.deleted'));
   };
 
   const toggleAdmin = async (user: User) => {
     const newVal = !user.isAdmin;
-    await fetch(`${url}/api/users/${user.id}/admin`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isAdmin: newVal }) });
+    await apiFetch(`/api/users/${user.id}/admin`, { method: 'PATCH', body: JSON.stringify({ isAdmin: newVal }) });
     setUsers(p => p.map(u => u.id === user.id ? { ...u, isAdmin: newVal } : u));
   };
 
   const banUser = async (user: User) => {
     const isBanned = !!user.banned_at;
-    await fetch(`${url}/api/users/${user.id}/ban`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ban: !isBanned }) });
+    await apiFetch(`/api/users/${user.id}/ban`, { method: 'PATCH', body: JSON.stringify({ ban: !isBanned }) });
     setUsers(p => p.map(u => u.id === user.id ? { ...u, banned_at: isBanned ? null : new Date().toISOString() } : u));
     toast.success(isBanned ? t('toast.unbanned') : t('toast.banned'));
   };
 
   const deleteRoom = async (id: string) => {
     if (!confirm(t('rooms.deleteConfirm'))) return;
-    await fetch(`${url}/api/rooms/${id}`, { method: 'DELETE' });
+    await apiFetch(`/api/rooms/${id}`, { method: 'DELETE' });
     setRooms(p => p.filter(r => r.id !== id));
     toast.success(t('toast.roomDeleted'));
   };
@@ -162,9 +163,8 @@ export default function DashboardPage() {
   const saveEditUser = async () => {
     if (!editUser) return;
     try {
-      const res = await fetch(`${url}/api/updateuser`, {
+      const res = await apiFetch('/api/updateuser', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editUser),
       });
       const data = await res.json();
@@ -183,14 +183,14 @@ export default function DashboardPage() {
 
   const saveEditRoom = async () => {
     if (!editRoom) return;
-    await fetch(`${url}/api/rooms/${editRoom.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editRoom) });
+    await apiFetch(`/api/rooms/${editRoom.id}`, { method: 'PATCH', body: JSON.stringify(editRoom) });
     setRooms(p => p.map(r => r.id === editRoom.id ? editRoom : r));
     setEditRoom(null);
     toast.success(t('toast.roomUpdated'));
   };
 
   const resolveReport = async (id: number, status: string) => {
-    await fetch(`${url}/api/reports/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+    await apiFetch(`/api/reports/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
     setReports(p => p.map(r => r.id === id ? { ...r, status } : r));
   };
 
@@ -219,9 +219,8 @@ export default function DashboardPage() {
     }
     const word = input.value.trim();
     try {
-      const res = await fetch(`${url}/api/analytics/banned-words`, {
+      const res = await apiFetch('/api/analytics/banned-words', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ word, requestingUserId: session.user.id })
       });
       if (!res.ok) throw new Error();
