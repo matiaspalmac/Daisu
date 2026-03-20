@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
     --bg: #f0f2f5;
@@ -139,4 +137,11 @@ input:focus,
 textarea:focus {
     border-color: var(--primary) !important;
     box-shadow: 0 0 0 2px var(--primary-light) !important;
+}
+
+/* Confetti pop-up animation */
+@keyframes pop-up {
+    0% { opacity: 1; transform: scale(0.5) translateY(0); }
+    50% { opacity: 1; transform: scale(1.2) translateY(-30px); }
+    100% { opacity: 0; transform: scale(1) translateY(-60px); }
 }
